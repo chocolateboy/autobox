@@ -1,5 +1,11 @@
 Revision history for Perl extension autobox-0.04.
 
+0.05  Mon Aug 11 03:13:04 2003
+
+    - autobox.pm update: no change to the patch
+    - Cleaned up implementation of isa() and can()
+    - Added support for VERSION() (untested)
+
 0.04  Sun Aug 10 14:57:18 2003
 
     - This version provides a new patch which ensures

@@ -2,8 +2,9 @@ package autobox;
 
 use strict;
 use warnings;
+use UNIVERSAL;
 
-our $VERSION = 0.04;
+our $VERSION = 0.05;
 
 our $hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
@@ -23,44 +24,15 @@ sub report {
     print STDERR Data::Dumper::Dumper($handlers), $/;
 }
 
-sub universal_can {
+sub autobox ($) {
     my $class = shift;
     no strict 'refs';
-    *{"$class\::can"} = sub {
-	my $boxed = shift;
-	my $proto;
-
-	if (defined $boxed) {
-	    my $ref = ref $boxed ? $boxed : \$boxed;
-	    $proto = bless $ref, $class;
-	} # else $proto is undef
-
-	UNIVERSAL::can($proto, @_)
-    };
-}
-
-sub universal_isa {
-    my $class = shift;
-    no strict 'refs';
-    *{"$class\::isa"} = sub {
-
-	my $boxed = shift;
-	my $proto;
-
-	if (defined $boxed) {
-	    my $ref = ref $boxed ? $boxed : \$boxed;
-	    $proto = bless $ref, $class;
-	} # else $proto is undef
-
-	UNIVERSAL::isa($proto, @_)
-    };
-}
-
-sub universal ($) {
-    my $class = shift;
-    no strict 'refs';
-    universal_isa($class) unless (*{"$class\::isa"}{CODE});
-    universal_can($class) unless (*{"$class\::can"}{CODE});
+    *{"$class\::can"} = sub { shift; UNIVERSAL::can($class, @_) }
+	unless (*{"$class\::can"}{CODE});
+    *{"$class\::isa"} = sub { shift; UNIVERSAL::isa($class, @_) }
+	unless (*{"$class\::isa"}{CODE});
+    *{"$class\::VERSION"} = sub { shift; UNIVERSAL::VERSION($class, @_) }
+	unless (*{"$class\::VERSION"}{CODE});
 }
 
 sub is_namespace ($) { $_[0] eq '' or ($_[0] =~ /::$/) }
@@ -109,7 +81,7 @@ sub import {
     $^H |= $hint_bits;
     $^H{AUTOBOX} = $key;
 
-    universal($_) for (values %$handlers);
+    autobox($_) for (values %$handlers);
 
     $report->($handlers) if ($report);
 }
@@ -145,7 +117,7 @@ sub unimport {
     # strings...
 
 	my $uri = "http://www.%s.com/foo.pl?arg=%s"->f($domain, $arg->escape());
-	my $message = 'autobox'->google();
+	my $links = 'autobox'->google();
 
 	my $word = 'rubicund';
 	my $definition = $word->lookup_on_dictionary_dot_com();
@@ -168,9 +140,6 @@ sub unimport {
 
 	my $plus_five = (\&add)->curry()->(5);
 	my $minus_three = sub { $_[0] - $_[1] }->reverse->curry->(3);
-
-	my $foo = $plus_five->(...);
-	my $bar = $minus_three->(...);
 
 =head1 DESCRIPTION
 
@@ -233,8 +202,7 @@ These don't:
 The classes into which the core types are boxed are fully configurable.
 By default, a method invoked on a non-object value is assumed to be
 defined in a package whose name corresponds to the ref() type of that
-value - with the exception of non-reference SCALAR types (i.e. strings,
-integers, floats) which are implicitly 'promoted' to the SCALAR class.
+value - or 'SCALAR' if the value is a non-reference.
 
 Thus a vanilla:
 
@@ -265,7 +233,7 @@ resolves to:
 
     ARRAY::for_each([ 1 .. 10 ], sub { ... })
 
-A mapping from the ref type to the user-defined type can be specified
+A mapping from the builtin type to the user-defined class can be specified
 by passing a list of key/value bindings to the C<use autobox> statement.
 
 The following example shows the range of valid values:
@@ -302,7 +270,7 @@ will invoke ARRAY methods on MyArray and all other methods on MyDefault.
 =item *
 
 A namespace: this is a package prefix (up to and including the final '::')
-to which the name of the default handler for this class will be appended:
+to which the name of the default handler for this type will be appended:
 
 Thus:
 
@@ -320,7 +288,7 @@ builtin type.
 
 =item *
 
-An empty string: this is shorthand for the default (builtin) type name. e.g.
+An empty string: this is shorthand for the builtin type name. e.g.
 
     use autobox SCALAR	=> 'MyScalar',
 		ARRAY	=> '',
@@ -364,7 +332,7 @@ In addition to the SCALAR, ARRAY, HASH, CODE and DEFAULT fields above,
 there is an additional diagnostic field, REPORT, which exposes the
 current handlers by means of a callback, or a static reporting function.
 
-This can be useful if one wishes to see the computed class bindings
+This can be useful if one wishes to see the computed bindings
 in 'longhand'.
 
 Reporting is ignored if the value coresponding to the REPORT key is false.
@@ -411,6 +379,9 @@ The solution is to wrap the reference in parentheses:
 
 The same applies for signed integer and float literals:
 
+    # this works
+    my $range = 10->to(1);
+
     # this doesn't work
     my $range = -10->to(10);
 
@@ -431,7 +402,7 @@ may require some further disambiguation:
     # and even this
     print { 'foo', 'bar', @_ }->foo();
 
-    # but this doesn't work
+    # but this doesn't
     print { @_ }->foo() ? 1 : 0 
 
 In the latter case, the solution is to supply something
@@ -451,6 +422,9 @@ to print():
     # or
     print '' . { @_ }->foo() ? 1 : 0; 
 
+    # or even
+    { @_ }->print_if_foo(1, 0); 
+
 =head1 REQUIREMENTS
 
 This pragma requires a patch against perl-5.8.1-RC4. It is supplied
@@ -461,7 +435,7 @@ Prelude) are not provided.
 
 =head1 VERSION
 
-    0.04
+    0.05
 
 =head1 AUTHOR
     
