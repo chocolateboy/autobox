@@ -1,5 +1,11 @@
 Revision history for Perl extension autobox-0.01.
 
+0.03  Sun Aug 10 03:17:16 2003
+
+    - added support for can() and isa()
+    - documented print { hashref_expression() }
+      issues/workarounds
+
 0.02  Wed Aug  6 16:49:45 2003
 
     - the patch is now a single file

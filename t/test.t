@@ -52,7 +52,7 @@ package main;
 use strict;
 use warnings;
 
-use Test::More tests => 230;
+use Test::More tests => 284;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -589,6 +589,94 @@ my $unblessed_error = q{Can't call method "test" on unblessed reference};
     my $method = \&HASH::test;
     my $foobar = { foo => 'bar' }->$method();
 
+}
+
+# test can
+{
+    use autobox;
+
+    is (3->can('test'), \&SCALAR::test, 'can: integer literal');
+    is ((-3)->can('test'), \&SCALAR::test, 'can: negative integer literal');
+    is ((+3)->can('test'), \&SCALAR::test, 'can: positive integer literal');
+    is ($int->can('test'), \&SCALAR::test, 'can: $integer');
+
+    is (3.1415927->can('test'), \&SCALAR::test, 'can: float literal');
+    is ((-3.1415927)->can('test'), \&SCALAR::test, 'can: negative float literal');
+    is ((+3.1415927)->can('test'), \&SCALAR::test, 'can: positive float literal');
+    is ($float->can('test'), \&SCALAR::test, 'can: $float');
+
+    is ('Hello, World'->can('test'), \&SCALAR::test, 'can: single quoted string literal');
+    is ("Hello, World"->can('test'), \&SCALAR::test, 'can: double quoted string literal');
+    is ($string->can('test'), \&SCALAR::test, 'can: $string');
+
+    is ([ 0 .. 9 ]->can('test'), \&ARRAY::test, 'can: ARRAY ref');
+    is ($array->can('test'), \&ARRAY::test, 'can: $array');
+
+    is ({ 0 .. 9 }->can('test'), \&HASH::test, 'can: HASH ref');
+    is ($hash->can('test'), \&HASH::test, 'can: $hash');
+
+    is ((\&add)->can('test'), \&CODE::test, 'can: CODE ref');
+    is (sub { $_[0] + $_[1] }->can('test'), \&CODE::test, 'can: ANON sub');
+    is ($code->can('test'), \&CODE::test, 'can: $code');
+}
+
+# test can
+{
+    use autobox;
+
+    ok (3->isa('SCALAR'), 'isa SCALAR: integer literal');
+    ok (3->isa('UNIVERSAL'), 'isa UNIVERSAL: integer literal');
+
+    ok ((-3)->isa('SCALAR'), 'isa SCALAR: negative integer literal');
+    ok ((-3)->isa('UNIVERSAL'), 'isa UNIVERSAL: negative integer literal');
+
+    ok ((+3)->isa('SCALAR'), 'isa SCALAR: positive integer literal');
+    ok ((+3)->isa('UNIVERSAL'), 'isa UNIVERSAL: positive integer literal');
+
+    ok ($int->isa('SCALAR'), 'isa SCALAR: $integer');
+    ok ($int->isa('UNIVERSAL'), 'isa UNIVERSAL: $integer');
+
+    ok (3.1415927->isa('SCALAR'), 'isa SCALAR: float literal');
+    ok (3.1415927->isa('UNIVERSAL'), 'isa UNIVERSAL: float literal');
+
+    ok ((-3.1415927)->isa('SCALAR'), 'isa SCALAR: negative float literal');
+    ok ((-3.1415927)->isa('UNIVERSAL'), 'isa UNIVERSAL: negative float literal');
+
+    ok ((+3.1415927)->isa('SCALAR'), 'isa SCALAR: positive float literal');
+    ok ((+3.1415927)->isa('UNIVERSAL'), 'isa UNIVERSAL: positive float literal');
+
+    ok ($float->isa('SCALAR'), 'isa SCALAR: $float');
+    ok ($float->isa('UNIVERSAL'), 'isa UNIVERSAL: $float');
+
+    ok ('Hello, World'->isa('SCALAR'), 'isa SCALAR: single quoted string literal');
+    ok ('Hello, World'->isa('UNIVERSAL'), 'isa UNIVERSAL: single quoted string literal');
+	 
+    ok ("Hello, World"->isa('SCALAR'), 'isa SCALAR: double quoted string literal');
+    ok ("Hello, World"->isa('UNIVERSAL'), 'isa UNIVERSAL: double quoted string literal');
+
+    ok ($string->isa('SCALAR'), 'isa SCALAR: $string');
+    ok ($string->isa('UNIVERSAL'), 'isa UNIVERSAL: $string');
+
+    ok ([ 0 .. 9 ]->isa('ARRAY'), 'isa ARRAY: ARRAY ref');
+    ok ([ 0 .. 9 ]->isa('UNIVERSAL'), 'isa UNIVERSAL: UNIVERSAL ref');
+
+    ok ($array->isa('ARRAY'), 'isa ARRAY: $array');
+    ok ($array->isa('UNIVERSAL'), 'isa UNIVERSAL: $array');
+
+    ok ({ 0 .. 9 }->isa('HASH'), 'isa HASH: HASH ref');
+    ok ({ 0 .. 9 }->isa('UNIVERSAL'), 'isa UNIVERSAL: UNIVERSAL ref');
+
+    ok ($hash->isa('HASH'), 'isa HASH: $hash');
+    ok ($hash->isa('UNIVERSAL'), 'isa UNIVERSAL: $hash');
+
+    ok ((\&add)->isa('CODE'), 'isa CODE: CODE ref');
+    ok ((\&add)->isa('UNIVERSAL'), 'isa UNIVERSAL: UNIVERSAL ref');
+
+    ok (sub { $_[0] + $_[1] }->isa('CODE'), 'isa CODE: ANON sub');
+    ok (sub { $_[0] + $_[1] }->isa('UNIVERSAL'), 'isa UNIVERSAL: ANON sub');
+
+    ok ($code->isa('CODE'), 'isa CODE: $code');
+    ok ($code->isa('UNIVERSAL'), 'isa UNIVERSAL: $code');
 }
 
 1;

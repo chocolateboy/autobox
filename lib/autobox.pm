@@ -3,10 +3,11 @@ package autobox;
 use strict;
 use warnings;
 
-
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 our $hint_bits = 0x20000; # HINT_LOCALIZE_HH
+
+our %cache = ();
 
 our $types = {
     map { $_ => $_ }
@@ -22,7 +23,34 @@ sub report {
     print STDERR Data::Dumper::Dumper($handlers), $/;
 }
 
-our %cache = ();
+sub universal_can {
+    my $class = shift;
+    no strict 'refs';
+    *{"$class\::can"} = sub {
+	my $boxed = shift;
+	my $ref = ref $boxed ? $boxed : \$boxed;
+	my $proto = bless $ref, $class;
+	UNIVERSAL::can($proto, @_)
+    };
+}
+
+sub universal_isa {
+    my $class = shift;
+    no strict 'refs';
+    *{"$class\::isa"} = sub {
+	my $boxed = shift;
+	my $ref = ref $boxed ? $boxed : \$boxed;
+	my $proto = bless $ref, $class;
+	UNIVERSAL::isa($proto, @_)
+    };
+}
+
+sub universal ($) {
+    my $class = shift;
+    no strict 'refs';
+    universal_isa($class) unless (*{"$class\::isa"}{CODE});
+    universal_can($class) unless (*{"$class\::can"}{CODE});
+}
 
 sub is_namespace ($) { $_[0] eq '' or ($_[0] =~ /::$/) }
 
@@ -33,7 +61,7 @@ sub import {
 
     if (scalar @_) {
 	my %args = @_;
-	my %seen = %$types;
+	my %unhandled = %$types;
 	my $default = exists $args{DEFAULT} ? delete $args{DEFAULT} : '';
        
 	if ($report = delete $args{REPORT}) { # REPORT => 1 : print to STDERR
@@ -44,7 +72,7 @@ sub import {
 	    die ("autobox: unrecognised type: '", (defined $key ? $key : ''), "'") 
 		unless ($types->{$key});
 
-	    delete $seen{$key}; # delete before iterating
+	    delete $unhandled{$key}; # delete before iterating
 
 	    my $value = $args{$key};
 
@@ -54,10 +82,11 @@ sub import {
 	}
 
 	if (defined $default) {
-	    for my $key (keys %seen) {
+	    for my $key (keys %unhandled) {
 		$handlers->{$key} = is_namespace($default) ? "$default$key" : $default;
 	    }
 	}
+
     } else {
 	$handlers = $types;
     }
@@ -68,6 +97,8 @@ sub import {
 
     $^H |= $hint_bits;
     $^H{AUTOBOX} = $key;
+
+    universal($_) for (values %$handlers);
 
     $report->($handlers) if ($report);
 }
@@ -95,7 +126,6 @@ sub unimport {
     # integers
 
 	my $range = 10->to(1); # [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ]
-	my $sd = [ 1, 8, 3, 3, 2, 9 ]->standard_deviation();
 
     # floats...
 
@@ -117,6 +147,7 @@ sub unimport {
     # ARRAY refs...
 
 	my $schwartzian = [ @_ ]->map(...)->sort(...)->map(...);
+	my $sd = [ 1, 8, 3, 3, 2, 9 ]->standard_deviation();
 
     # HASH refs
 
@@ -194,7 +225,7 @@ defined in a package whose name corresponds to the ref() type of that
 value - with the exception of non-reference SCALAR types (i.e. strings,
 integers, floats) which are implicitly 'promoted' to the SCALAR class.
 
-Thus a vanilla
+Thus a vanilla:
 
     use autobox;
 
@@ -375,6 +406,40 @@ The same applies for signed integer and float literals:
     # this does
     my $range = (-10)->to(10);
 
+Perl's special-casing for the C<print BLOCK ...> syntax
+(see perlsub) means that C<print { expression() } ...>
+(where the curly brackets denote an anonymous HASH ref)
+may require some further disambiguation:
+
+    # this works (
+    print { foo => 'bar' }->foo();
+
+    # and this
+    print { 'foo', 'bar' }->foo();
+
+    # and even this
+    print { 'foo', 'bar', @_ }->foo();
+
+    # but this doesn't work
+    print { @_ }->foo() ? 1 : 0 
+
+In the latter case, the solution is to supply something
+other than a HASH ref literal as the first argument
+to print():
+
+    # e.g.
+    print STDOUT { @_ }->foo() ? 1 : 0;
+
+    # or
+    my $hashref = { @_ };
+    print $hashref->foo() ? 1 : 0; 
+
+    # or
+    print '', { @_ }->foo() ? 1 : 0; 
+
+    # or
+    print '' . { @_ }->foo() ? 1 : 0; 
+
 =head1 REQUIREMENTS
 
 This pragma requires a patch against perl-5.8.1-RC4. It is supplied
@@ -385,7 +450,7 @@ Prelude) are not provided.
 
 =head1 VERSION
 
-    0.02
+    0.03
 
 =head1 AUTHOR
     
