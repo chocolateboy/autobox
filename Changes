@@ -1,4 +1,7 @@
-Revision history for Perl extension autobox-0.10.
+Revision history for Perl extension autobox-0.11.
+
+0.11  Tue Feb 3 13:21:47 2004
+    - Added patch for perl-5.8.3
 
 0.10  Fri Dec 12 15:24:16 2003
     - fixed obsolete reference to perl-5.8.1 in POD
@@ -48,12 +51,12 @@ Revision history for Perl extension autobox-0.10.
     - documented print { hashref_expression() }
       issues/workarounds
 
-0.02  Wed Aug  6 16:49:45 2003
+0.02  Wed Aug 6 16:49:45 2003
 
     - the patch is now a single file
     - instructions for applying the patch added to README
     - documentation fixlets for the patch and module
 
-0.01  Mon Aug  4 01:00:18 2003
+0.01  Mon Aug 4 01:00:18 2003
     - original version; created by h2xs 1.21 with options
       -n autobox-0.01

@@ -1,4 +1,4 @@
-autobox version 0.10
+autobox version 0.11
 =========================
 
 The autobox pragma endows Perl's core datatypes with the capabilities of
@@ -44,4 +44,4 @@ COPYRIGHT AND LICENCE
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
-Copyright (C) 2003 chocolateboy: <chocolate.boy@email.com>
+Copyright (C) 2003-2004 chocolateboy: <chocolate.boy@email.com>

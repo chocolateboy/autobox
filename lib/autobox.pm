@@ -5,7 +5,7 @@ use warnings;
 
 use UNIVERSAL;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 our $hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
@@ -125,7 +125,7 @@ sub unimport {
 
     # strings
 
-	my $uri = 'http://www.%s.com/foo.pl?arg=%s'->f($domain, $arg->escape());
+	my $uri = 'www.%s.com/foo.pl?arg=%s'->f($domain, $arg->escape());
 	my $links = 'autobox'->google();
 
 	my $word = 'rubicund';
@@ -478,14 +478,16 @@ Prelude) are not provided.
 
 =head1 VERSION
 
-    0.10
+0.11
 
 =head1 AUTHOR
     
-    chocolateboy: <chocolate.boy@email.com>
+chocolateboy: <chocolate.boy@email.com>
 
 =head1 SEE ALSO
 
-    Java 1.5 (Tiger), C#, Ruby, String::Ruby, Scalar::Properties
+Java 1.5 (Tiger), C#, Ruby
+
+L<String::Ruby>, L<Scalar::Properties>, L<Set::Array>
 
 =cut
