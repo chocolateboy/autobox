@@ -527,7 +527,6 @@ my $unblessed_error = q{Can't call method "test" on unblessed reference};
     use autobox;
 
     no autobox;
-    # BEGIN { autobox->unimport() } # why doesn't no autobox work? perl bug?
 
     eval { $int->test() };
     ok (($@ && ($@ =~ /^$error/)), 'no autobox: $int');
@@ -582,6 +581,14 @@ my $unblessed_error = q{Can't call method "test" on unblessed reference};
     is ((\&add)->test(), 'CODE', 'nested (outer): CODE ref');
     is (sub { $_[0] + $_[1] }->test(), 'CODE', 'nested (outer): ANON sub');
     is ($code->test(), 'CODE', 'nested (outer): $code');
+}
+
+{
+    use autobox;
+
+    my $method = \&HASH::test;
+    my $foobar = { foo => 'bar' }->$method();
+
 }
 
 1;

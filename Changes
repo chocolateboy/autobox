@@ -1,6 +1,11 @@
 Revision history for Perl extension autobox-0.01.
 
-0.01  Mon Aug  4 01:00:18 2003
-	- original version; created by h2xs 1.21 with options
-		-n autobox-0.01
+0.02  Wed Aug  6 16:49:45 2003
 
+    - the patch is now a single file
+    - instructions for applying the patch added to README
+    - documentation fixlets for the patch and module
+
+0.01  Mon Aug  4 01:00:18 2003
+    - original version; created by h2xs 1.21 with options
+	-n autobox-0.01

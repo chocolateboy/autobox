@@ -1,10 +1,8 @@
 Changes
+lib/autobox.pm
+Makefile.PL
 MANIFEST
 META.yml
-Makefile.PL
+patch/autobox.diff
 README
-lib/autobox.pm
-patch/op.c.diff
-patch/op.h.diff
-patch/pp_hot.c.diff
 t/test.t

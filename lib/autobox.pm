@@ -3,9 +3,8 @@ package autobox;
 use strict;
 use warnings;
 
-$| = 1;
 
-our $VERSION = 0.01;
+our $VERSION = 0.02;
 
 our $hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
@@ -17,6 +16,7 @@ our $types = {
 
 sub report {
     my $handlers = shift;
+    local $| = 1;
     require Data::Dumper;
     local $Data::Dumper::Indent = $Data::Dumper::Terse = 1;
     print STDERR Data::Dumper::Dumper($handlers), $/;
@@ -69,7 +69,6 @@ sub import {
     $^H |= $hint_bits;
     $^H{AUTOBOX} = $key;
 
-    # $report->($key, $handlers) if ($report);
     $report->($handlers) if ($report);
 }
 
@@ -96,7 +95,7 @@ sub unimport {
     # integers
 
 	my $range = 10->to(1); # [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ]
-	my $ton = $range->[0]->mul(10);
+	my $sd = [ 1, 8, 3, 3, 2, 9 ]->standard_deviation();
 
     # floats...
 
@@ -121,21 +120,19 @@ sub unimport {
 
     # HASH refs
 
-	my $hash_iterator = sub { my ($key, $value) = @_; ... };
-
-	{ alpha => 'beta', gamma => 'vlissides' }->for_each($hash_iterator);
+	{ alpha => 'beta', gamma => 'vlissides' }->for_each(...);
 
     # CODE refs
 
 	my $plus_five = (\&add)->curry()->(5);
 	my $minus_three = sub { $_[0] - $_[1] }->reverse->curry->(3);
 
-	$plus_five->($hashref->size());
-	$minus_three->([ 1, 8, 3, 3, 2, 9 ]->standard_deviation());
+	my $foo = $plus_five->(...);
+	my $bar = $minus_three->(...);
 
 =head1 DESCRIPTION
 
-The autobox pragma equips Perl's core datatypes with the capabilities of
+The autobox pragma endows Perl's core datatypes with the capabilities of
 first-class objects. This enables methods to be called on ARRAY refs,
 HASH refs, CODE refs and raw SCALARs in exactly the same manner as blessed
 references. The autoboxing is transparent: boxed values are not blessed
@@ -156,7 +153,7 @@ can be overridden or countermanded in a nested scope:
 	...
     }
 
-autoboxing can be turned off entirely by using the C<no> syntax:
+Autoboxing can be turned off entirely by using the C<no> syntax:
 
     {
 	use autobox;
@@ -169,7 +166,7 @@ autoboxing can be turned off entirely by using the C<no> syntax:
 
     use autobox DEFAULT => undef;
 
-Autoboxing is not performed for bare words i.e. 
+Autoboxing is not performed for barewords i.e. 
 
     my $foo = Foo->new();
 
@@ -177,7 +174,19 @@ and:
 
     my $foo = new Foo;
 
-perform as expected.
+behave as expected.
+
+In addition, it only covers named methods, so while this works:
+
+    my $foobar = { foo => 'bar' }->some_method();
+
+These don't:
+
+    my $method1 = 'some_method';
+    my $method2 = \&HASH::some_method;
+
+    my $error1 = { foo => 'bar' }->$method1();
+    my $error2 = { foo => 'bar' }->$method2();
 
 The classes into which the core types are boxed are fully configurable.
 By default, a method invoked on a non-object value is assumed to be
@@ -328,14 +337,14 @@ Thus:
 
     use autobox REPORT => 1, ...
 
-# or
+or
 
     use autobox REPORT => sub { ... }, ...
 
-# or
+or
 
-    sub my_callback ($$) {
-	my ($key, $hashref) = @_;
+    sub my_callback ($) {
+	my $hashref = shift;
 	...
     }
 
@@ -376,13 +385,13 @@ Prelude) are not provided.
 
 =head1 VERSION
 
-    0.01
+    0.02
 
 =head1 AUTHOR
     
     chocolateboy: <chocolate.boy@email.com>
 
-SEE ALSO
+=head1 SEE ALSO
 
     Java 1.5 (Tiger), C#, Ruby
 

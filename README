@@ -1,7 +1,7 @@
-autobox version 0.01
+autobox version 0.02
 =========================
 
-The autobox pragma equips Perl's core datatypes with the capabilities of
+The autobox pragma endows Perl's core datatypes with the capabilities of
 first-class objects. This enables methods to be called on ARRAY refs,
 HASH refs, CODE refs and raw SCALARs in exactly the same manner as blessed
 references. The autoboxing is transparent: boxed values are not blessed
@@ -19,7 +19,13 @@ First of all, you won't be able to run this module unless
 you have applied the patch included in the patch directory
 to (currently) perl-5.8.1-RC4.
 
-Once that patch has been applied, it's the usual incantation:
+The procedure for installing the patch is quite straightforward:
+
+    cd /path/to/perl-5.8.1-RC4/
+    patch < /path/to/autobox.diff
+
+Once that patch has been applied, and the patched perl has been
+installed, it's the usual incantation:
 
    perl_autobox Makefile.PL # i.e. your patched perl
    make

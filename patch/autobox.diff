@@ -1,0 +1,130 @@
+diff -up orig_perl-5.8.1-RC4/op.c perl-5.8.1-RC4/op.c
+--- orig_perl-5.8.1-RC4/op.c	2003-07-23 14:32:43.000000000 +0100
++++ perl-5.8.1-RC4/op.c	2003-08-05 12:32:52.000000000 +0100
+@@ -1561,6 +1561,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *ta
+     (void)SvUPGRADE(meth, SVt_PVIV);
+     (void)SvIOK_on(meth);
+     PERL_HASH(SvUVX(meth), SvPVX(meth), SvCUR(meth));
++    pack->op_private |= OPpCONST_BARE; /* for autobox */
+     imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
+ 		   append_elem(OP_LIST,
+ 			       prepend_elem(OP_LIST, pack, list(arg)),
+@@ -2974,6 +2975,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, 
+ 	(void)SvUPGRADE(meth, SVt_PVIV);
+ 	(void)SvIOK_on(meth);
+ 	PERL_HASH(SvUVX(meth), SvPVX(meth), SvCUR(meth));
++	pack->op_private |= OPpCONST_BARE; /* for autobox */
+ 	imop = convert(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
+ 		       append_elem(OP_LIST,
+ 				   prepend_elem(OP_LIST, pack, list(arg)),
+@@ -6074,6 +6076,28 @@ Perl_ck_subr(pTHX_ OP *o)
+     else if (cvop->op_type == OP_METHOD || cvop->op_type == OP_METHOD_NAMED) {
+ 	if (o2->op_type == OP_CONST)
+ 	    o2->op_private &= ~OPpCONST_STRICT;
++
++	/*
++	   disable autoboxing if Name in "Name->method()" is a bareword
++	   otherwise, enable it if the appropriate field of the
++	   (lexically-scoped) hints hash is set
++	 */
++	if (!(o2->op_private & OPpCONST_BARE)
++		&& (PL_hints & HINT_LOCALIZE_HH)
++		&& (cvop->op_type == OP_METHOD_NAMED)) {
++		HV *table = GvHV(PL_hintgv);
++		SV **svp;
++
++		if (table && (svp = hv_fetch(table, "AUTOBOX", 7, FALSE))
++		    && *svp && SvOK(*svp)) {
++		    SV * new_sv = *svp;
++		    SV * old_sv = ((SVOP *)cvop)->op_sv;
++
++		    sv_catpvn(old_sv, "\0", 1);
++		    sv_catsv(old_sv, new_sv);
++		    cvop->op_flags |= OPf_SPECIAL;
++		}
++	}
+ 	else if (o2->op_type == OP_LIST) {
+ 	    OP *o = ((UNOP*)o2)->op_first->op_sibling;
+ 	    if (o && o->op_type == OP_CONST)
+diff -up orig_perl-5.8.1-RC4/op.h perl-5.8.1-RC4/op.h
+--- orig_perl-5.8.1-RC4/op.h	2003-07-10 07:12:24.000000000 +0100
++++ perl-5.8.1-RC4/op.h	2003-08-05 12:31:10.000000000 +0100
+@@ -100,6 +100,8 @@ Deprecated.  Use C<GIMME_V> instead.
+ 				/*  On RV2[SG]V, don't create GV--in defined()*/
+ 				/*  On OP_DBSTATE, indicates breakpoint
+ 				 *    (runtime property) */
++				/*  On OP_METHOD_NAMED, indicates object
++				 *  should be autoboxed */
+ 
+ /* old names; don't use in new code, but don't break them, either */
+ #define OPf_LIST	OPf_WANT_LIST
+diff -up orig_perl-5.8.1-RC4/pp_hot.c perl-5.8.1-RC4/pp_hot.c
+--- orig_perl-5.8.1-RC4/pp_hot.c	2003-07-27 18:33:57.000000000 +0100
++++ perl-5.8.1-RC4/pp_hot.c	2003-08-05 12:37:45.000000000 +0100
+@@ -3036,7 +3036,7 @@ STATIC SV *
+ S_method_common(pTHX_ SV* meth, U32* hashp)
+ {
+     SV* sv;
+-    SV* ob;
++    SV* ob = NULL; /* must be initialized to NULL */
+     GV* gv;
+     HV* stash;
+     char* name;
+@@ -3053,6 +3053,57 @@ S_method_common(pTHX_ SV* meth, U32* has
+ 
+     if (SvGMAGICAL(sv))
+ 	mg_get(sv);
++
++    /* autobox: set ob (if possible) in case we goto fetch */
++    if ((PL_op->op_flags & OPf_SPECIAL) && (!SvOBJECT(SvROK(sv) ? (ob = SvRV(sv)) : sv))) {
++	HV * autobox_cache; /* points to the primitive2boxed map */
++	char *packed = SvPV(meth, SvCUR(meth)); /* augmented (hacked) method name */
++	STRLEN klen; /* length of the original method name */
++
++	klen = strlen(packed) + 1; /* up to "\0" */
++	meth = sv_2mortal(newSVpvn(packed, klen)); /* original method name */
++	name = SvPV(meth, namelen); /* update name and namelen for diagnostics */
++	PERL_HASH(*hashp, name, namelen); /* update (i.e. correct) the hash code */
++	autobox_cache = get_hv("autobox::cache", 0);
++
++	if (autobox_cache) {
++	    SV * autobox_key; /* %autobox::cache key */
++	    HV * autobox_handlers = NULL; /* %autobox::cache value */
++	    HE * he; /* %autobox::cache entry */
++	    SV **svp; /* pointer to autobox_handlers */
++	    char *reftype; /* autobox_handlers key */
++
++	    autobox_key = newSVpv(packed + klen, 0);
++	    he = hv_fetch_ent(autobox_cache, autobox_key, 0, 0);
++	    
++	    if (he) {
++		SV *heval = HeVAL(he);
++		if (SvROK(heval) && (autobox_handlers = (HV *)(SvRV(heval)))) {
++		    reftype = sv_reftype((ob ? ob : sv), 0);
++		    svp = hv_fetch(autobox_handlers, reftype, strlen(reftype), FALSE);
++
++		    if (svp) {
++			if (SvOK(*svp)) { /* i.e. sv is not undef */
++			    packname = SvPVX(*svp); /* fake the package name */
++			    packlen = strlen(packname);
++			    stash = gv_stashpvn(packname, packlen, FALSE);
++			    /* set packsv in case we goto fetch */
++			    packsv = *svp;
++
++			    if (stash) {
++				SV* ref = newSViv(PTR2IV(stash));
++				/* cache the stash */
++				hv_store(PL_stashcache, packname, packlen, ref, 0);
++			    }
++			    /* either way goto fetch, as we've *demanded* autoboxing */
++			    goto fetch;
++			} /* else: autobox_handlers value is undef - don't autobox */
++		    } /* else autobox_handlers key doesn't exist - don't autobox */
++		} /* else %autobox::cache value is not a hash ref - don't autobox */
++	    } /* else: %autobox::cache key doesn't exist - don't autobox */
++	}
++    }
++
+     if (SvROK(sv))
+ 	ob = (SV*)SvRV(sv);
+     else {

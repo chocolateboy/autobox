@@ -5,7 +5,5 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'		=> 'autobox',
     'VERSION_FROM'	=> 'lib/autobox.pm',
-    'PREREQ_PM'		=> {
-
-    }
+    'PREREQ_PM'		=> { }
 );
