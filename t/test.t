@@ -52,7 +52,7 @@ package main;
 use strict;
 use warnings;
 
-use Test::More tests => 284;
+use Test::More tests => 308;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -61,8 +61,14 @@ BEGIN {
 
 $| = 1;
 
+sub _nok ($$) {
+    my ($test, $description) = @_;
+    ok(!$test, $description);
+}
+
 sub add { my ($x, $y) = @_; $x + $y }
 
+my $undef = undef;
 my $int = 3;
 my $float = 3.1415927;
 my $string = "Hello, World!";
@@ -72,6 +78,7 @@ my $code = \&add;
 my $error = q{Can't call method "test" without a package or object reference};
 my $string_error = q{Can't locate object method "test" via package "Hello, World!"};
 my $unblessed_error = q{Can't call method "test" on unblessed reference};
+my $undef_error = q{Can't call method "%s" on an undefined value};
 
 # test no args
 {
@@ -620,63 +627,110 @@ my $unblessed_error = q{Can't call method "test" on unblessed reference};
     is ($code->can('test'), \&CODE::test, 'can: $code');
 }
 
-# test can
+# test isa: also ensures isa() isn't simply
+# returning true unconditionally
+# '_nok' in case 'nok' is added to Test::More
 {
     use autobox;
 
     ok (3->isa('SCALAR'), 'isa SCALAR: integer literal');
     ok (3->isa('UNIVERSAL'), 'isa UNIVERSAL: integer literal');
+    _nok (3->isa('UNKNOWN'), 'isa UNKNOWN: integer literal');
 
     ok ((-3)->isa('SCALAR'), 'isa SCALAR: negative integer literal');
     ok ((-3)->isa('UNIVERSAL'), 'isa UNIVERSAL: negative integer literal');
+    _nok ((-3)->isa('UNKNOWN'), 'isa UNKNOWN: negative integer literal');
 
     ok ((+3)->isa('SCALAR'), 'isa SCALAR: positive integer literal');
     ok ((+3)->isa('UNIVERSAL'), 'isa UNIVERSAL: positive integer literal');
+    _nok ((+3)->isa('UNKNOWN'), 'isa UNKNOWN: positive integer literal');
 
     ok ($int->isa('SCALAR'), 'isa SCALAR: $integer');
     ok ($int->isa('UNIVERSAL'), 'isa UNIVERSAL: $integer');
+    _nok ($int->isa('UNKNOWN'), 'isa UNKNOWN: $integer');
 
     ok (3.1415927->isa('SCALAR'), 'isa SCALAR: float literal');
     ok (3.1415927->isa('UNIVERSAL'), 'isa UNIVERSAL: float literal');
+    _nok (3.1415927->isa('UNKNOWN'), 'isa UNKNOWN: float literal');
 
     ok ((-3.1415927)->isa('SCALAR'), 'isa SCALAR: negative float literal');
     ok ((-3.1415927)->isa('UNIVERSAL'), 'isa UNIVERSAL: negative float literal');
+    _nok ((-3.1415927)->isa('UNKNOWN'), 'isa UNKNOWN: negative float literal');
 
     ok ((+3.1415927)->isa('SCALAR'), 'isa SCALAR: positive float literal');
     ok ((+3.1415927)->isa('UNIVERSAL'), 'isa UNIVERSAL: positive float literal');
+    _nok ((+3.1415927)->isa('UNKNOWN'), 'isa UNKNOWN: positive float literal');
 
     ok ($float->isa('SCALAR'), 'isa SCALAR: $float');
     ok ($float->isa('UNIVERSAL'), 'isa UNIVERSAL: $float');
+    _nok ($float->isa('UNKNOWN'), 'isa UNKNOWN: $float');
 
     ok ('Hello, World'->isa('SCALAR'), 'isa SCALAR: single quoted string literal');
     ok ('Hello, World'->isa('UNIVERSAL'), 'isa UNIVERSAL: single quoted string literal');
+    _nok ('Hello, World'->isa('UNKNOWN'), 'isa UNKNOWN: single quoted string literal');
 	 
     ok ("Hello, World"->isa('SCALAR'), 'isa SCALAR: double quoted string literal');
     ok ("Hello, World"->isa('UNIVERSAL'), 'isa UNIVERSAL: double quoted string literal');
+    _nok ("Hello, World"->isa('UNKNOWN'), 'isa UNKNOWN: double quoted string literal');
 
     ok ($string->isa('SCALAR'), 'isa SCALAR: $string');
     ok ($string->isa('UNIVERSAL'), 'isa UNIVERSAL: $string');
+    _nok ($string->isa('UNKNOWN'), 'isa UNKNOWN: $string');
 
     ok ([ 0 .. 9 ]->isa('ARRAY'), 'isa ARRAY: ARRAY ref');
-    ok ([ 0 .. 9 ]->isa('UNIVERSAL'), 'isa UNIVERSAL: UNIVERSAL ref');
+    ok ([ 0 .. 9 ]->isa('UNIVERSAL'), 'isa UNIVERSAL: ARRAY ref');
+    _nok ([ 0 .. 9 ]->isa('UNKNOWN'), 'isa UNKNOWN: ARRAY ref');
 
     ok ($array->isa('ARRAY'), 'isa ARRAY: $array');
     ok ($array->isa('UNIVERSAL'), 'isa UNIVERSAL: $array');
+    _nok ($array->isa('UNKNOWN'), 'isa UNKNOWN: $array');
 
     ok ({ 0 .. 9 }->isa('HASH'), 'isa HASH: HASH ref');
-    ok ({ 0 .. 9 }->isa('UNIVERSAL'), 'isa UNIVERSAL: UNIVERSAL ref');
+    ok ({ 0 .. 9 }->isa('UNIVERSAL'), 'isa UNIVERSAL: HASH ref');
+    _nok ({ 0 .. 9 }->isa('UNKNOWN'), 'isa UNKNOWN: HASH ref');
 
     ok ($hash->isa('HASH'), 'isa HASH: $hash');
     ok ($hash->isa('UNIVERSAL'), 'isa UNIVERSAL: $hash');
+    _nok ($hash->isa('UNKNOWN'), 'isa UNKNOWN: $hash');
 
     ok ((\&add)->isa('CODE'), 'isa CODE: CODE ref');
-    ok ((\&add)->isa('UNIVERSAL'), 'isa UNIVERSAL: UNIVERSAL ref');
+    ok ((\&add)->isa('UNIVERSAL'), 'isa UNIVERSAL: CODE ref');
+    _nok ((\&add)->isa('UNKNOWN'), 'isa UNKNOWN: CODE ref');
 
     ok (sub { $_[0] + $_[1] }->isa('CODE'), 'isa CODE: ANON sub');
     ok (sub { $_[0] + $_[1] }->isa('UNIVERSAL'), 'isa UNIVERSAL: ANON sub');
+    _nok (sub { $_[0] + $_[1] }->isa('UNKNOWN'), 'isa UNKNOWN: ANON sub');
 
     ok ($code->isa('CODE'), 'isa CODE: $code');
     ok ($code->isa('UNIVERSAL'), 'isa UNIVERSAL: $code');
+    _nok ($code->isa('UNKNOWN'), 'isa UNKNOWN: $code');
+}
+
+# test undef: undef shouldn't be autoboxed
+{
+    use autobox;
+
+    my $test_error = sprintf $undef_error, 'test';
+    my $isa_error = sprintf $undef_error, 'isa';
+    my $can_error = sprintf $undef_error, 'can';
+
+    eval { undef->test() };
+    ok (($@ && ($@ =~ /^$test_error/)), 'undef: undef->test()');
+
+    eval { $undef->test() };
+    ok (($@ && ($@ =~ /^$test_error/)), 'undef: $undef->test()');
+
+    eval { undef->isa('SCALAR') };
+    ok (($@ && ($@ =~ /^$isa_error/)), 'undef: undef->isa(...)');
+
+    eval { $undef->isa('SCALAR') };
+    ok (($@ && ($@ =~ /^$isa_error/)), 'undef: $undef->isa(...)');
+
+    eval { undef->can('test') };
+    ok (($@ && ($@ =~ /^$can_error/)), 'undef: undef->can(...)');
+
+    eval { $undef->can('test') };
+    ok (($@ && ($@ =~ /^$can_error/)), 'undef: $undef->can(...)');
 }
 
 1;

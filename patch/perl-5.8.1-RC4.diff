@@ -1,6 +1,6 @@
-diff -up orig_perl-5.8.1-RC4/op.c perl-5.8.1-RC4/op.c
---- orig_perl-5.8.1-RC4/op.c	2003-07-23 14:32:43.000000000 +0100
-+++ perl-5.8.1-RC4/op.c	2003-08-05 12:32:52.000000000 +0100
+diff -pu orig/op.c new/op.c
+--- orig/op.c	Sun Aug 10 14:21:25 2003
++++ new/op.c	Sun Aug 10 14:17:21 2003
 @@ -1561,6 +1561,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *ta
      (void)SvUPGRADE(meth, SVt_PVIV);
      (void)SvIOK_on(meth);
@@ -46,21 +46,21 @@ diff -up orig_perl-5.8.1-RC4/op.c perl-5.8.1-RC4/op.c
  	else if (o2->op_type == OP_LIST) {
  	    OP *o = ((UNOP*)o2)->op_first->op_sibling;
  	    if (o && o->op_type == OP_CONST)
-diff -up orig_perl-5.8.1-RC4/op.h perl-5.8.1-RC4/op.h
---- orig_perl-5.8.1-RC4/op.h	2003-07-10 07:12:24.000000000 +0100
-+++ perl-5.8.1-RC4/op.h	2003-08-05 12:31:10.000000000 +0100
+diff -pu orig/op.h new/op.h
+--- orig/op.h	Sun Aug 10 14:19:24 2003
++++ new/op.h	Sun Aug 10 14:18:27 2003
 @@ -100,6 +100,8 @@ Deprecated.  Use C<GIMME_V> instead.
  				/*  On RV2[SG]V, don't create GV--in defined()*/
  				/*  On OP_DBSTATE, indicates breakpoint
  				 *    (runtime property) */
-+				/*  On OP_METHOD_NAMED, indicates object
++				/*  On OP_METHOD_NAMED, indicates receiver
 +				 *  should be autoboxed */
  
  /* old names; don't use in new code, but don't break them, either */
  #define OPf_LIST	OPf_WANT_LIST
-diff -up orig_perl-5.8.1-RC4/pp_hot.c perl-5.8.1-RC4/pp_hot.c
---- orig_perl-5.8.1-RC4/pp_hot.c	2003-07-27 18:33:57.000000000 +0100
-+++ perl-5.8.1-RC4/pp_hot.c	2003-08-05 12:37:45.000000000 +0100
+diff -pu orig/pp_hot.c new/pp_hot.c
+--- orig/pp_hot.c	Sun Aug 10 14:18:56 2003
++++ new/pp_hot.c	Sun Aug 10 14:17:17 2003
 @@ -3036,7 +3036,7 @@ STATIC SV *
  S_method_common(pTHX_ SV* meth, U32* hashp)
  {
@@ -70,13 +70,15 @@ diff -up orig_perl-5.8.1-RC4/pp_hot.c perl-5.8.1-RC4/pp_hot.c
      GV* gv;
      HV* stash;
      char* name;
-@@ -3053,6 +3053,57 @@ S_method_common(pTHX_ SV* meth, U32* has
+@@ -3053,6 +3053,59 @@ S_method_common(pTHX_ SV* meth, U32* has
  
      if (SvGMAGICAL(sv))
  	mg_get(sv);
 +
 +    /* autobox: set ob (if possible) in case we goto fetch */
-+    if ((PL_op->op_flags & OPf_SPECIAL) && (!SvOBJECT(SvROK(sv) ? (ob = SvRV(sv)) : sv))) {
++    if ((PL_op->op_flags & OPf_SPECIAL) /* inside autobox's lexical scope */
++	&& (!SvOBJECT(SvROK(sv) ? (ob = SvRV(sv)) : sv)) /* not an object */
++	&& SvOK(sv)) { /* not undef */
 +	HV * autobox_cache; /* points to the primitive2boxed map */
 +	char *packed = SvPV(meth, SvCUR(meth)); /* augmented (hacked) method name */
 +	STRLEN klen; /* length of the original method name */

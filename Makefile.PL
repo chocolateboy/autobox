@@ -1,9 +1,10 @@
+require 5.008_001;
+
 use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
 
 WriteMakefile(
     'NAME'		=> 'autobox',
     'VERSION_FROM'	=> 'lib/autobox.pm',
+    'INSTALLDIRS'       => 'perl',
     'PREREQ_PM'		=> { }
 );

@@ -1,4 +1,14 @@
-Revision history for Perl extension autobox-0.01.
+Revision history for Perl extension autobox-0.04.
+
+0.04  Sun Aug 10 14:57:18 2003
+
+    - This version provides a new patch which ensures
+      that undef values aren't autoboxed. It should
+      be applied to a clean perl-5.8.1-RC4 tree
+    - fixed (i.e. prevented) autoboxing of undef in isa() and can()
+    - fixed Makemaker.PL and META.yml to ensure that new
+      installs of autobox.pm aren't shadowed by old
+      versions (thanks Michael G Schwern)
 
 0.03  Sun Aug 10 03:17:16 2003
 
@@ -14,4 +24,4 @@ Revision history for Perl extension autobox-0.01.
 
 0.01  Mon Aug  4 01:00:18 2003
     - original version; created by h2xs 1.21 with options
-	-n autobox-0.01
+      -n autobox-0.01

@@ -3,7 +3,7 @@ package autobox;
 use strict;
 use warnings;
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 
 our $hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
@@ -28,8 +28,13 @@ sub universal_can {
     no strict 'refs';
     *{"$class\::can"} = sub {
 	my $boxed = shift;
-	my $ref = ref $boxed ? $boxed : \$boxed;
-	my $proto = bless $ref, $class;
+	my $proto;
+
+	if (defined $boxed) {
+	    my $ref = ref $boxed ? $boxed : \$boxed;
+	    $proto = bless $ref, $class;
+	} # else $proto is undef
+
 	UNIVERSAL::can($proto, @_)
     };
 }
@@ -38,9 +43,15 @@ sub universal_isa {
     my $class = shift;
     no strict 'refs';
     *{"$class\::isa"} = sub {
+
 	my $boxed = shift;
-	my $ref = ref $boxed ? $boxed : \$boxed;
-	my $proto = bless $ref, $class;
+	my $proto;
+
+	if (defined $boxed) {
+	    my $ref = ref $boxed ? $boxed : \$boxed;
+	    $proto = bless $ref, $class;
+	} # else $proto is undef
+
 	UNIVERSAL::isa($proto, @_)
     };
 }
@@ -450,7 +461,7 @@ Prelude) are not provided.
 
 =head1 VERSION
 
-    0.03
+    0.04
 
 =head1 AUTHOR
     
