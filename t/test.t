@@ -2,17 +2,25 @@ package SCALAR;
 
 sub test { __PACKAGE__ }
 
+our $VERSION = 0.01;
+
 package ARRAY;
 
 sub test { __PACKAGE__ }
+
+our $VERSION = 0.01;
 
 package HASH;
 
 sub test { __PACKAGE__ }
 
+our $VERSION = 0.01;
+
 package CODE;
 
 sub test { __PACKAGE__ }
+
+our $VERSION = 0.01;
 
 package Test::SCALAR;
 
@@ -52,7 +60,7 @@ package main;
 use strict;
 use warnings;
 
-use Test::More tests => 308;
+use Test::More tests => 328;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -75,10 +83,10 @@ my $string = "Hello, World!";
 my $array = [ 0 .. 9 ];
 my $hash = { 0 .. 9 };
 my $code = \&add;
-my $error = q{Can't call method "test" without a package or object reference};
-my $string_error = q{Can't locate object method "test" via package "Hello, World!"};
-my $unblessed_error = q{Can't call method "test" on unblessed reference};
-my $undef_error = q{Can't call method "%s" on an undefined value};
+my $error = qr{Can't call method "test" without a package or object reference};
+my $string_error = qr{Can't locate object method "test" via package "Hello, World!"};
+my $unblessed_error = qr{Can't call method "test" on unblessed reference};
+my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 
 # test no args
 {
@@ -343,38 +351,38 @@ my $undef_error = q{Can't call method "%s" on an undefined value};
 	HASH	=> undef,	    # don't autobox
 	DEFAULT => 'MyNamespace::'; # use MyNamespace:: namespace for CODE
 
-	my $object = Test->new();
-	is (ref $object, 'Test', 'test all 1: Test->new() - bareword not autoboxed');
+    my $object = Test->new();
+    is (ref $object, 'Test', 'test all 1: Test->new() - bareword not autoboxed');
 
-	my $result = $object->test();
-	is ($result, 'rubicund', 'test all 1: $object->test() - object not autoboxed');
+    my $result = $object->test();
+    is ($result, 'rubicund', 'test all 1: $object->test() - object not autoboxed');
 
-	is (3->test(), 'MyScalar', 'test all 1: integer literal');
-	is ((-3)->test(), 'MyScalar', 'test all 1: negative integer literal');
-	is ((+3)->test(), 'MyScalar', 'test all 1: positive integer literal');
-	is ($int->test(), 'MyScalar', 'test all 1: $int');
+    is (3->test(), 'MyScalar', 'test all 1: integer literal');
+    is ((-3)->test(), 'MyScalar', 'test all 1: negative integer literal');
+    is ((+3)->test(), 'MyScalar', 'test all 1: positive integer literal');
+    is ($int->test(), 'MyScalar', 'test all 1: $int');
 
-	is (3.1415927->test(), 'MyScalar', 'test all 1: float literal');
-	is ((-3.1415927)->test(), 'MyScalar', 'test all 1: negative float literal');
-	is ((+3.1415927)->test(), 'MyScalar', 'test all 1: positive float literal');
-	is ($float->test(), 'MyScalar', 'test all 1: $float');
+    is (3.1415927->test(), 'MyScalar', 'test all 1: float literal');
+    is ((-3.1415927)->test(), 'MyScalar', 'test all 1: negative float literal');
+    is ((+3.1415927)->test(), 'MyScalar', 'test all 1: positive float literal');
+    is ($float->test(), 'MyScalar', 'test all 1: $float');
 
-	is ('Hello, World'->test(), 'MyScalar',
-	    'test all 1: single quoted string literal');
-	is ("Hello, World"->test(), 'MyScalar',
-	    'test all 1: double quoted string literal');
-	is ($string->test(), 'MyScalar', 'test all 1: $string');
+    is ('Hello, World'->test(), 'MyScalar',
+	'test all 1: single quoted string literal');
+    is ("Hello, World"->test(), 'MyScalar',
+	'test all 1: double quoted string literal');
+    is ($string->test(), 'MyScalar', 'test all 1: $string');
 
-	is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 1: ARRAY ref');
-	is ($array->test(), 'ARRAY', 'test all 1: $array');
+    is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 1: ARRAY ref');
+    is ($array->test(), 'ARRAY', 'test all 1: $array');
 
-	my $error = q{Can't call method "test" on unblessed reference};
-	eval { ({ 0 .. 9 })->test() };
-	ok (($@ && ($@ =~ /^$error/)), 'test all 1: HASH ref: not autoboxed');
-	    
-	is ((\&add)->test(), 'MyNamespace::CODE', 'test all 1: CODE ref');
-	is (sub { $_[0] + $_[1] }->test(), 'MyNamespace::CODE', 'test all 1: ANON sub');
-	is ($code->test(), 'MyNamespace::CODE', 'test all 1: $code');
+    my $error = q{Can't call method "test" on unblessed reference};
+    eval { ({ 0 .. 9 })->test() };
+    ok (($@ && ($@ =~ /^$error/)), 'test all 1: HASH ref: not autoboxed');
+	
+    is ((\&add)->test(), 'MyNamespace::CODE', 'test all 1: CODE ref');
+    is (sub { $_[0] + $_[1] }->test(), 'MyNamespace::CODE', 'test all 1: ANON sub');
+    is ($code->test(), 'MyNamespace::CODE', 'test all 1: $code');
 }
 
 # test all 2
@@ -385,38 +393,38 @@ my $undef_error = q{Can't call method "%s" on an undefined value};
 	HASH	=> undef,	    # don't autobox
 	DEFAULT => 'MyDefault';	    # use MyDefault package for CODE
 
-	my $object = Test->new();
-	is (ref $object, 'Test', 'test all 2: Test->new() - bareword not autoboxed');
+    my $object = Test->new();
+    is (ref $object, 'Test', 'test all 2: Test->new() - bareword not autoboxed');
 
-	my $result = $object->test();
-	is ($result, 'rubicund', 'test all 2: $object->test() - object not autoboxed');
+    my $result = $object->test();
+    is ($result, 'rubicund', 'test all 2: $object->test() - object not autoboxed');
 
-	is (3->test(), 'MyScalar', 'test all 2: integer literal');
-	is ((-3)->test(), 'MyScalar', 'test all 2: negative integer literal');
-	is ((+3)->test(), 'MyScalar', 'test all 2: positive integer literal');
-	is ($int->test(), 'MyScalar', 'test all 2: $int');
+    is (3->test(), 'MyScalar', 'test all 2: integer literal');
+    is ((-3)->test(), 'MyScalar', 'test all 2: negative integer literal');
+    is ((+3)->test(), 'MyScalar', 'test all 2: positive integer literal');
+    is ($int->test(), 'MyScalar', 'test all 2: $int');
 
-	is (3.1415927->test(), 'MyScalar', 'test all 2: float literal');
-	is ((-3.1415927)->test(), 'MyScalar', 'test all 2: negative float literal');
-	is ((+3.1415927)->test(), 'MyScalar', 'test all 2: positive float literal');
-	is ($float->test(), 'MyScalar', 'test all 2: $float');
+    is (3.1415927->test(), 'MyScalar', 'test all 2: float literal');
+    is ((-3.1415927)->test(), 'MyScalar', 'test all 2: negative float literal');
+    is ((+3.1415927)->test(), 'MyScalar', 'test all 2: positive float literal');
+    is ($float->test(), 'MyScalar', 'test all 2: $float');
 
-	is ('Hello, World'->test(), 'MyScalar',
-	    'test all 2: single quoted string literal');
-	is ("Hello, World"->test(), 'MyScalar',
-	    'test all 2: double quoted string literal');
-	is ($string->test(), 'MyScalar', 'test all 2: $string');
+    is ('Hello, World'->test(), 'MyScalar',
+	'test all 2: single quoted string literal');
+    is ("Hello, World"->test(), 'MyScalar',
+	'test all 2: double quoted string literal');
+    is ($string->test(), 'MyScalar', 'test all 2: $string');
 
-	is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 2: ARRAY ref');
-	is ($array->test(), 'ARRAY', 'test all 2: $array');
+    is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 2: ARRAY ref');
+    is ($array->test(), 'ARRAY', 'test all 2: $array');
 
-	my $error = q{Can't call method "test" on unblessed reference};
-	eval { ({ 0 .. 9 })->test() };
-	ok (($@ && ($@ =~ /^$error/)), 'test all 2: HASH ref: not autoboxed');
-	    
-	is ((\&add)->test(), 'MyDefault', 'test all 2: CODE ref');
-	is (sub { $_[0] + $_[1] }->test(), 'MyDefault', 'test all 2: ANON sub');
-	is ($code->test(), 'MyDefault', 'test all 2: $code');
+    my $error = q{Can't call method "test" on unblessed reference};
+    eval { ({ 0 .. 9 })->test() };
+    ok (($@ && ($@ =~ /^$error/)), 'test all 2: HASH ref: not autoboxed');
+	
+    is ((\&add)->test(), 'MyDefault', 'test all 2: CODE ref');
+    is (sub { $_[0] + $_[1] }->test(), 'MyDefault', 'test all 2: ANON sub');
+    is ($code->test(), 'MyDefault', 'test all 2: $code');
 }
 
 # test all 3
@@ -427,38 +435,38 @@ my $undef_error = q{Can't call method "%s" on an undefined value};
 	HASH	=> undef,	    # don't autobox
 	DEFAULT => '';		    # use CODE package for CODE
 
-	my $object = Test->new();
-	is (ref $object, 'Test', 'test all 3: Test->new() - bareword not autoboxed');
+    my $object = Test->new();
+    is (ref $object, 'Test', 'test all 3: Test->new() - bareword not autoboxed');
 
-	my $result = $object->test();
-	is ($result, 'rubicund', 'test all 3: $object->test() - object not autoboxed');
+    my $result = $object->test();
+    is ($result, 'rubicund', 'test all 3: $object->test() - object not autoboxed');
 
-	is (3->test(), 'MyScalar', 'test all 3: integer literal');
-	is ((-3)->test(), 'MyScalar', 'test all 3: negative integer literal');
-	is ((+3)->test(), 'MyScalar', 'test all 3: positive integer literal');
-	is ($int->test(), 'MyScalar', 'test all 3: $int');
+    is (3->test(), 'MyScalar', 'test all 3: integer literal');
+    is ((-3)->test(), 'MyScalar', 'test all 3: negative integer literal');
+    is ((+3)->test(), 'MyScalar', 'test all 3: positive integer literal');
+    is ($int->test(), 'MyScalar', 'test all 3: $int');
 
-	is (3.1415927->test(), 'MyScalar', 'test all 3: float literal');
-	is ((-3.1415927)->test(), 'MyScalar', 'test all 3: negative float literal');
-	is ((+3.1415927)->test(), 'MyScalar', 'test all 3: positive float literal');
-	is ($float->test(), 'MyScalar', 'test all 3: $float');
+    is (3.1415927->test(), 'MyScalar', 'test all 3: float literal');
+    is ((-3.1415927)->test(), 'MyScalar', 'test all 3: negative float literal');
+    is ((+3.1415927)->test(), 'MyScalar', 'test all 3: positive float literal');
+    is ($float->test(), 'MyScalar', 'test all 3: $float');
 
-	is ('Hello, World'->test(), 'MyScalar',
-	    'test all 3: single quoted string literal');
-	is ("Hello, World"->test(), 'MyScalar',
-	    'test all 3: double quoted string literal');
-	is ($string->test(), 'MyScalar', 'test all 3: $string');
+    is ('Hello, World'->test(), 'MyScalar',
+	'test all 3: single quoted string literal');
+    is ("Hello, World"->test(), 'MyScalar',
+	'test all 3: double quoted string literal');
+    is ($string->test(), 'MyScalar', 'test all 3: $string');
 
-	is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 3: ARRAY ref');
-	is ($array->test(), 'ARRAY', 'test all 3: $array');
+    is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 3: ARRAY ref');
+    is ($array->test(), 'ARRAY', 'test all 3: $array');
 
-	my $error = q{Can't call method "test" on unblessed reference};
-	eval { ({ 0 .. 9 })->test() };
-	ok (($@ && ($@ =~ /^$error/)), 'test all 3: HASH ref: not autoboxed');
-	    
-	is ((\&add)->test(), 'CODE', 'test all 3: CODE ref');
-	is (sub { $_[0] + $_[1] }->test(), 'CODE', 'test all 3: ANON sub');
-	is ($code->test(), 'CODE', 'test all 3: $code');
+    my $error = q{Can't call method "test" on unblessed reference};
+    eval { ({ 0 .. 9 })->test() };
+    ok (($@ && ($@ =~ /^$error/)), 'test all 3: HASH ref: not autoboxed');
+	
+    is ((\&add)->test(), 'CODE', 'test all 3: CODE ref');
+    is (sub { $_[0] + $_[1] }->test(), 'CODE', 'test all 3: ANON sub');
+    is ($code->test(), 'CODE', 'test all 3: $code');
 }
 
 # test all 4
@@ -469,43 +477,43 @@ my $undef_error = q{Can't call method "%s" on an undefined value};
 	HASH	=> undef,	    # don't autobox
 	DEFAULT => undef;	    # don't autobox code
 
-	my $object = Test->new();
-	is (ref $object, 'Test', 'test all 4: Test->new() - bareword not autoboxed');
+    my $object = Test->new();
+    is (ref $object, 'Test', 'test all 4: Test->new() - bareword not autoboxed');
 
-	my $result = $object->test();
-	is ($result, 'rubicund', 'test all 4: $object->test() - object not autoboxed');
+    my $result = $object->test();
+    is ($result, 'rubicund', 'test all 4: $object->test() - object not autoboxed');
 
-	is (3->test(), 'MyScalar', 'test all 4: integer literal');
-	is ((-3)->test(), 'MyScalar', 'test all 4: negative integer literal');
-	is ((+3)->test(), 'MyScalar', 'test all 4: positive integer literal');
-	is ($int->test(), 'MyScalar', 'test all 4: $int');
+    is (3->test(), 'MyScalar', 'test all 4: integer literal');
+    is ((-3)->test(), 'MyScalar', 'test all 4: negative integer literal');
+    is ((+3)->test(), 'MyScalar', 'test all 4: positive integer literal');
+    is ($int->test(), 'MyScalar', 'test all 4: $int');
 
-	is (3.1415927->test(), 'MyScalar', 'test all 4: float literal');
-	is ((-3.1415927)->test(), 'MyScalar', 'test all 4: negative float literal');
-	is ((+3.1415927)->test(), 'MyScalar', 'test all 4: positive float literal');
-	is ($float->test(), 'MyScalar', 'test all 4: $float');
+    is (3.1415927->test(), 'MyScalar', 'test all 4: float literal');
+    is ((-3.1415927)->test(), 'MyScalar', 'test all 4: negative float literal');
+    is ((+3.1415927)->test(), 'MyScalar', 'test all 4: positive float literal');
+    is ($float->test(), 'MyScalar', 'test all 4: $float');
 
-	is ('Hello, World'->test(), 'MyScalar',
-	    'test all 4: single quoted string literal');
-	is ("Hello, World"->test(), 'MyScalar',
-	    'test all 4: double quoted string literal');
-	is ($string->test(), 'MyScalar', 'test all 4: $string');
+    is ('Hello, World'->test(), 'MyScalar',
+	'test all 4: single quoted string literal');
+    is ("Hello, World"->test(), 'MyScalar',
+	'test all 4: double quoted string literal');
+    is ($string->test(), 'MyScalar', 'test all 4: $string');
 
-	is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 4: ARRAY ref');
-	is ($array->test(), 'ARRAY', 'test all 4: $array');
+    is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 4: ARRAY ref');
+    is ($array->test(), 'ARRAY', 'test all 4: $array');
 
-	my $error = q{Can't call method "test" on unblessed reference};
-	eval { ({ 0 .. 9 })->test() };
-	ok (($@ && ($@ =~ /^$error/)), 'test all 4: HASH ref: not autoboxed');
+    my $error = q{Can't call method "test" on unblessed reference};
+    eval { ({ 0 .. 9 })->test() };
+    ok (($@ && ($@ =~ /^$error/)), 'test all 4: HASH ref: not autoboxed');
 
-	eval { (\&add)->test() };
-	ok (($@ && ($@ =~ /^$error/)), 'test all 4: CODE ref: not autoboxed');
+    eval { (\&add)->test() };
+    ok (($@ && ($@ =~ /^$error/)), 'test all 4: CODE ref: not autoboxed');
 
-	eval { sub { $_[0] + $_[1] }->test() };
-	ok (($@ && ($@ =~ /^$error/)), 'test all 4: ANON sub: not autoboxed');
+    eval { sub { $_[0] + $_[1] }->test() };
+    ok (($@ && ($@ =~ /^$error/)), 'test all 4: ANON sub: not autoboxed');
 
-	eval { $code->test() };
-	ok (($@ && ($@ =~ /^$error/)), 'test all 4: $code: not autoboxed');
+    eval { $code->test() };
+    ok (($@ && ($@ =~ /^$error/)), 'test all 4: $code: not autoboxed');
 }
 
 # test autobox not used
@@ -588,14 +596,6 @@ my $undef_error = q{Can't call method "%s" on an undefined value};
     is ((\&add)->test(), 'CODE', 'nested (outer): CODE ref');
     is (sub { $_[0] + $_[1] }->test(), 'CODE', 'nested (outer): ANON sub');
     is ($code->test(), 'CODE', 'nested (outer): $code');
-}
-
-{
-    use autobox;
-
-    my $method = \&HASH::test;
-    my $foobar = { foo => 'bar' }->$method();
-
 }
 
 # test can
@@ -706,31 +706,64 @@ my $undef_error = q{Can't call method "%s" on an undefined value};
     _nok ($code->isa('UNKNOWN'), 'isa UNKNOWN: $code');
 }
 
-# test undef: undef shouldn't be autoboxed
+# test VERSION
 {
     use autobox;
 
-    my $test_error = sprintf $undef_error, 'test';
-    my $isa_error = sprintf $undef_error, 'isa';
-    my $can_error = sprintf $undef_error, 'can';
+    is (3->VERSION(), 0.01, 'can: integer literal');
+    is ((-3)->VERSION(), 0.01, 'can: negative integer literal');
+    is ((+3)->VERSION(), 0.01, 'can: positive integer literal');
+    is ($int->VERSION(), 0.01, 'can: $integer');
+
+    is (3.1415927->VERSION(), 0.01, 'can: float literal');
+    is ((-3.1415927)->VERSION(), 0.01, 'can: negative float literal');
+    is ((+3.1415927)->VERSION(), 0.01, 'can: positive float literal');
+    is ($float->VERSION(), 0.01, 'can: $float');
+
+    is ('Hello, World'->VERSION(), 0.01, 'can: single quoted string literal');
+    is ("Hello, World"->VERSION(), 0.01, 'can: double quoted string literal');
+    is ($string->VERSION(), 0.01, 'can: $string');
+
+    is ([ 0 .. 9 ]->VERSION(), 0.01, 'can: ARRAY ref');
+    is ($array->VERSION(), 0.01, 'can: $array');
+
+    is ({ 0 .. 9 }->VERSION(), 0.01, 'can: HASH ref');
+    is ($hash->VERSION(), 0.01, 'can: $hash');
+
+    is ((\&add)->VERSION(), 0.01, 'can: CODE ref');
+    is (sub { $_[0] + $_[1] }->VERSION(), 0.01, 'can: ANON sub');
+    is ($code->VERSION(), 0.01, 'can: $code');
+}
+
+# test undef: by default, undef shouldn't be autoboxed...
+{
+    use autobox;
 
     eval { undef->test() };
-    ok (($@ && ($@ =~ /^$test_error/)), 'undef: undef->test()');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef: undef->test()');
 
     eval { $undef->test() };
-    ok (($@ && ($@ =~ /^$test_error/)), 'undef: $undef->test()');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef: $undef->test()');
 
     eval { undef->isa('SCALAR') };
-    ok (($@ && ($@ =~ /^$isa_error/)), 'undef: undef->isa(...)');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef: undef->isa(...)');
 
     eval { $undef->isa('SCALAR') };
-    ok (($@ && ($@ =~ /^$isa_error/)), 'undef: $undef->isa(...)');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef: $undef->isa(...)');
 
     eval { undef->can('test') };
-    ok (($@ && ($@ =~ /^$can_error/)), 'undef: undef->can(...)');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef: undef->can(...)');
 
     eval { $undef->can('test') };
-    ok (($@ && ($@ =~ /^$can_error/)), 'undef: $undef->can(...)');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef: $undef->can(...)');
+}
+
+# test undef: but undef support can be enabled
+{
+    use autobox UNDEF => 'MyDefault';
+
+    is (undef->test(), 'MyDefault', 'handle undef: undef');
+    is ($undef->test(), 'MyDefault', 'handle undef: $undef');
 }
 
 1;

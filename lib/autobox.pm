@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use UNIVERSAL;
 
-our $VERSION = 0.05;
+our $VERSION = 0.06;
 
 our $hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
@@ -16,7 +16,9 @@ our $types = {
     qw(SCALAR ARRAY HASH CODE) # only support the core types
 };
 
-sub report {
+$types->{UNDEF} = undef;
+
+sub report ($) {
     my $handlers = shift;
     local $| = 1;
     require Data::Dumper;
@@ -24,8 +26,9 @@ sub report {
     print STDERR Data::Dumper::Dumper($handlers), $/;
 }
 
-sub autobox ($) {
+sub universalize ($) {
     my $class = shift;
+    return unless (defined $class);
     no strict 'refs';
     *{"$class\::can"} = sub { shift; UNIVERSAL::can($class, @_) }
 	unless (*{"$class\::can"}{CODE});
@@ -45,15 +48,16 @@ sub import {
     if (scalar @_) {
 	my %args = @_;
 	my %unhandled = %$types;
+
 	my $default = exists $args{DEFAULT} ? delete $args{DEFAULT} : '';
        
 	if ($report = delete $args{REPORT}) { # REPORT => 1 : print to STDERR
 	    $report = \&report unless (ref $report eq 'CODE');
 	}
-	
+
 	for my $key (keys %args) {
 	    die ("autobox: unrecognised type: '", (defined $key ? $key : ''), "'") 
-		unless ($types->{$key});
+		unless (exists $types->{$key});
 
 	    delete $unhandled{$key}; # delete before iterating
 
@@ -65,8 +69,9 @@ sub import {
 	}
 
 	if (defined $default) {
+	    my $default_is_namespace = is_namespace($default);
 	    for my $key (keys %unhandled) {
-		$handlers->{$key} = is_namespace($default) ? "$default$key" : $default;
+		$handlers->{$key} = $default_is_namespace ? "$default$key" : $default;
 	    }
 	}
 
@@ -81,7 +86,7 @@ sub import {
     $^H |= $hint_bits;
     $^H{AUTOBOX} = $key;
 
-    autobox($_) for (values %$handlers);
+    universalize($_) for (values %$handlers);
 
     $report->($handlers) if ($report);
 }
@@ -140,6 +145,12 @@ sub unimport {
 
 	my $plus_five = (\&add)->curry()->(5);
 	my $minus_three = sub { $_[0] - $_[1] }->reverse->curry->(3);
+
+    # can(), isa() and VERSION() work as expected
+
+	if ("Hello, World"->can('foo')) ...
+	if (3.1415927->isa('Number')) ...
+	if ([ ... ]->VERSION() > 0.01) ...
 
 =head1 DESCRIPTION
 
@@ -243,9 +254,10 @@ The following example shows the range of valid values:
 		HASH    => '',		    # use the default i.e. HASH 
 		CODE    => undef,	    # don't autobox this type
 		DEFAULT => ...,		    # can take any of the 4 types above
+		UNDEF   => ...,		    # can take any of the 4 types above
 		REPORT  => ...;		    # boolean or coderef
 
-SCALAR, ARRAY, HASH, CODE and DEFAULT can take four different types of value:
+SCALAR, ARRAY, HASH, CODE, UNDEF and DEFAULT can take four different types of value:
 
 =over
 
@@ -329,13 +341,40 @@ in the case of DEFAULT.
 =back
 
 In addition to the SCALAR, ARRAY, HASH, CODE and DEFAULT fields above,
-there is an additional diagnostic field, REPORT, which exposes the
-current handlers by means of a callback, or a static reporting function.
+there are two additional fields: UNDEF and REPORT.
+
+=head2 UNDEF
+
+The pseudotype, UNDEF, can be used to autobox undefined values. These are
+not autoboxed by default (i.e. the default value is undef):
+
+This doesn't work:
+
+    use autobox;
+
+    undef->foo() # runtime error
+
+This works:
+
+    use autobox UNDEF => 'MyPackage'; 
+
+    undef->foo(); # ok
+
+So does this:
+
+    use autobox UNDEF => 'MyNamespace::'; 
+
+    undef->foo(); # ok
+
+=head2 REPORT
+
+REPORT exposes the current handlers by means of a callback, or a
+static reporting function.
 
 This can be useful if one wishes to see the computed bindings
 in 'longhand'.
 
-Reporting is ignored if the value coresponding to the REPORT key is false.
+Reporting is ignored if the value corresponding to the REPORT key is false.
 
 If the value is a CODE ref, then this sub is called with a reference to
 the HASH containing the computed handlers for the current scope.
@@ -385,7 +424,7 @@ The same applies for signed integer and float literals:
     # this doesn't work
     my $range = -10->to(10);
 
-    # this does
+    # this works
     my $range = (-10)->to(10);
 
 Perl's special-casing for the C<print BLOCK ...> syntax
@@ -435,7 +474,7 @@ Prelude) are not provided.
 
 =head1 VERSION
 
-    0.05
+    0.06
 
 =head1 AUTHOR
     

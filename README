@@ -1,4 +1,4 @@
-autobox version 0.05
+autobox version 0.06
 =========================
 
 The autobox pragma endows Perl's core datatypes with the capabilities of
@@ -22,7 +22,7 @@ to (currently) perl-5.8.1-RC4.
 The procedure for installing the patch is quite straightforward:
 
     cd /path/to/perl-5.8.1-RC4/
-    patch < /path/to/autobox.diff
+    patch < /path/to/perl-5.8.1-RC4.diff
 
 Once that patch has been applied, and the patched perl has been
 installed, it's the usual incantation:
