@@ -1,4 +1,7 @@
-Revision history for Perl extension autobox-0.08.
+Revision history for Perl extension autobox-0.09.
+
+0.09  Fri Dec 12 11:53:02 2003
+    - Added patch for perl-5.8.2
 
 0.08  Fri Oct 17 11:50:34 2003
     - removed obsolete references to perl-5.8.1-RC4 from README

@@ -5,7 +5,7 @@ use warnings;
 
 use UNIVERSAL;
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 our $hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
@@ -159,7 +159,7 @@ sub unimport {
 =head1 DESCRIPTION
 
 The autobox pragma endows Perl's core datatypes with the capabilities of
-first-class objects. This enables methods to be called on ARRAY refs,
+first-class objects. This allows methods to be called on ARRAY refs,
 HASH refs, CODE refs and raw scalars in exactly the same manner as blessed
 references. The autoboxing is transparent: boxed values are not blessed
 into their (user-defined) implementation class (unless the method elects to
@@ -478,7 +478,7 @@ Prelude) are not provided.
 
 =head1 VERSION
 
-    0.08
+    0.09
 
 =head1 AUTHOR
     
@@ -486,6 +486,6 @@ Prelude) are not provided.
 
 =head1 SEE ALSO
 
-    Java 1.5 (Tiger), C#, Ruby, String::Ruby
+    Java 1.5 (Tiger), C#, Ruby, String::Ruby, Scalar::Properties
 
 =cut

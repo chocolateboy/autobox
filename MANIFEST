@@ -4,5 +4,6 @@ Makefile.PL
 MANIFEST
 META.yml
 patch/perl-5.8.1.diff
+patch/perl-5.8.2.diff
 README
 t/test.t
