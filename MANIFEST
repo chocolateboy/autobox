@@ -1,0 +1,10 @@
+Changes
+MANIFEST
+META.yml
+Makefile.PL
+README
+lib/autobox.pm
+patch/op.c.diff
+patch/op.h.diff
+patch/pp_hot.c.diff
+t/test.t

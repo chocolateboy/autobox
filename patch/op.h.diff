@@ -1,0 +1,12 @@
+--- ./op.h.orig	Mon Aug  4 14:57:06 2003
++++ op.h	Mon Aug  4 14:57:33 2003
+@@ -100,6 +100,9 @@ Deprecated.  Use C<GIMME_V> instead.
+ 				/*  On RV2[SG]V, don't create GV--in defined()*/
+ 				/*  On OP_DBSTATE, indicates breakpoint
+ 				 *    (runtime property) */
++				/*  On OP_METHOD and OP_METHOD_NAMED,
++				 *  indicates object/class should be autoboxed */
++
+ 
+ /* old names; don't use in new code, but don't break them, either */
+ #define OPf_LIST	OPf_WANT_LIST
