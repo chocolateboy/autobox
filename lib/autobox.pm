@@ -5,7 +5,7 @@ use warnings;
 
 use UNIVERSAL;
 
-our $VERSION = 0.09;
+our $VERSION = '0.10';
 
 our $hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
@@ -470,7 +470,7 @@ to print():
 
 =head1 REQUIREMENTS
 
-This pragma requires a patch against perl-5.8.1. It is supplied
+This pragma requires a patch against perl-5.8.2. It is supplied
 in the patch directory of the distribution.
 
 Core modules for SCALAR, ARRAY, HASH and CODE (i.e. a Perl Standard
@@ -478,7 +478,7 @@ Prelude) are not provided.
 
 =head1 VERSION
 
-    0.09
+    0.10
 
 =head1 AUTHOR
     

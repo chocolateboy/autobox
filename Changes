@@ -1,4 +1,7 @@
-Revision history for Perl extension autobox-0.09.
+Revision history for Perl extension autobox-0.10.
+
+0.10  Fri Dec 12 15:24:16 2003
+    - fixed obsolete reference to perl-5.8.1 in POD
 
 0.09  Fri Dec 12 11:53:02 2003
     - Added patch for perl-5.8.2
