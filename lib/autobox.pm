@@ -2,27 +2,29 @@ package autobox;
 
 use strict;
 use warnings;
+
 use UNIVERSAL;
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 our $hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
 our %cache = ();
 
-our $types = {
-    map { $_ => $_ }
-    # qw(REF SCALAR LVALUE ARRAY HASH CODE GLOB FORMAT IO UNKNOWN)
-    qw(SCALAR ARRAY HASH CODE) # only support the core types
-};
+# called as a static method - class->typemap() - returns the default bindings for the builtin types
+# the returned hashref should provide an entry for all the supported types
+# subclasses can override this to provide different semantics
+# TODO: document this
 
-$types->{UNDEF} = undef;
+sub typemap {
+    # the full list is: qw(REF SCALAR LVALUE ARRAY HASH CODE GLOB FORMAT IO UNKNOWN)
+    { SCALAR => 'SCALAR', ARRAY => 'ARRAY', HASH => 'HASH', CODE => 'CODE', UNDEF => undef }
+}
 
 sub report ($) {
     my $handlers = shift;
-    local $| = 1;
     require Data::Dumper;
-    local $Data::Dumper::Indent = $Data::Dumper::Terse = 1;
+    local ($|, $Data::Dumper::Indent, $Data::Dumper::Terse) = (1, 1, 1);
     print STDERR Data::Dumper::Dumper($handlers), $/;
 }
 
@@ -41,8 +43,9 @@ sub universalize ($) {
 sub is_namespace ($) { $_[0] eq '' or ($_[0] =~ /::$/) }
 
 sub import {
-    shift;
-    my $handlers = { };
+    my $class = shift;
+    my $handlers = { }; # custom typemap
+    my $types = $class->typemap(); # default typemap
     my $report;
 
     if (scalar @_) {
@@ -76,7 +79,8 @@ sub import {
 	}
 
     } else {
-	$handlers = $types;
+	# isolate from $types in case monkey business occurs in a user-supplied report handler
+	$handlers = { %$types };
     }
 
     my $key = sprintf '0x%x', int ($handlers);
@@ -115,13 +119,13 @@ sub unimport {
 
 	my $range = 10->to(1); # [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ]
 
-    # floats...
+    # floats
 
 	my $error = 3.1415927->minus(22/7)->abs();
 
-    # strings...
+    # strings
 
-	my $uri = "http://www.%s.com/foo.pl?arg=%s"->f($domain, $arg->escape());
+	my $uri = 'http://www.%s.com/foo.pl?arg=%s'->f($domain, $arg->escape());
 	my $links = 'autobox'->google();
 
 	my $word = 'rubicund';
@@ -132,7 +136,7 @@ sub unimport {
 	$greeting->to_lower(); # greeting is now "hello, world"
 	$greeting->for_each(\&character_handler);
 
-    # ARRAY refs...
+    # ARRAY refs
 
 	my $schwartzian = [ @_ ]->map(...)->sort(...)->map(...);
 	my $sd = [ 1, 8, 3, 3, 2, 9 ]->standard_deviation();
@@ -156,7 +160,7 @@ sub unimport {
 
 The autobox pragma endows Perl's core datatypes with the capabilities of
 first-class objects. This enables methods to be called on ARRAY refs,
-HASH refs, CODE refs and raw SCALARs in exactly the same manner as blessed
+HASH refs, CODE refs and raw scalars in exactly the same manner as blessed
 references. The autoboxing is transparent: boxed values are not blessed
 into their (user-defined) implementation class (unless the method elects to
 bestow such a blessing) - they simply use its methods as though they are.
@@ -234,7 +238,7 @@ Consequently:
 
 would be invoked as:
 
-    SCALAR::upper("Hello, World")
+    SCALAR::upper("hello, world")
 
 while:
 
@@ -247,7 +251,7 @@ resolves to:
 A mapping from the builtin type to the user-defined class can be specified
 by passing a list of key/value bindings to the C<use autobox> statement.
 
-The following example shows the range of valid values:
+The following example shows the range of valid arguments:
 
     use autobox SCALAR  => 'MyScalar'	    # package name
 		ARRAY   => 'MyNamespace::', # package prefix (ending in '::')
@@ -295,8 +299,8 @@ As with the package name form, specifying a default namespace e.g.
     use autobox SCALAR	=> 'MyScalar',
 		DEFAULT => 'MyNamespace::';
 
-binds MyNamespace::ARRAY, MyNamespace::HASH &c. to each unhandled
-builtin type.
+binds MyNamespace::ARRAY, MyNamespace::HASH &c. to the corresponding builtin
+types.
 
 =item *
 
@@ -406,7 +410,7 @@ parenthesized:
 
 For instance, while this works:
 
-    my $curried = $sub { ... }->curry();
+    my $curried = sub { ... }->curry();
 
 this doesn't:
 
@@ -466,7 +470,7 @@ to print():
 
 =head1 REQUIREMENTS
 
-This pragma requires a patch against perl-5.8.1-RC4. It is supplied
+This pragma requires a patch against perl-5.8.1. It is supplied
 in the patch directory of the distribution.
 
 Core modules for SCALAR, ARRAY, HASH and CODE (i.e. a Perl Standard
@@ -474,7 +478,7 @@ Prelude) are not provided.
 
 =head1 VERSION
 
-    0.06
+    0.07
 
 =head1 AUTHOR
     
@@ -482,6 +486,6 @@ Prelude) are not provided.
 
 =head1 SEE ALSO
 
-    Java 1.5 (Tiger), C#, Ruby
+    Java 1.5 (Tiger), C#, Ruby, String::Ruby
 
 =cut

@@ -1,8 +1,8 @@
 Changes
+lib/autobox.pm
+Makefile.PL
 MANIFEST
 META.yml
-Makefile.PL
+patch/perl-5.8.1.diff
 README
-lib/autobox.pm
-patch/perl-5.8.1-RC4.diff
 t/test.t

@@ -1,4 +1,11 @@
-Revision history for Perl extension autobox-0.04.
+Revision history for Perl extension autobox-0.07.
+
+0.07  Tue Oct 14 13:34:16 2003
+    - updated patch to work against perl-5.8.1. This patch should be
+      applied to a clean perl-5.8.1 tree. Previous versions of perl are
+      no longer supported
+    - minor documentation tweaklets
+    - added typemap() static method to autobox.pm to facilitate subclassing
 
 0.06  Mon Aug 18 17:40:53 2003
 
