@@ -5,13 +5,13 @@ use warnings;
 
 use UNIVERSAL;
 
-our $VERSION = 0.07;
+our $VERSION = 0.08;
 
 our $hint_bits = 0x20000; # HINT_LOCALIZE_HH
 
 our %cache = ();
 
-# called as a static method - class->typemap() - returns the default bindings for the builtin types
+# called as a static method - $class->typemap() - returns the default bindings for the builtin types
 # the returned hashref should provide an entry for all the supported types
 # subclasses can override this to provide different semantics
 # TODO: document this
@@ -478,7 +478,7 @@ Prelude) are not provided.
 
 =head1 VERSION
 
-    0.07
+    0.08
 
 =head1 AUTHOR
     
