@@ -5,7 +5,7 @@ README
 autobox.pm
 autobox.xs
 ppport.h
-ptr_table.h
+ptable.h
 t/autoboxtest.pm
 t/pod.t
 t/test.t

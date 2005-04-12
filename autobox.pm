@@ -7,7 +7,7 @@ use warnings;
 use XSLoader;
 use Scope::Guard;
 
-our $VERSION = '1.00';
+our $VERSION = '1.01';
 our $cache = {};
 
 XSLoader::load 'autobox', $VERSION;
@@ -505,7 +505,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 	
 =head1 VERSION
 
-1.00
+1.01
 
 =head1 AUTHOR
     
@@ -513,6 +513,6 @@ chocolateboy: <chocolate.boy@email.com>
 
 =head1 SEE ALSO
 
-L<autobox::Core>, L<Perl6::Contexts>, L<Scalar::Properties>, L<Set::Array>, L<String::Ruby>
+L<autobox::Core>, L<Perl6::Contexts>, L<Scalar::Properties>, L<Set::Array>, L<String::Ruby>, L<Language::Functional>
 
 =cut

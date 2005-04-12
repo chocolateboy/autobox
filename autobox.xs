@@ -3,9 +3,9 @@
 #include "XSUB.h"
 #include "ppport.h"
 
-#include "ptr_table.h"
+#include "ptable.h"
 
-static PTR_TBL_t *AUTOBOX_OP_MAP = NULL;
+static PTABLE_t *AUTOBOX_OP_MAP = NULL;
 static U32 AUTOBOX_SCOPE_DEPTH = 0;
 
 OP * autobox_ck_method_named(pTHX_ OP *o);
@@ -24,7 +24,7 @@ OP * autobox_ck_method_named(pTHX_ OP *o) {
 		 SV **svp;
 
 		 if (table && (svp = hv_fetch(table, "autobox", 7, FALSE)) && *svp && SvOK(*svp)) {
-			 ptr_table_store(AUTOBOX_OP_MAP, o, INT2PTR(void *, SvIVX(*svp)));
+			 PTABLE_store(AUTOBOX_OP_MAP, o, INT2PTR(void *, SvIVX(*svp)));
 			 /* autoboxing has been disabled (by prematurely setting OPf_SPECIAL) because the receiver is a bareword */
 			if (o->op_flags & OPf_SPECIAL) {
 				 o->op_flags &= ~OPf_SPECIAL;
@@ -49,7 +49,7 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
 		cvop->op_flags |= OPf_SPECIAL;
 	}
 
-	return Perl_ck_subr(o);
+	return Perl_ck_subr(aTHX_ o);
 }
 
 OP* autobox_method_named(pTHX) {
@@ -73,7 +73,7 @@ OP* autobox_method_named(pTHX) {
 		mg_get(sv);
 
     if ((PL_op->op_flags & OPf_SPECIAL) && !(SvOBJECT(SvROK(sv) ? SvRV(sv) : sv))) {
-        HV * autobox_handlers = (HV *)(ptr_table_fetch(AUTOBOX_OP_MAP, PL_op)); /* maps datatypes to package names */
+        HV * autobox_handlers = (HV *)(PTABLE_fetch(AUTOBOX_OP_MAP, PL_op)); /* maps datatypes to package names */
 
         if (autobox_handlers) {
             char *reftype; /* autobox_handlers key */
@@ -115,7 +115,7 @@ OP* autobox_method_named(pTHX) {
 		XPUSHs(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
 		RETURN;
 	} else {
-		return Perl_pp_method_named();
+		return Perl_pp_method_named(aTHX);
 	}
 }
 
@@ -124,7 +124,7 @@ MODULE = autobox		PACKAGE = Autobox
 PROTOTYPES: ENABLE
 
 BOOT:
-AUTOBOX_OP_MAP = ptr_table_new(); if (!AUTOBOX_OP_MAP) croak ("Can't initialize op map");
+AUTOBOX_OP_MAP = PTABLE_new(); if (!AUTOBOX_OP_MAP) croak ("Can't initialize op map");
 
 void
 enterscope()
@@ -159,6 +159,6 @@ cleanup()
 		/* Perl_warn("inside autobox::cleanup\n"); */
 		PL_check[OP_METHOD_NAMED] = MEMBER_TO_FPTR(Perl_ck_null);
 		PL_check[OP_ENTERSUB] = MEMBER_TO_FPTR(Perl_ck_subr);
-		ptr_table_free(AUTOBOX_OP_MAP);
+		PTABLE_free(AUTOBOX_OP_MAP);
 		AUTOBOX_OP_MAP = NULL;
 		AUTOBOX_SCOPE_DEPTH = 0;
