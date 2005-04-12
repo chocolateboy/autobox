@@ -1,4 +1,7 @@
-Revision history for Perl extension autobox-1.01.
+Revision history for Perl extension autobox
+
+1.02  Tue Apr 12 20:52:02 2005
+    - re-fixed Makefile.PL/META.yml + copyright
 
 1.01  Tue Apr 12 19:58:49 2005
     - compatibility/portability fixes + isolate ptr table from perl's implementation
@@ -47,7 +50,7 @@ Revision history for Perl extension autobox-1.01.
       that undef values aren't autoboxed. It should
       be applied to a clean perl-5.8.1-RC4 tree
     - fixed (i.e. prevented) autoboxing of undef in isa() and can()
-    - fixed Makemaker.PL and META.yml to ensure that new
+    - fixed Makefile.PL and META.yml to ensure that new
       installs of autobox.pm aren't shadowed by old
       versions (thanks Michael G Schwern)
 

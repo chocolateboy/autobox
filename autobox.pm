@@ -7,7 +7,7 @@ use warnings;
 use XSLoader;
 use Scope::Guard;
 
-our $VERSION = '1.01';
+our $VERSION = '1.02';
 our $cache = {};
 
 XSLoader::load 'autobox', $VERSION;
@@ -505,14 +505,21 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 	
 =head1 VERSION
 
-1.01
+1.02
+
+=head1 SEE ALSO
+
+L<autobox::Core>, L<Perl6::Contexts>, L<Scalar::Properties>, L<Set::Array>, L<String::Ruby>, L<Language::Functional>
 
 =head1 AUTHOR
     
 chocolateboy: <chocolate.boy@email.com>
 
-=head1 SEE ALSO
+=head1 COPYRIGHT
 
-L<autobox::Core>, L<Perl6::Contexts>, L<Scalar::Properties>, L<Set::Array>, L<String::Ruby>, L<Language::Functional>
+Copyright (c) 2005, chocolateboy.
+
+This module is free software. It may be used, redistributed
+and/or modified under the same terms as Perl itself.
 
 =cut

@@ -5,6 +5,7 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     NAME              => 'autobox',
     VERSION_FROM      => 'autobox.pm', # finds $VERSION
+    INSTALLDIRS		  => 'perl',
     PREREQ_PM         => {
 		'XSLoader'			=> 0,
 		'Test::More'		=> 0,
