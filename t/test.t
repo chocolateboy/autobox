@@ -57,10 +57,11 @@ sub test { 'rubicund' }
 
 package main;
 
+use blib;
 use strict;
 use warnings;
 
-use Test::More tests => 328;
+use Test::More tests => 316;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -578,16 +579,16 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ($int->test(), 'SCALAR', 'nested (outer): $integer');
 
     {
-	use autobox DEFAULT => 'MyNamespace::';
+		use autobox DEFAULT => 'MyNamespace::';
 
-	is ('Hello, World'->test(), 'MyNamespace::SCALAR',
-	    'nested (inner): single quoted string literal');
-	is ("Hello, World"->test(), 'MyNamespace::SCALAR',
-	    'nested (inner): double quoted string literal');
-	is ($string->test(), 'MyNamespace::SCALAR', 'nested (inner): $string');
+		is ('Hello, World'->test(), 'MyNamespace::SCALAR',
+			'nested (inner): single quoted string literal');
+		is ("Hello, World"->test(), 'MyNamespace::SCALAR',
+			'nested (inner): double quoted string literal');
+		is ($string->test(), 'MyNamespace::SCALAR', 'nested (inner): $string');
 
-	is ([ 0 .. 9 ]->test(), 'MyNamespace::ARRAY', 'nested (inner): ARRAY ref');
-	is ($array->test(), 'MyNamespace::ARRAY', 'nested (inner): $array');
+		is ([ 0 .. 9 ]->test(), 'MyNamespace::ARRAY', 'nested (inner): ARRAY ref');
+		is ($array->test(), 'MyNamespace::ARRAY', 'nested (inner): $array');
     }
 
     is ({ 0 .. 9 }->test(), 'HASH', 'nested (outer): HASH ref');
@@ -707,6 +708,7 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 }
 
 # test VERSION
+=pod
 {
     use autobox;
 
@@ -734,6 +736,7 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is (sub { $_[0] + $_[1] }->VERSION(), 0.01, 'can: ANON sub');
     is ($code->VERSION(), 0.01, 'can: $code');
 }
+=cut
 
 # test undef: by default, undef shouldn't be autoboxed...
 {
@@ -764,6 +767,25 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 
     is (undef->test(), 'MyDefault', 'handle undef: undef');
     is ($undef->test(), 'MyDefault', 'handle undef: $undef');
+}
+
+# test import(), unimport() and VERSION() (receivers not tagged as barewords)
+{
+    use autoboxtest; # i.e. autoboxtest->import();
+	is($autoboxtest::VERSION, '3.14', 'Bareword->import() - Bareword is not autoboxed');
+	is($autoboxtest::VERSION, autoboxtest->VERSION(), 'Bareword->VERSION() - Bareword is not autoboxed');
+	is(autoboxtest::test(), 'unimport', 'Bareword->import() - Bareword is not autoboxed');
+	no autoboxtest; # use() and no() are performed *before* the tests
+}
+
+# same again with autobox enabled
+{
+	use autobox;
+    use autoboxtest; # i.e. autoboxtest->import();
+	is($autoboxtest::VERSION, '3.14', 'Bareword->import() - Bareword is not autoboxed');
+	is($autoboxtest::VERSION, autoboxtest->VERSION(), 'Bareword->VERSION() - Bareword is not autoboxed');
+	is(autoboxtest::test(), 'unimport', 'Bareword->import() - Bareword is not autoboxed');
+	no autoboxtest; # use() and no() are performed *before* the tests
 }
 
 1;

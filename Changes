@@ -1,4 +1,7 @@
-Revision history for Perl extension autobox-0.11.
+Revision history for Perl extension autobox-1.00.
+
+1.00  Tue Apr 12 01:16:52 2005
+	- rewrite: no longer requires a patch
 
 0.11  Tue Feb 3 13:21:47 2004
     - Added patch for perl-5.8.3

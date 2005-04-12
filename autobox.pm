@@ -1,104 +1,107 @@
 package autobox;
 
+use 5.006001;
 use strict;
 use warnings;
 
-use UNIVERSAL;
+use XSLoader;
+use Scope::Guard;
 
-our $VERSION = '0.11';
+our $VERSION = '1.00';
+our $cache = {};
 
-our $hint_bits = 0x20000; # HINT_LOCALIZE_HH
+XSLoader::load 'autobox', $VERSION;
 
-our %cache = ();
+END { Autobox::cleanup() }
 
-# called as a static method - $class->typemap() - returns the default bindings for the builtin types
 # the returned hashref should provide an entry for all the supported types
 # subclasses can override this to provide different semantics
 # TODO: document this
 
 sub typemap {
-    # the full list is: qw(REF SCALAR LVALUE ARRAY HASH CODE GLOB FORMAT IO UNKNOWN)
-    { SCALAR => 'SCALAR', ARRAY => 'ARRAY', HASH => 'HASH', CODE => 'CODE', UNDEF => undef }
+	# the full list is: qw(REF SCALAR LVALUE ARRAY HASH CODE GLOB FORMAT IO UNKNOWN)
+	{ SCALAR => 'SCALAR', ARRAY => 'ARRAY', HASH => 'HASH', CODE => 'CODE', UNDEF => undef }
 }
 
 sub report ($) {
-    my $handlers = shift;
-    require Data::Dumper;
-    local ($|, $Data::Dumper::Indent, $Data::Dumper::Terse) = (1, 1, 1);
-    print STDERR Data::Dumper::Dumper($handlers), $/;
+	my $handlers = shift;
+	require Data::Dumper;
+	local ($|, $Data::Dumper::Indent, $Data::Dumper::Terse) = (1, 1, 1);
+	print STDERR Data::Dumper::Dumper($handlers), $/;
 }
 
 sub universalize ($) {
-    my $class = shift;
-    return unless (defined $class);
-    no strict 'refs';
-    *{"$class\::can"} = sub { shift; UNIVERSAL::can($class, @_) }
-	unless (*{"$class\::can"}{CODE});
-    *{"$class\::isa"} = sub { shift; UNIVERSAL::isa($class, @_) }
-	unless (*{"$class\::isa"}{CODE});
-    *{"$class\::VERSION"} = sub { shift; UNIVERSAL::VERSION($class, @_) }
-	unless (*{"$class\::VERSION"}{CODE});
+	my $class = shift;
+	return unless (defined $class);
+	no strict 'refs';
+	*{"$class\::can"} = sub { shift; UNIVERSAL::can($class, @_) }
+		unless (*{"$class\::can"}{CODE});
+	*{"$class\::isa"} = sub { shift; UNIVERSAL::isa($class, @_) }
+		unless (*{"$class\::isa"}{CODE});
+	*{"$class\::VERSION"} = sub { shift; UNIVERSAL::VERSION($class, @_) } # hmm...
+		unless (*{"$class\::VERSION"}{CODE});
 }
 
 sub is_namespace ($) { $_[0] eq '' or ($_[0] =~ /::$/) }
 
 sub import {
-    my $class = shift;
-    my $handlers = { }; # custom typemap
-    my $types = $class->typemap(); # default typemap
-    my $report;
+	my $class = shift;
+	my $handlers = { }; # custom typemap
+	my $types = $class->typemap(); # default typemap
+	my $report;
 
-    if (scalar @_) {
-	my %args = @_;
-	my %unhandled = %$types;
+	if (scalar @_) {
+		my %args = @_;
+		my %unhandled = %$types;
+		my $default = exists $args{DEFAULT} ? delete $args{DEFAULT} : '';
 
-	my $default = exists $args{DEFAULT} ? delete $args{DEFAULT} : '';
-       
-	if ($report = delete $args{REPORT}) { # REPORT => 1 : print to STDERR
-	    $report = \&report unless (ref $report eq 'CODE');
+		if ($report = delete $args{REPORT}) { # REPORT => 1 : print to STDERR
+			$report = \&report unless (ref $report eq 'CODE');
+		}
+
+		for my $key (keys %args) {
+			die ("autobox: unrecognised type: '", (defined $key ? $key : ''), "'") 
+				unless (exists $types->{$key});
+
+			delete $unhandled{$key}; # delete before iterating
+
+			my $value = $args{$key};
+
+			next unless (defined $value);
+
+			$handlers->{$key} = is_namespace($value) ? "$value$key" : $value;
+		}
+
+		if (defined $default) {
+			my $default_is_namespace = is_namespace($default);
+			for my $key (keys %unhandled) {
+				$handlers->{$key} = $default_is_namespace ? "$default$key" : $default;
+			}
+		}
+
+	} else {
+		# isolate from $types in case monkey business occurs in a user-supplied report handler
+		$handlers = { %$types };
 	}
 
-	for my $key (keys %args) {
-	    die ("autobox: unrecognised type: '", (defined $key ? $key : ''), "'") 
-		unless (exists $types->{$key});
+	$^H |= 0x20000;
+	$^H{autobox} = int($handlers);
 
-	    delete $unhandled{$key}; # delete before iterating
+	$cache->{$handlers} = $handlers;
 
-	    my $value = $args{$key};
+	universalize($_) for (values %$handlers);
 
-	    next unless (defined $value);
+	$report->($handlers) if ($report);
 
-	    $handlers->{$key} = is_namespace($value) ? "$value$key" : $value;
-	}
+	my $sg = Scope::Guard->new(sub { Autobox::leavescope() });
+	$^H{$sg} = $sg;
 
-	if (defined $default) {
-	    my $default_is_namespace = is_namespace($default);
-	    for my $key (keys %unhandled) {
-		$handlers->{$key} = $default_is_namespace ? "$default$key" : $default;
-	    }
-	}
-
-    } else {
-	# isolate from $types in case monkey business occurs in a user-supplied report handler
-	$handlers = { %$types };
-    }
-
-    my $key = sprintf '0x%x', int ($handlers);
-    
-    $cache{$key} = $handlers;
-
-    $^H |= $hint_bits;
-    $^H{AUTOBOX} = $key;
-
-    universalize($_) for (values %$handlers);
-
-    $report->($handlers) if ($report);
+	Autobox::enterscope();
 }
 
 sub unimport {
-    shift;
-    $^H &= ~$hint_bits;
-    delete $^H{AUTOBOX};
+    $^H &= ~0x20000;
+    delete $^H{autobox};
 }
 
 1;
@@ -107,7 +110,7 @@ sub unimport {
 
 =head1 NAME
 
-    autobox - use builtin datatypes as first-class objects
+autobox - use builtin datatypes as first-class objects
 
 =head1 SYNOPSIS
 
@@ -468,17 +471,41 @@ to print():
     # or even
     { @_ }->print_if_foo(1, 0); 
 
-=head1 REQUIREMENTS
+Although C<isa> and C<can> are "overloaded" for autoboxed values, the C<VERSION> method isn't.
+Thus, while these work:
 
-This pragma requires a patch against perl-5.8.2. It is supplied
-in the patch directory of the distribution.
+	[ ... ]->can('pop')
 
-Core modules for SCALAR, ARRAY, HASH and CODE (i.e. a Perl Standard
-Prelude) are not provided.
+	3.1415->isa('MyScalar')
 
+This doesn't:
+
+	use MyScalar 1.23;
+
+	use autobox SCALAR => MyScalar;
+
+	print "Hello, World"->VERSION(), $/;
+
+Though, of course:
+
+	print MyScalar->VERSION(), $/;
+
+and
+	
+	print $MyScalar::VERSION, $/;
+
+continue to work.
+
+This is due to a limitation in perl's implementation of C<use> and C<no>.
+Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
+
+	'Foo'->import() # equivalent to Foo->import() rather than MyScalar->import('Foo')
+
+	[]->import()  # error: Can't call method "import" on unblessed reference
+	
 =head1 VERSION
 
-0.11
+1.00
 
 =head1 AUTHOR
     
@@ -486,8 +513,6 @@ chocolateboy: <chocolate.boy@email.com>
 
 =head1 SEE ALSO
 
-Java 1.5 (Tiger), C#, Ruby
-
-L<String::Ruby>, L<Scalar::Properties>, L<Set::Array>
+L<autobox::Core>, L<Perl6::Contexts>, L<Scalar::Properties>, L<Set::Array>, L<String::Ruby>
 
 =cut

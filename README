@@ -1,5 +1,5 @@
-autobox version 0.11
-=========================
+autobox version 1.00
+====================
 
 The autobox pragma endows Perl's core datatypes with the capabilities of
 first-class objects. This allows methods to be called on ARRAY refs,
@@ -15,33 +15,23 @@ See the POD for more details.
 
 INSTALLATION
 
-First of all, you won't be able to run this module unless
-you have applied the patch included in the patch directory
-to perl-5.8.2.
+To install this module type the following:
 
-The procedure for installing the patch is quite straightforward:
-
-    cd /path/to/perl-5.8.2/
-    patch < /path/to/perl-5.8.2.diff
-
-Once that patch has been applied, and the patched perl has been
-installed, it's the usual incantation:
-
-   perl_autobox Makefile.PL # i.e. your patched perl
+   perl Makefile.PL
    make
    make test
    make install
 
-There are no builtin SCALAR, ARRAY, HASH or CODE classes. You'll
-have to supply those yourself.
-
 DEPENDENCIES
 
-This module requires the patch referred to above.
+This module requires these other modules and libraries:
+
+  Scope::Guard
+  Test::More
 
 COPYRIGHT AND LICENCE
 
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
-Copyright (C) 2003-2004 chocolateboy: <chocolate.boy@email.com>
+Copyright (C) 2003-2005 chocolateboy: <chocolate.boy@email.com>
