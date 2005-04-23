@@ -1,14 +1,14 @@
 package autobox;
 
-use 5.006001;
+use 5.008;
 use strict;
 use warnings;
 
 use XSLoader;
 use Scope::Guard;
 
-our $VERSION = '1.02';
-our $cache = {};
+our $VERSION = '1.03';
+our $cache = {}; # hold a reference to the handlers hashes
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -84,10 +84,10 @@ sub import {
 		$handlers = { %$types };
 	}
 
-	$^H |= 0x20000;
+	$^H |= 0x120000; # set HINT_LOCALIZE_HH + an unused bit to work a round a %^H bug
 	$^H{autobox} = int($handlers);
 
-	$cache->{$handlers} = $handlers;
+	$cache->{$handlers} = $handlers; # hold a reference to the handlers hash
 
 	universalize($_) for (values %$handlers);
 
@@ -100,7 +100,7 @@ sub import {
 }
 
 sub unimport {
-    $^H &= ~0x20000;
+    $^H &= ~0x120000;
     delete $^H{autobox};
 }
 
@@ -505,7 +505,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 	
 =head1 VERSION
 
-1.02
+1.03
 
 =head1 SEE ALSO
 

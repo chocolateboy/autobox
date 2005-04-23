@@ -1,5 +1,9 @@
 Revision history for Perl extension autobox
 
+1.03  Sat Apr 23 20:35:16 2005
+    - workaround and test for %^H bug
+    - require perl >= 5.8
+
 1.02  Tue Apr 12 20:52:02 2005
     - re-fixed Makefile.PL/META.yml + copyright
 

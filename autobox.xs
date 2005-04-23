@@ -16,10 +16,13 @@ OP * autobox_method_named(pTHX);
 OP * autobox_ck_method_named(pTHX_ OP *o) {
 	char *meth  = SvPVX(((SVOP *)o)->op_sv);
 	/*
+	 * workaround %^H scoping bug by checking that PL_hints (which is properly scoped) & 0x100000 is true
+	 *
 	 * the bareword flag is not set on the receivers of the import, unimport
 	 * and VERSION messages faked up by use and no, so exempt them
 	 */
-	if (strNE(meth, "import") && strNE(meth, "unimport") && strNE(meth, "VERSION")) {
+	/* Perl_warn(aTHX_ "Perl_hints: 0x%x", PL_hints); */
+	if (((PL_hints & 0x120000) == 0x120000) && strNE(meth, "import") && strNE(meth, "unimport") && strNE(meth, "VERSION")) {
 		 HV *table = GvHV(PL_hintgv);
 		 SV **svp;
 

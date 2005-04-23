@@ -61,7 +61,7 @@ use blib;
 use strict;
 use warnings;
 
-use Test::More tests => 316;
+use Test::More tests => 312;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -769,23 +769,26 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ($undef->test(), 'MyDefault', 'handle undef: $undef');
 }
 
-# test import(), unimport() and VERSION() (receivers not tagged as barewords)
+# verify expected behaviour when autobox isn't enabled (workaround for a %^H bug)
 {
-    use autoboxtest; # i.e. autoboxtest->import();
-	is($autoboxtest::VERSION, '3.14', 'Bareword->import() - Bareword is not autoboxed');
-	is($autoboxtest::VERSION, autoboxtest->VERSION(), 'Bareword->VERSION() - Bareword is not autoboxed');
-	is(autoboxtest::test(), 'unimport', 'Bareword->import() - Bareword is not autoboxed');
-	no autoboxtest; # use() and no() are performed *before* the tests
+    use autobox_scope_1;
+
+	eval { autobox_scope_1::test() };
+
+	ok(($@ && ($@ =~ /^$unblessed_error/)),
+		'[]->test() raises an exception in a required module when autobox is not used');
 }
 
-# same again with autobox enabled
+# make sure behaviour is the same when autobox is enabled (workaround for a %^H bug)
 {
+	
 	use autobox;
-    use autoboxtest; # i.e. autoboxtest->import();
-	is($autoboxtest::VERSION, '3.14', 'Bareword->import() - Bareword is not autoboxed');
-	is($autoboxtest::VERSION, autoboxtest->VERSION(), 'Bareword->VERSION() - Bareword is not autoboxed');
-	is(autoboxtest::test(), 'unimport', 'Bareword->import() - Bareword is not autoboxed');
-	no autoboxtest; # use() and no() are performed *before* the tests
+    use autobox_scope_2;
+
+	eval { autobox_scope_2::test() };
+
+	ok(($@ && ($@ =~ /^$unblessed_error/)),
+		'[]->test() raises an exception in a required module when autobox is used');
 }
 
 1;
