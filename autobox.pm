@@ -7,7 +7,7 @@ use warnings;
 use XSLoader;
 use Scope::Guard;
 
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 our $cache = {}; # hold a reference to the handlers hashes
 
 XSLoader::load 'autobox', $VERSION;
@@ -153,11 +153,10 @@ autobox - use builtin datatypes as first-class objects
 	my $plus_five = (\&add)->curry()->(5);
 	my $minus_three = sub { $_[0] - $_[1] }->reverse->curry->(3);
 
-    # can(), isa() and VERSION() work as expected
+    # can() and isa() work as expected
 
 	if ("Hello, World"->can('foo')) ...
-	if (3.1415927->isa('Number')) ...
-	if ([ ... ]->VERSION() > 0.01) ...
+	if (3.1415927->isa('SCALAR')) ...
 
 =head1 DESCRIPTION
 
@@ -471,7 +470,7 @@ to print():
     # or even
     { @_ }->print_if_foo(1, 0); 
 
-Although C<isa> and C<can> are "overloaded" for autoboxed values, the C<VERSION> method isn't.
+Although C<can> and C<isa> are "overloaded" for autoboxed values, the C<VERSION> method isn't.
 Thus, while these work:
 
 	[ ... ]->can('pop')
@@ -505,7 +504,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 	
 =head1 VERSION
 
-1.03
+1.04
 
 =head1 SEE ALSO
 
