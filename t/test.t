@@ -61,7 +61,7 @@ use blib;
 use strict;
 use warnings;
 
-use Test::More tests => 312;
+use Test::More tests => 318;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -759,6 +759,29 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 
     eval { $undef->can('test') };
     ok (($@ && ($@ =~ /^$undef_error/)), 'undef: $undef->can(...)');
+}
+
+# test undef 2: the empty string shorthand should default to the typemap default (undef) rather than 'UNDEF'
+{
+    use autobox UNDEF => '';
+
+    eval { undef->test() };
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": undef->test()');
+
+    eval { $undef->test() };
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": $undef->test()');
+
+    eval { undef->isa('SCALAR') };
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": undef->isa(...)');
+
+    eval { $undef->isa('SCALAR') };
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": $undef->isa(...)');
+
+    eval { undef->can('test') };
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": undef->can(...)');
+
+    eval { $undef->can('test') };
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": $undef->can(...)');
 }
 
 # test undef: but undef support can be enabled

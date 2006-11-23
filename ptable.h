@@ -21,7 +21,7 @@ struct PTABLE {
 typedef struct PTABLE_entry	PTABLE_ENTRY_t;
 typedef struct PTABLE 		PTABLE_t;
 
-static PTABLE_t * PTABLE_new();
+static PTABLE_t * PTABLE_new(void);
 static void * PTABLE_fetch(PTABLE_t *tbl, void *key);
 static void PTABLE_store(PTABLE_t *tbl, void *key, void *value);
 static void PTABLE_grow(PTABLE_t *tbl);
@@ -31,7 +31,7 @@ static void PTABLE_free(PTABLE_t *tbl);
 /* create a new pointer => pointer table */
 
 static PTABLE_t *
-PTABLE_new()
+PTABLE_new(void)
 {
 	PTABLE_t *tbl;
 	Newz(0, tbl, 1, PTABLE_t);

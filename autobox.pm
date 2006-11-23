@@ -4,99 +4,116 @@ use 5.008;
 use strict;
 use warnings;
 
+use Carp qw(confess);
 use XSLoader;
 use Scope::Guard;
 
-our $VERSION = '1.04';
-our $cache = {}; # hold a reference to the handlers hashes
+our $VERSION = '1.10';
 
 XSLoader::load 'autobox', $VERSION;
 
-END { Autobox::cleanup() }
+############################################# PRIVATE ###############################################
 
-# the returned hashref should provide an entry for all the supported types
-# subclasses can override this to provide different semantics
-# TODO: document this
+# map builtin types to the package or namespace that handles them, or undef if (by default)
+# that type should not be boxed; the full list of supported types is:
+#
+#     REF SCALAR LVALUE ARRAY HASH CODE GLOB FORMAT IO UNKNOWN
+# 
+# this map is exposed by the (undocumented) typemap method below, allowing subclasses to provide new
+# defaults and/or allow a wider or narrower range of types to be autoboxed.
 
-sub typemap {
-	# the full list is: qw(REF SCALAR LVALUE ARRAY HASH CODE GLOB FORMAT IO UNKNOWN)
-	{ SCALAR => 'SCALAR', ARRAY => 'ARRAY', HASH => 'HASH', CODE => 'CODE', UNDEF => undef }
+my $TYPEMAP = {
+    SCALAR	=> 'SCALAR',
+    ARRAY	=> 'ARRAY',
+    HASH	=> 'HASH',
+    CODE	=> 'CODE',
+    UNDEF	=>  undef,
+};
+
+my $CACHE = {}; # hold a reference to the handlers hashes
+
+sub _is_namespace ($) { $_[0] =~ /::$/ }
+
+sub _universalize ($) {
+    my $class = shift;
+    return unless (defined $class);
+    no strict 'refs';
+    *{"$class\::can"} = sub { shift; UNIVERSAL::can($class, @_) }
+    unless (*{"$class\::can"}{CODE});
+    *{"$class\::isa"} = sub { shift; UNIVERSAL::isa($class, @_) }
+    unless (*{"$class\::isa"}{CODE});
 }
 
-sub report ($) {
-	my $handlers = shift;
-	require Data::Dumper;
-	local ($|, $Data::Dumper::Indent, $Data::Dumper::Terse) = (1, 1, 1);
-	print STDERR Data::Dumper::Dumper($handlers), $/;
+sub _debug ($) {
+    my $handlers = shift;
+    require Data::Dumper;
+    no warnings qw(once);
+    local ($|, $Data::Dumper::Indent, $Data::Dumper::Terse) = (1, 1, 1);
+    print STDERR Data::Dumper::Dumper($handlers), $/;
 }
 
-sub universalize ($) {
-	my $class = shift;
-	return unless (defined $class);
-	no strict 'refs';
-	*{"$class\::can"} = sub { shift; UNIVERSAL::can($class, @_) }
-		unless (*{"$class\::can"}{CODE});
-	*{"$class\::isa"} = sub { shift; UNIVERSAL::isa($class, @_) }
-		unless (*{"$class\::isa"}{CODE});
-	*{"$class\::VERSION"} = sub { shift; UNIVERSAL::VERSION($class, @_) } # hmm...
-		unless (*{"$class\::VERSION"}{CODE});
-}
+############################################# PUBLIC (Methods) ###############################################
 
-sub is_namespace ($) { $_[0] eq '' or ($_[0] =~ /::$/) }
+# this undocumented method allows subclasses to provide their own default bindings; see the notes above
+
+sub typemap { $TYPEMAP }
 
 sub import {
-	my $class = shift;
-	my $handlers = { }; # custom typemap
-	my $types = $class->typemap(); # default typemap
-	my $report;
+    my ($class, %args) = @_;
+    my $handlers = {}; # custom typemap
+    my $debug = delete $args{DEBUG};
+    my $default = exists $args{DEFAULT} ? delete $args{DEFAULT} : '';
+    my $typemap = $class->typemap();
 
-	if (scalar @_) {
-		my %args = @_;
-		my %unhandled = %$types;
-		my $default = exists $args{DEFAULT} ? delete $args{DEFAULT} : '';
+    # fill in defaults for unhandled cases
+    for my $key (keys %$typemap) {
 
-		if ($report = delete $args{REPORT}) { # REPORT => 1 : print to STDERR
-			$report = \&report unless (ref $report eq 'CODE');
-		}
+	# skip explicit undefs
+	next if ((exists $args{$key}) && (not(defined $args{$key})));
 
-		for my $key (keys %args) {
-			die ("autobox: unrecognised type: '", (defined $key ? $key : ''), "'") 
-				unless (exists $types->{$key});
-
-			delete $unhandled{$key}; # delete before iterating
-
-			my $value = $args{$key};
-
-			next unless (defined $value);
-
-			$handlers->{$key} = is_namespace($value) ? "$value$key" : $value;
-		}
-
-		if (defined $default) {
-			my $default_is_namespace = is_namespace($default);
-			for my $key (keys %unhandled) {
-				$handlers->{$key} = $default_is_namespace ? "$default$key" : $default;
-			}
-		}
-
+	if (exists $args{$key}) { # we know it's not undef
+	    if ($args{$key} eq '') {
+		$args{$key} = $typemap->{$key};
+	    } # else: already defined
 	} else {
-		# isolate from $types in case monkey business occurs in a user-supplied report handler
-		$handlers = { %$types };
+	    if ((defined $default) && ($default eq '')) {
+		$args{$key} = $typemap->{$key};
+	    } else {
+		$args{$key} = $default; # namespace expansion is handled below
+	    }
 	}
+    }
 
-	$^H |= 0x120000; # set HINT_LOCALIZE_HH + an unused bit to work a round a %^H bug
-	$^H{autobox} = int($handlers);
+    # sanity check %args, expand the namespace prefixes into package names and copy defined values to $handlers
+    for my $key (keys %args) {
+	confess ("unrecognised option: '", (defined $key ? $key : ''), "'") 
+	    unless (exists $typemap->{$key});
 
-	$cache->{$handlers} = $handlers; # hold a reference to the handlers hash
+	my $value = $args{$key};
 
-	universalize($_) for (values %$handlers);
+	# The default typemap of UNDEF => undef (typically hoist into %args in the loop above)
+	# ensures that UNDEF is never autoboxed unless an explicit package or namespace
+	# is supplied
+	next unless (defined $value);
+	$handlers->{$key} = _is_namespace($value) ? "$value$key" : $value;
+    }
 
-	$report->($handlers) if ($report);
+    $^H |= 0x120000; # set HINT_LOCALIZE_HH + an unused bit to work a round a %^H bug
+    $^H{autobox} = int($handlers);
 
-	my $sg = Scope::Guard->new(sub { Autobox::leavescope() });
-	$^H{$sg} = $sg;
+    $CACHE->{$handlers} = $handlers; # hold a reference to the handlers hash
 
-	Autobox::enterscope();
+    _universalize($_) for (values %$handlers);
+
+    if ($debug) {
+	$debug = \&_debug unless (ref $debug eq 'CODE');
+	$debug->($handlers);
+    }
+
+    my $sg = Scope::Guard->new(sub { Autobox::leavescope() });
+    $^H{$sg} = $sg;
+
+    Autobox::enterscope();
 }
 
 sub unimport {
@@ -259,9 +276,9 @@ The following example shows the range of valid arguments:
 		ARRAY   => 'MyNamespace::', # package prefix (ending in '::')
 		HASH    => '',		    # use the default i.e. HASH 
 		CODE    => undef,	    # don't autobox this type
-		DEFAULT => ...,		    # can take any of the 4 types above
 		UNDEF   => ...,		    # can take any of the 4 types above
-		REPORT  => ...;		    # boolean or coderef
+		DEFAULT => ...,		    # can take any of the 4 types above
+		DEBUG   => ...;		    # boolean or coderef
 
 SCALAR, ARRAY, HASH, CODE, UNDEF and DEFAULT can take four different types of value:
 
@@ -346,8 +363,8 @@ in the case of DEFAULT.
 
 =back
 
-In addition to the SCALAR, ARRAY, HASH, CODE and DEFAULT fields above,
-there are two additional fields: UNDEF and REPORT.
+In addition to the SCALAR, ARRAY, HASH, CODE and DEFAULT options above,
+there are two additional options: UNDEF and DEBUG.
 
 =head2 UNDEF
 
@@ -372,29 +389,29 @@ So does this:
 
     undef->foo(); # ok
 
-=head2 REPORT
+=head2 DEBUG
 
-REPORT exposes the current handlers by means of a callback, or a
-static reporting function.
+DEBUG exposes the current handlers by means of a callback, or a
+static debugging function.
 
 This can be useful if one wishes to see the computed bindings
 in 'longhand'.
 
-Reporting is ignored if the value corresponding to the REPORT key is false.
+Debugging is ignored if the value corresponding to the DEBUG key is false.
 
 If the value is a CODE ref, then this sub is called with a reference to
 the HASH containing the computed handlers for the current scope.
 
-Finally, if REPORT is true but not a CODE ref, the handlers are dumped
+Finally, if DEBUG is true but not a CODE ref, the handlers are dumped
 to STDERR.
 
 Thus:
 
-    use autobox REPORT => 1, ...
+    use autobox DEBUG => 1, ...
 
 or
 
-    use autobox REPORT => sub { ... }, ...
+    use autobox DEBUG => sub { ... }, ...
 
 or
 
@@ -403,7 +420,7 @@ or
 	...
     }
 
-    use autobox REPORT => \&my_callback, ...
+    use autobox DEBUG => \&my_callback, ...
 
 =head1 CAVEATS
 
@@ -504,11 +521,25 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 	
 =head1 VERSION
 
-1.04
+1.10
 
 =head1 SEE ALSO
 
-L<autobox::Core>, L<Perl6::Contexts>, L<Scalar::Properties>, L<Set::Array>, L<String::Ruby>, L<Language::Functional>
+=over
+
+=item * L<Moose::Autobox>
+
+=item * L<autobox::Core|autobox::Core>
+
+=item * L<Perl6::Contexts|Perl6::Contexts>
+
+=item * L<Shell::Autobox|Shell::Autobox>
+
+=item * L<Scalar::Properties|Scalar::Properties>
+
+=item * L<Set::Array|Set::Array>
+
+=back
 
 =head1 AUTHOR
     

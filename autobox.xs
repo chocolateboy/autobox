@@ -167,7 +167,7 @@ leavescope()
 	}
 
 void
-cleanup()
+END()
     PROTOTYPE:
     CODE: 
 	/* Perl_warn("inside autobox::cleanup\n"); */
