@@ -11,7 +11,6 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#include "ppport.h"
 
 #include "ptable.h"
 
@@ -62,7 +61,7 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
 	cvop->op_flags |= OPf_SPECIAL;
     }
 
-    return Perl_ck_subr(aTHX_ o);
+    return ck_subr(o);
 }
 
 OP* autobox_method_named(pTHX) {
@@ -129,7 +128,7 @@ OP* autobox_method_named(pTHX) {
 	XPUSHs(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
 	RETURN;
     } else {
-	return Perl_pp_method_named(aTHX);
+	return PL_ppaddr[OP_METHOD_NAMED](aTHX);
     }
 }
 

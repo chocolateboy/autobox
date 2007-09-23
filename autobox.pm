@@ -8,7 +8,7 @@ use Carp qw(confess);
 use XSLoader;
 use Scope::Guard;
 
-our $VERSION = '1.10';
+our $VERSION = '1.20';
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -521,7 +521,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 	
 =head1 VERSION
 
-1.10
+1.20
 
 =head1 SEE ALSO
 
@@ -547,7 +547,7 @@ chocolateboy: <chocolate.boy@email.com>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2005, chocolateboy.
+Copyright (c) 2003-2007, chocolateboy.
 
 This module is free software. It may be used, redistributed
 and/or modified under the same terms as Perl itself.
