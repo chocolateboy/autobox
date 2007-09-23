@@ -4,7 +4,7 @@ use ExtUtils::MakeMaker;
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
 
-my $optimize = ($^O eq 'MSWin32') ? '-O2' : '-O3';
+my $optimize = ($^O eq 'MSWin32') ? '-O2 -W4' : '-O3 -Wall';
 
 WriteMakefile(
     NAME	    => 'autobox',
@@ -21,7 +21,7 @@ WriteMakefile(
     LIBS		=> [''], # e.g., '-lm'
     DEFINE		=> '', # e.g., '-DHAVE_SOMETHING'
     INC			=> '-I.', # e.g., '-I. -I/usr/include/other'
-    OPTIMIZE		=> "$optimize -Wall",
+    OPTIMIZE		=> $optimize,
     # Un-comment this if you add C files to link with later:
     # OBJECT		=> '$(O_FILES)', # link all the C files too
 );

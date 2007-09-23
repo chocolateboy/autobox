@@ -8,7 +8,7 @@ use Carp qw(confess);
 use XSLoader;
 use Scope::Guard;
 
-our $VERSION = '1.20';
+our $VERSION = '1.21';
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -521,7 +521,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 	
 =head1 VERSION
 
-1.20
+1.21
 
 =head1 SEE ALSO
 
