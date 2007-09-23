@@ -1,15 +1,18 @@
 Revision history for Perl extension autobox
 
+1.22  Sun Sep 23 22:27:44 2007
+    - (Perl_ck_subr and Perl_ck_null): fix build failure on Windows
+
 1.21  Sun Sep 23 20:35:37 2007
-    - fix build failure on Windows (thanks Alexandr Ciornii)
+    - (Makefile): fix build failure on Windows (thanks Alexandr Ciornii)
 
 1.20  Sun Sep 23 14:05:39 2007
-    - fix build failures on perl >= 5.9.3 (thanks Andreas Koenig)
-    - fix build failure on Windows (thanks randyk and Alexandr Ciornii)
+    - (ptable.h): fix build failures on perl >= 5.9.3 (thanks Andreas Koenig)
+    - (Perl_pp_method_named): fix build failure on Windows (thanks randyk and Alexandr Ciornii)
 
 1.10  Thu Nov 23 20:32:53 2006
     - moved END handler into XS
-    - updated See Also section
+    - updated SEE ALSO section
     - s/REPORT/DEBUG/
     - fix and test for UNDEF => ''
     - portability fixlet for Windows
@@ -81,8 +84,7 @@ Revision history for Perl extension autobox
 0.03  Sun Aug 10 03:17:16 2003
 
     - added support for can() and isa()
-    - documented print { hashref_expression() }
-      issues/workarounds
+    - documented print { hashref_expression() } issues/workarounds
 
 0.02  Wed Aug 6 16:49:45 2003
 
@@ -91,5 +93,4 @@ Revision history for Perl extension autobox
     - documentation fixlets for the patch and module
 
 0.01  Mon Aug 4 01:00:18 2003
-    - original version; created by h2xs 1.21 with options
-      -n autobox-0.01
+    - original version; created by h2xs 1.21 with options -n autobox-0.01

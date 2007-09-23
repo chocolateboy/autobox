@@ -16,6 +16,8 @@
 
 static PTABLE_t *AUTOBOX_OP_MAP = NULL;
 static U32 AUTOBOX_SCOPE_DEPTH = 0;
+static OP *(*autobox_old_ck_method_named)(pTHX_ OP *op) = NULL;
+static OP *(*autobox_old_ck_subr)(pTHX_ OP *op) = NULL;
 
 OP * autobox_ck_method_named(pTHX_ OP *o);
 OP * autobox_ck_subr(pTHX_ OP *o);
@@ -25,24 +27,27 @@ OP * autobox_method_named(pTHX);
 OP * autobox_ck_method_named(pTHX_ OP *o) {
     char *meth  = SvPVX(((SVOP *)o)->op_sv);
     /*
-     * workaround %^H scoping bug by checking that PL_hints (which is properly scoped) & 0x100000 is true
+     * work around a %^H scoping bug by checking that PL_hints (which is properly scoped) & an unused
+     * PL_hints bit (0x100000) is true
      *
      * the bareword flag is not set on the receivers of the import, unimport
-     * and VERSION messages faked up by use and no, so exempt them
+     * and VERSION messages faked up by use() and no(), so exempt them
      */
-    /* Perl_warn(aTHX_ "Perl_hints: 0x%x", PL_hints); */
     if (((PL_hints & 0x120000) == 0x120000) && strNE(meth, "import") && strNE(meth, "unimport") && strNE(meth, "VERSION")) {
 	HV *table = GvHV(PL_hintgv);
 	SV **svp;
 
 	if (table && (svp = hv_fetch(table, "autobox", 7, FALSE)) && *svp && SvOK(*svp)) {
 	    PTABLE_store(AUTOBOX_OP_MAP, o, INT2PTR(void *, SvIVX(*svp)));
-	    /* autoboxing has been disabled (by prematurely setting OPf_SPECIAL) because the receiver is a bareword */
+	    /*
+	     * autoboxing has been disabled for this op (by prematurely setting OPf_SPECIAL in autobox_ck_subr)
+	     * because the receiver is a bareword
+	     */
 	    if (o->op_flags & OPf_SPECIAL) {
-		o->op_flags &= ~OPf_SPECIAL;
-	    } else {
+		o->op_flags &= ~OPf_SPECIAL; /* undo the bogus flag */
+	    } else { /* otherwise, enable it for this op */
 		o->op_flags |= OPf_SPECIAL;
-		o->op_ppaddr = MEMBER_TO_FPTR(autobox_method_named);
+		o->op_ppaddr = autobox_method_named;
 	    }
 	}
     }
@@ -84,6 +89,7 @@ OP* autobox_method_named(pTHX) {
     if (SvGMAGICAL(sv))
 	mg_get(sv);
 
+    /* if autobox is enabled (in scope) for this op and the receiver isn't an object... */
     if ((PL_op->op_flags & OPf_SPECIAL) && !(SvOBJECT(SvROK(sv) ? SvRV(sv) : sv))) {
 	HV * autobox_handlers = (HV *)(PTABLE_fetch(AUTOBOX_OP_MAP, PL_op)); /* maps datatypes to package names */
 
@@ -91,6 +97,7 @@ OP* autobox_method_named(pTHX) {
 	    char *reftype; /* autobox_handlers key */
 	    SV **svp; /* pointer to autobox_handlers value */
 
+	    /* determine the package from the receiver's reftype() - or "UNDEF" if it's not a ref */
 	    reftype = SvOK(sv) ? sv_reftype((SvROK(sv) ? SvRV(sv) : sv), 0) : "UNDEF";
 	    svp = hv_fetch(autobox_handlers, reftype, strlen(reftype), 0);
 
@@ -147,9 +154,17 @@ enterscope()
 	    ++AUTOBOX_SCOPE_DEPTH;
 	} else {
 	    AUTOBOX_SCOPE_DEPTH = 1;
-	    /* Perl_warn("inside autobox::enterscope\n"); */
-	    PL_check[OP_METHOD_NAMED] = MEMBER_TO_FPTR(autobox_ck_method_named);
-	    PL_check[OP_ENTERSUB] = MEMBER_TO_FPTR(autobox_ck_subr);
+	    /*
+	     * capture the check routines in scope when autobox is used.
+	     * usually, these will be Perl_ck_null and Perl_ck_subr respectively,
+	     * though, in principle, they could be bespoke checkers spliced
+	     * in by another module.
+	     */
+	    autobox_old_ck_method_named = PL_check[OP_METHOD_NAMED];
+	    autobox_old_ck_subr = PL_check[OP_ENTERSUB];
+
+	    PL_check[OP_METHOD_NAMED] = autobox_ck_method_named;
+	    PL_check[OP_ENTERSUB] = autobox_ck_subr;
 	}
 
 void
@@ -160,18 +175,23 @@ leavescope()
 	    --AUTOBOX_SCOPE_DEPTH;
 	} else {
 	    AUTOBOX_SCOPE_DEPTH = 0;
-	    /* Perl_warn("inside autobox::leavescope\n"); */
-	    PL_check[OP_METHOD_NAMED] = MEMBER_TO_FPTR(Perl_ck_null);
-	    PL_check[OP_ENTERSUB] = MEMBER_TO_FPTR(Perl_ck_subr);
+	    PL_check[OP_METHOD_NAMED] = autobox_old_ck_method_named;
+	    PL_check[OP_ENTERSUB] = autobox_old_ck_subr;
 	}
 
 void
 END()
     PROTOTYPE:
     CODE: 
-	/* Perl_warn("inside autobox::cleanup\n"); */
-	PL_check[OP_METHOD_NAMED] = MEMBER_TO_FPTR(Perl_ck_null);
-	PL_check[OP_ENTERSUB] = MEMBER_TO_FPTR(Perl_ck_subr);
+	/* make sure we got as far as initializing pointers to the original checkers */
+	if (autobox_old_ck_method_named) {
+	    PL_check[OP_METHOD_NAMED] = autobox_old_ck_method_named;
+	}
+
+	if (autobox_old_ck_subr) {
+	    PL_check[OP_ENTERSUB] = autobox_old_ck_subr;
+	}
+
 	PTABLE_free(AUTOBOX_OP_MAP);
 	AUTOBOX_OP_MAP = NULL;
 	AUTOBOX_SCOPE_DEPTH = 0;
