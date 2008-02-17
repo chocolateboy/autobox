@@ -1,13 +1,15 @@
-Changes
-MANIFEST
-META.yml
-Makefile.PL
-README
 autobox.pm
+autobox.pod
 autobox.xs
+Changes
+Makefile.PL
+MANIFEST			This list of files
+META.yml
 ppport.h
 ptable.h
+README
+t/all.t
 t/autobox_scope_1.pm
 t/autobox_scope_2.pm
+t/merge.t
 t/pod.t
-t/test.t

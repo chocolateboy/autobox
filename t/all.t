@@ -61,7 +61,7 @@ use blib;
 use strict;
 use warnings;
 
-use Test::More tests => 318;
+use Test::More tests => 292;
 
 BEGIN {
     chdir 't' if -d 't';
@@ -69,11 +69,6 @@ BEGIN {
 }
 
 $| = 1;
-
-sub _nok ($$) {
-    my ($test, $description) = @_;
-    ok(!$test, $description);
-}
 
 sub add { my ($x, $y) = @_; $x + $y }
 
@@ -149,16 +144,6 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ("Hello, World"->test(), 'MyScalar',
 	'override package: double quoted string literal');
     is ($string->test(), 'MyScalar', 'override package: $string');
-
-    is ([ 0 .. 9 ]->test(), 'ARRAY', 'override package: ARRAY ref');
-    is ($array->test(), 'ARRAY', 'override package: $array');
-
-    is ({ 0 .. 9 }->test(), 'HASH', 'override package: HASH ref');
-    is ($hash->test(), 'HASH', 'override package: $hash');
-
-    is ((\&add)->test(), 'CODE', 'override package: CODE ref');
-    is (sub { $_[0] + $_[1] }->test(), 'CODE', 'override package: ANON sub');
-    is ($code->test(), 'CODE', 'override package: $code');
 }
 
 # test override namespace 
@@ -193,17 +178,6 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ("Hello, World"->test(), 'MyNamespace::SCALAR',
 	'override namespace: double quoted string literal');
     is ($string->test(), 'MyNamespace::SCALAR', 'override namespace: $string');
-
-    is ([ 0 .. 9 ]->test(), 'ARRAY', 'override namespace: ARRAY ref');
-    is ($array->test(), 'ARRAY', 'override namespace: $array');
-
-    is ({ 0 .. 9 }->test(), 'HASH', 'override namespace: HASH ref');
-    is ($hash->test(), 'HASH', 'override namespace: $hash');
-
-    is ((\&add)->test(), 'CODE', 'override namespace: CODE ref');
-    is (sub { $_[0] + $_[1] }->test(), 'CODE', 'override namespace: ANON sub');
-	
-    is ($code->test(), 'CODE', 'override namespace: $code');
 }
 
 # test default package
@@ -286,41 +260,6 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ($code->test(), 'MyNamespace::CODE', 'default namespace: $code');
 }
 
-# test default empty
-{
-    use autobox DEFAULT => '';
-
-    my $object = Test->new();
-    is (ref $object, 'Test', 'default empty: Test->new() - bareword not autoboxed');
-
-    my $result = $object->test();
-    is ($result, 'rubicund', 'default empty: $object->test() - object not autoboxed');
-
-    is (3->test(), 'SCALAR', 'default empty: integer literal');
-    is ((-3)->test(), 'SCALAR', 'default empty: negative integer literal');
-    is ((+3)->test(), 'SCALAR', 'default empty: positive integer literal');
-    is ($int->test(), 'SCALAR', 'default empty: $integer');
-
-    is (3.1415927->test(), 'SCALAR', 'default empty: float literal');
-    is ((-3.1415927)->test(), 'SCALAR', 'default empty: negative float literal');
-    is ((+3.1415927)->test(), 'SCALAR', 'default empty: positive float literal');
-    is ($float->test(), 'SCALAR', 'default empty: $float');
-
-    is ('Hello, World'->test(), 'SCALAR', 'default empty: single quoted string literal');
-    is ("Hello, World"->test(), 'SCALAR', 'default empty: double quoted string literal');
-    is ($string->test(), 'SCALAR', 'default empty: $string');
-
-    is ([ 0 .. 9 ]->test(), 'ARRAY', 'default empty: ARRAY ref');
-    is ($array->test(), 'ARRAY', 'default empty: $array');
-
-    is ({ 0 .. 9 }->test(), 'HASH', 'default empty: HASH ref');
-    is ($hash->test(), 'HASH', 'default empty: $hash');
-
-    is ((\&add)->test(), 'CODE', 'default empty: CODE ref');
-    is (sub { $_[0] + $_[1] }->test(), 'CODE', 'default empty: ANON sub');
-    is ($code->test(), 'CODE', 'default empty: $code');
-}
-
 # test default undef
 {
     use autobox DEFAULT => undef;
@@ -348,7 +287,6 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 {
     use autobox 
 	SCALAR	=> 'MyScalar',	    # specific package
-	ARRAY	=> '',		    # use default (ARRAY)
 	HASH	=> undef,	    # don't autobox
 	DEFAULT => 'MyNamespace::'; # use MyNamespace:: namespace for CODE
 
@@ -374,9 +312,6 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 	'test all 1: double quoted string literal');
     is ($string->test(), 'MyScalar', 'test all 1: $string');
 
-    is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 1: ARRAY ref');
-    is ($array->test(), 'ARRAY', 'test all 1: $array');
-
     my $error = q{Can't call method "test" on unblessed reference};
     eval { ({ 0 .. 9 })->test() };
     ok (($@ && ($@ =~ /^$error/)), 'test all 1: HASH ref: not autoboxed');
@@ -390,7 +325,6 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 {
     use autobox 
 	SCALAR	=> 'MyScalar',	    # specific package
-	ARRAY	=> '',		    # use default (ARRAY)
 	HASH	=> undef,	    # don't autobox
 	DEFAULT => 'MyDefault';	    # use MyDefault package for CODE
 
@@ -416,9 +350,6 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 	'test all 2: double quoted string literal');
     is ($string->test(), 'MyScalar', 'test all 2: $string');
 
-    is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 2: ARRAY ref');
-    is ($array->test(), 'ARRAY', 'test all 2: $array');
-
     my $error = q{Can't call method "test" on unblessed reference};
     eval { ({ 0 .. 9 })->test() };
     ok (($@ && ($@ =~ /^$error/)), 'test all 2: HASH ref: not autoboxed');
@@ -432,9 +363,8 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 {
     use autobox 
 	SCALAR	=> 'MyScalar',	    # specific package
-	ARRAY	=> '',		    # use default (ARRAY)
 	HASH	=> undef,	    # don't autobox
-	DEFAULT => '';		    # use CODE package for CODE
+	DEFAULT => 'CODE';	    # use CODE package for CODE
 
     my $object = Test->new();
     is (ref $object, 'Test', 'test all 3: Test->new() - bareword not autoboxed');
@@ -458,9 +388,6 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 	'test all 3: double quoted string literal');
     is ($string->test(), 'MyScalar', 'test all 3: $string');
 
-    is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 3: ARRAY ref');
-    is ($array->test(), 'ARRAY', 'test all 3: $array');
-
     my $error = q{Can't call method "test" on unblessed reference};
     eval { ({ 0 .. 9 })->test() };
     ok (($@ && ($@ =~ /^$error/)), 'test all 3: HASH ref: not autoboxed');
@@ -474,9 +401,7 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 {
     use autobox 
 	SCALAR	=> 'MyScalar',	    # specific package
-	ARRAY	=> '',		    # use default (ARRAY)
-	HASH	=> undef,	    # don't autobox
-	DEFAULT => undef;	    # don't autobox code
+	DEFAULT => undef;	    # don't autobox ARRAY, HASH or CODE
 
     my $object = Test->new();
     is (ref $object, 'Test', 'test all 4: Test->new() - bareword not autoboxed');
@@ -499,9 +424,6 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ("Hello, World"->test(), 'MyScalar',
 	'test all 4: double quoted string literal');
     is ($string->test(), 'MyScalar', 'test all 4: $string');
-
-    is ([ 0 .. 9 ]->test(), 'ARRAY', 'test all 4: ARRAY ref');
-    is ($array->test(), 'ARRAY', 'test all 4: $array');
 
     my $error = q{Can't call method "test" on unblessed reference};
     eval { ({ 0 .. 9 })->test() };
@@ -579,17 +501,32 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ($int->test(), 'SCALAR', 'nested (outer): $integer');
 
     {
-		use autobox DEFAULT => 'MyNamespace::';
+	use autobox DEFAULT => 'MyNamespace::';
 
-		is ('Hello, World'->test(), 'MyNamespace::SCALAR',
-			'nested (inner): single quoted string literal');
-		is ("Hello, World"->test(), 'MyNamespace::SCALAR',
-			'nested (inner): double quoted string literal');
-		is ($string->test(), 'MyNamespace::SCALAR', 'nested (inner): $string');
+	is ('Hello, World'->test(), 'SCALAR', 'nested (inner): single quoted string literal');
+	is ("Hello, World"->test(), 'SCALAR', 'nested (inner): double quoted string literal');
+	is ($string->test(), 'SCALAR', 'nested (inner): $string');
+	is ([ 0 .. 9 ]->test(), 'ARRAY', 'nested (inner): ARRAY ref');
+	is ($array->test(), 'ARRAY', 'nested (inner): $array');
 
-		is ([ 0 .. 9 ]->test(), 'MyNamespace::ARRAY', 'nested (inner): ARRAY ref');
-		is ($array->test(), 'MyNamespace::ARRAY', 'nested (inner): $array');
+	ok ('Hello, World'->isa('SCALAR'), 'nested (inner): single quoted string literal isa(OUTER)');
+	ok ("Hello, World"->isa('SCALAR'), 'nested (inner): double quoted string literal isa(OUTER)');
+	ok ($string->isa('SCALAR'), 'nested (inner): $string isa(OUTER)');
+	ok ([ 0 .. 9 ]->isa('ARRAY'), 'nested (inner): ARRAY ref isa(OUTER)');
+	ok ($array->isa('ARRAY'), 'nested (inner): $array isa(OUTER)');
+
+	ok ('Hello, World'->isa('MyNamespace::SCALAR'), 'nested (inner): single quoted string literal isa(INNER)');
+	ok ("Hello, World"->isa('MyNamespace::SCALAR'), 'nested (inner): double quoted string literal isa(INNER)');
+	ok ($string->isa('MyNamespace::SCALAR'), 'nested (inner): $string isa(INNER)');
+	ok ([ 0 .. 9 ]->isa('MyNamespace::ARRAY'), 'nested (inner): ARRAY ref isa(INNER)');
+	ok ($array->isa('MyNamespace::ARRAY'), 'nested (inner): $array isa(INNER)');
     }
+
+    is ('Hello, World'->isa('MyNamespace::SCALAR'), '', 'nested (outer): single quoted string literal !isa(INNER)');
+    is ("Hello, World"->isa('MyNamespace::SCALAR'), '', 'nested (outer): double quoted string literal !isa(INNER)');
+    is ($string->isa('MyNamespace::SCALAR'), '', 'nested (outer): $string !isa(INNER)');
+    is ([ 0 .. 9 ]->isa('MyNamespace::ARRAY'), '', 'nested (outer): ARRAY ref !isa(INNER)');
+    is ($array->isa('MyNamespace::ARRAY'), '', 'nested (outer): $array !isa(INNER)');
 
     is ({ 0 .. 9 }->test(), 'HASH', 'nested (outer): HASH ref');
     is ($hash->test(), 'HASH', 'nested (outer): $hash');
@@ -630,81 +567,80 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 
 # test isa: also ensures isa() isn't simply
 # returning true unconditionally
-# '_nok' in case 'nok' is added to Test::More
 {
     use autobox;
 
     ok (3->isa('SCALAR'), 'isa SCALAR: integer literal');
     ok (3->isa('UNIVERSAL'), 'isa UNIVERSAL: integer literal');
-    _nok (3->isa('UNKNOWN'), 'isa UNKNOWN: integer literal');
+    is (3->isa('UNKNOWN'), '', 'isa UNKNOWN: integer literal');
 
     ok ((-3)->isa('SCALAR'), 'isa SCALAR: negative integer literal');
     ok ((-3)->isa('UNIVERSAL'), 'isa UNIVERSAL: negative integer literal');
-    _nok ((-3)->isa('UNKNOWN'), 'isa UNKNOWN: negative integer literal');
+    is ((-3)->isa('UNKNOWN'), '', 'isa UNKNOWN: negative integer literal');
 
     ok ((+3)->isa('SCALAR'), 'isa SCALAR: positive integer literal');
     ok ((+3)->isa('UNIVERSAL'), 'isa UNIVERSAL: positive integer literal');
-    _nok ((+3)->isa('UNKNOWN'), 'isa UNKNOWN: positive integer literal');
+    is ((+3)->isa('UNKNOWN'), '', 'isa UNKNOWN: positive integer literal');
 
     ok ($int->isa('SCALAR'), 'isa SCALAR: $integer');
     ok ($int->isa('UNIVERSAL'), 'isa UNIVERSAL: $integer');
-    _nok ($int->isa('UNKNOWN'), 'isa UNKNOWN: $integer');
+    is ($int->isa('UNKNOWN'), '', 'isa UNKNOWN: $integer');
 
     ok (3.1415927->isa('SCALAR'), 'isa SCALAR: float literal');
     ok (3.1415927->isa('UNIVERSAL'), 'isa UNIVERSAL: float literal');
-    _nok (3.1415927->isa('UNKNOWN'), 'isa UNKNOWN: float literal');
+    is (3.1415927->isa('UNKNOWN'), '', 'isa UNKNOWN: float literal');
 
     ok ((-3.1415927)->isa('SCALAR'), 'isa SCALAR: negative float literal');
     ok ((-3.1415927)->isa('UNIVERSAL'), 'isa UNIVERSAL: negative float literal');
-    _nok ((-3.1415927)->isa('UNKNOWN'), 'isa UNKNOWN: negative float literal');
+    is ((-3.1415927)->isa('UNKNOWN'), '', 'isa UNKNOWN: negative float literal');
 
     ok ((+3.1415927)->isa('SCALAR'), 'isa SCALAR: positive float literal');
     ok ((+3.1415927)->isa('UNIVERSAL'), 'isa UNIVERSAL: positive float literal');
-    _nok ((+3.1415927)->isa('UNKNOWN'), 'isa UNKNOWN: positive float literal');
+    is ((+3.1415927)->isa('UNKNOWN'), '', 'isa UNKNOWN: positive float literal');
 
     ok ($float->isa('SCALAR'), 'isa SCALAR: $float');
     ok ($float->isa('UNIVERSAL'), 'isa UNIVERSAL: $float');
-    _nok ($float->isa('UNKNOWN'), 'isa UNKNOWN: $float');
+    is ($float->isa('UNKNOWN'), '', 'isa UNKNOWN: $float');
 
     ok ('Hello, World'->isa('SCALAR'), 'isa SCALAR: single quoted string literal');
     ok ('Hello, World'->isa('UNIVERSAL'), 'isa UNIVERSAL: single quoted string literal');
-    _nok ('Hello, World'->isa('UNKNOWN'), 'isa UNKNOWN: single quoted string literal');
+    is ('Hello, World'->isa('UNKNOWN'), '', 'isa UNKNOWN: single quoted string literal');
 	 
     ok ("Hello, World"->isa('SCALAR'), 'isa SCALAR: double quoted string literal');
     ok ("Hello, World"->isa('UNIVERSAL'), 'isa UNIVERSAL: double quoted string literal');
-    _nok ("Hello, World"->isa('UNKNOWN'), 'isa UNKNOWN: double quoted string literal');
+    is ("Hello, World"->isa('UNKNOWN'), '', 'isa UNKNOWN: double quoted string literal');
 
     ok ($string->isa('SCALAR'), 'isa SCALAR: $string');
     ok ($string->isa('UNIVERSAL'), 'isa UNIVERSAL: $string');
-    _nok ($string->isa('UNKNOWN'), 'isa UNKNOWN: $string');
+    is ($string->isa('UNKNOWN'), '', 'isa UNKNOWN: $string');
 
     ok ([ 0 .. 9 ]->isa('ARRAY'), 'isa ARRAY: ARRAY ref');
     ok ([ 0 .. 9 ]->isa('UNIVERSAL'), 'isa UNIVERSAL: ARRAY ref');
-    _nok ([ 0 .. 9 ]->isa('UNKNOWN'), 'isa UNKNOWN: ARRAY ref');
+    is ([ 0 .. 9 ]->isa('UNKNOWN'), '', 'isa UNKNOWN: ARRAY ref');
 
     ok ($array->isa('ARRAY'), 'isa ARRAY: $array');
     ok ($array->isa('UNIVERSAL'), 'isa UNIVERSAL: $array');
-    _nok ($array->isa('UNKNOWN'), 'isa UNKNOWN: $array');
+    is ($array->isa('UNKNOWN'), '', 'isa UNKNOWN: $array');
 
     ok ({ 0 .. 9 }->isa('HASH'), 'isa HASH: HASH ref');
     ok ({ 0 .. 9 }->isa('UNIVERSAL'), 'isa UNIVERSAL: HASH ref');
-    _nok ({ 0 .. 9 }->isa('UNKNOWN'), 'isa UNKNOWN: HASH ref');
+    is ({ 0 .. 9 }->isa('UNKNOWN'), '', 'isa UNKNOWN: HASH ref');
 
     ok ($hash->isa('HASH'), 'isa HASH: $hash');
     ok ($hash->isa('UNIVERSAL'), 'isa UNIVERSAL: $hash');
-    _nok ($hash->isa('UNKNOWN'), 'isa UNKNOWN: $hash');
+    is ($hash->isa('UNKNOWN'), '', 'isa UNKNOWN: $hash');
 
     ok ((\&add)->isa('CODE'), 'isa CODE: CODE ref');
     ok ((\&add)->isa('UNIVERSAL'), 'isa UNIVERSAL: CODE ref');
-    _nok ((\&add)->isa('UNKNOWN'), 'isa UNKNOWN: CODE ref');
+    is ((\&add)->isa('UNKNOWN'), '', 'isa UNKNOWN: CODE ref');
 
     ok (sub { $_[0] + $_[1] }->isa('CODE'), 'isa CODE: ANON sub');
     ok (sub { $_[0] + $_[1] }->isa('UNIVERSAL'), 'isa UNIVERSAL: ANON sub');
-    _nok (sub { $_[0] + $_[1] }->isa('UNKNOWN'), 'isa UNKNOWN: ANON sub');
+    is (sub { $_[0] + $_[1] }->isa('UNKNOWN'), '', 'isa UNKNOWN: ANON sub');
 
     ok ($code->isa('CODE'), 'isa CODE: $code');
     ok ($code->isa('UNIVERSAL'), 'isa UNIVERSAL: $code');
-    _nok ($code->isa('UNKNOWN'), 'isa UNKNOWN: $code');
+    is ($code->isa('UNKNOWN'), '', 'isa UNKNOWN: $code');
 }
 
 # test VERSION
@@ -761,33 +697,32 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     ok (($@ && ($@ =~ /^$undef_error/)), 'undef: $undef->can(...)');
 }
 
-# test undef 2: the empty string shorthand should default to the typemap default (undef) rather than 'UNDEF'
+# test undef 2: not even if DEFAULT is specified
 {
-    use autobox UNDEF => '';
+    use autobox DEFAULT => 'SCALAR';
 
     eval { undef->test() };
-    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": undef->test()');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with DEFAULT: undef->test()');
 
     eval { $undef->test() };
-    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": $undef->test()');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with DEFAULT: $undef->test()');
 
     eval { undef->isa('SCALAR') };
-    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": undef->isa(...)');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with DEFAULT: undef->isa(...)');
 
     eval { $undef->isa('SCALAR') };
-    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": $undef->isa(...)');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with DEFAULT: $undef->isa(...)');
 
     eval { undef->can('test') };
-    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": undef->can(...)');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with DEFAULT: undef->can(...)');
 
     eval { $undef->can('test') };
-    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with UNDEF => "": $undef->can(...)');
+    ok (($@ && ($@ =~ /^$undef_error/)), 'undef with DEFAULT: $undef->can(...)');
 }
 
 # test undef: but undef support can be enabled
 {
     use autobox UNDEF => 'MyDefault';
-
     is (undef->test(), 'MyDefault', 'handle undef: undef');
     is ($undef->test(), 'MyDefault', 'handle undef: $undef');
 }
@@ -795,23 +730,24 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 # verify expected behaviour when autobox isn't enabled (workaround for a %^H bug)
 {
     use autobox_scope_1;
-
-	eval { autobox_scope_1::test() };
-
-	ok(($@ && ($@ =~ /^$unblessed_error/)),
-		'[]->test() raises an exception in a required module when autobox is not used');
+    eval { autobox_scope_1::test() };
+    ok(($@ && ($@ =~ /^$unblessed_error/)), '[]->test() raises an exception in a required module when autobox is not used');
 }
 
 # make sure behaviour is the same when autobox is enabled (workaround for a %^H bug)
 {
-	
-	use autobox;
+    use autobox;
     use autobox_scope_2;
-
-	eval { autobox_scope_2::test() };
-
-	ok(($@ && ($@ =~ /^$unblessed_error/)),
-		'[]->test() raises an exception in a required module when autobox is used');
+    eval { autobox_scope_2::test() };
+    ok(($@ && ($@ =~ /^$unblessed_error/)), '[]->test() raises an exception in a required module when autobox is used');
 }
+
+# make sure enterscope/leavescope have popped the stack back so that the default op_method_named is restored
+(my $isa_error = $error) =~ s/test/isa/;
+eval { 3->isa('SCALAR') };
+ok(
+    ($@ && ($@ =~ /^$isa_error/)),
+    "3->isa('SCALAR') raises an exception outside a lexical scope in which autobox is loaded"
+);
 
 1;

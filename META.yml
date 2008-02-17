@@ -1,13 +1,17 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         autobox
-version:      1.22
-version_from: autobox.pm
-installdirs:  perl
-requires:
-    Scope::Guard:                  0
+--- #YAML:1.0
+name:                autobox
+version:             2.00
+abstract:            use builtin data types as first-class objects
+license:             ~
+author:              
+    - chocolateboy <chocolate.boy@email.com>
+generated_by:        ExtUtils::MakeMaker version 6.42
+distribution_type:   module
+requires:     
+    Scalar::Util:                  1.19
+    Scope::Guard:                  0.03
     Test::More:                    0
     XSLoader:                      0
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.30_01
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3

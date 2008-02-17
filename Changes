@@ -1,5 +1,21 @@
 Revision history for Perl extension autobox
 
+2.00  Sun Feb 17 02:29:11 2008
+    - API changes:
+	autobox with one or more args leaves the unspecified types unboxed
+	multiple autobox (or autobox subclass) invocations in the same lexical scope are merged (thanks Matsuno Tokuhiro)
+	multiple bindings for each type can be supplied as an ARRAY ref of classes or namespaces
+	"no autobox qw(...)" disables/resets bindings for the specified type(s)
+
+    - fixed incorrect bareword handling
+    - perl 5.10 compatibility fixes (thanks Andreas Koenig)
+    - document previously undocumented features
+    - document subclassing
+    - merge.t: test merging
+    - beef up the default DEBUG handler so that it shows the superclasses of the synthetic classes
+    - Windows compatibilty fix (thanks Alexandr Ciornii)
+    - misc optimizations, cleanups
+
 1.22  Sun Sep 23 22:27:44 2007
     - (Perl_ck_subr and Perl_ck_null): fix build failure on Windows
 

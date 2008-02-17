@@ -4,29 +4,26 @@
 
 #include "ppport.h"
 
-#if (PTRSIZE == 8)
-#define PTABLE_HASH(ptr) (PTR2UV(ptr) >> 3)
-#else
-#define PTABLE_HASH(ptr) (PTR2UV(ptr) >> 2)
-#endif
+#define PTABLE_HASH(ptr) ((PTR2UV(ptr) >> 3) ^ (PTR2UV(ptr) >> (3 + 7)) ^ (PTR2UV(ptr) >> (3 + 17)))
 
 struct PTABLE_entry {
-    struct PTABLE_entry	    *next;
-    void		    *key;
-    void		    *value;
+    struct PTABLE_entry     *next;
+    void                    *key;
+    void                    *value;
 };
 
 struct PTABLE {
-    struct PTABLE_entry	    **tbl_ary;
-    UV			    tbl_max;
-    UV			    tbl_items;
+    struct PTABLE_entry     **tbl_ary;
+    UV                      tbl_max;
+    UV                      tbl_items;
 };
 
 typedef struct PTABLE_entry PTABLE_ENTRY_t;
-typedef struct PTABLE	    PTABLE_t;
+typedef struct PTABLE            PTABLE_t;
 
 static PTABLE_t * PTABLE_new(void);
-static void * PTABLE_fetch(PTABLE_t *tbl, void *key);
+static PTABLE_ENTRY_t * PTABLE_find(PTABLE_t *tbl, const void *key);
+static void * PTABLE_fetch(PTABLE_t *tbl, const void *key);
 static void PTABLE_store(PTABLE_t *tbl, void *key, void *value);
 static void PTABLE_grow(PTABLE_t *tbl);
 static void PTABLE_clear(PTABLE_t *tbl);
@@ -38,7 +35,7 @@ static PTABLE_t *
 PTABLE_new(void)
 {
     PTABLE_t *tbl;
-    Newx(tbl, 1, PTABLE_t);
+    Newxz(tbl, 1, PTABLE_t);
     tbl->tbl_max = 511;
     tbl->tbl_items = 0;
     Newxz(tbl->tbl_ary, tbl->tbl_max + 1, PTABLE_ENTRY_t*);
@@ -47,50 +44,46 @@ PTABLE_new(void)
 
 /* map an existing pointer using a table */
 
-static void *
-PTABLE_fetch(PTABLE_t *tbl, void *key)
-{
+static PTABLE_ENTRY_t *
+PTABLE_find(PTABLE_t *tbl, const void *key) {
     PTABLE_ENTRY_t *tblent;
-    UV hash = PTABLE_HASH(key);
+    const UV hash = PTABLE_HASH(key);
     tblent = tbl->tbl_ary[hash & tbl->tbl_max];
-
     for (; tblent; tblent = tblent->next) {
-	if (tblent->key == key) {
-	    /* Perl_warn(aTHX_ "    found value in PTABLE: 0x%x => 0x%x\n", key, tblent->value); */
-	    return tblent->value;
-	}
+        if (tblent->key == key)
+            return tblent;
     }
-    return (void*)NULL;
+    return NULL;
 }
 
-/* add a new entry to a pointer-mapping table */
+static void *
+PTABLE_fetch(PTABLE_t *tbl, const void *key)
+{
+    PTABLE_ENTRY_t const *const tblent = PTABLE_find(tbl, key);
+    return tblent ? tblent->value : NULL;
+}
+
+/* add a new entry to a pointer => pointer table */
 
 static void
 PTABLE_store(PTABLE_t *tbl, void *key, void *value)
 {
-    PTABLE_ENTRY_t *tblent, **otblent;
-    /* XXX this may be pessimal on platforms where pointers aren't good
-     * hash values e.g. if they grow faster in the most significant
-     * bits */
-    UV hash = PTABLE_HASH(key);
-    bool empty = 1;
-    /* Perl_warn(aTHX_ "    storing value in PTABLE: 0x%x => 0x%x\n", key, value); */
+    PTABLE_ENTRY_t *tblent = PTABLE_find(tbl, key);
 
-    otblent = &tbl->tbl_ary[hash & tbl->tbl_max];
-    for (tblent = *otblent; tblent; empty=0, tblent = tblent->next) {
-	if (tblent->key == key) {
-	    tblent->value = value;
-	    return;
-	}
+    if (tblent) {
+        tblent->value = value;
+    } else {
+        const UV entry = PTABLE_HASH(key) & tbl->tbl_max;
+        Newx(tblent, 1, PTABLE_ENTRY_t);
+
+        tblent->key = key;
+        tblent->value = value;
+        tblent->next = tbl->tbl_ary[entry];
+        tbl->tbl_ary[entry] = tblent;
+        tbl->tbl_items++;
+        if (tblent->next && (tbl->tbl_items > tbl->tbl_max))
+            PTABLE_grow(tbl);
     }
-    Newx(tblent, 1, PTABLE_ENTRY_t);
-    tblent->key = key;
-    tblent->value = value;
-    tblent->next = *otblent;
-    *otblent = tblent;
-    tbl->tbl_items++;
-    if (!empty && tbl->tbl_items > tbl->tbl_max)
-	PTABLE_grow(tbl);
 }
 
 /* double the hash bucket size of an existing ptr table */
@@ -99,29 +92,30 @@ static void
 PTABLE_grow(PTABLE_t *tbl)
 {
     PTABLE_ENTRY_t **ary = tbl->tbl_ary;
-    UV oldsize = tbl->tbl_max + 1;
+    const UV oldsize = tbl->tbl_max + 1;
     UV newsize = oldsize * 2;
     UV i;
 
     Renew(ary, newsize, PTABLE_ENTRY_t*);
-    Zero(&ary[oldsize], newsize-oldsize, PTABLE_ENTRY_t*);
+    Zero(&ary[oldsize], newsize - oldsize, PTABLE_ENTRY_t*);
     tbl->tbl_max = --newsize;
     tbl->tbl_ary = ary;
-    for (i=0; i < oldsize; i++, ary++) {
-	PTABLE_ENTRY_t **curentp, **entp, *ent;
-	if (!*ary)
-	    continue;
-	curentp = ary + oldsize;
-	for (entp = ary, ent = *ary; ent; ent = *entp) {
-	    if ((newsize & PTABLE_HASH(ent->key)) != i) {
-		*entp = ent->next;
-		ent->next = *curentp;
-		*curentp = ent;
-		continue;
+
+    for (i = 0; i < oldsize; i++, ary++) {
+        PTABLE_ENTRY_t **curentp, **entp, *ent;
+        if (!*ary)
+            continue;
+        curentp = ary + oldsize;
+        for (entp = ary, ent = *ary; ent; ent = *entp) {
+            if ((newsize & PTABLE_HASH(ent->key)) != i) {
+                *entp = ent->next;
+                ent->next = *curentp;
+                *curentp = ent;
+                continue;
+            } else {
+                entp = &ent->next;
 	    }
-	    else
-		entp = &ent->next;
-	}
+        }
     }
 }
 
@@ -130,35 +124,29 @@ PTABLE_grow(PTABLE_t *tbl)
 static void
 PTABLE_clear(PTABLE_t *tbl)
 {
-    register PTABLE_ENTRY_t **array;
-    register PTABLE_ENTRY_t *entry;
-    register PTABLE_ENTRY_t *oentry = Null(PTABLE_ENTRY_t*);
-    UV riter = 0;
-    UV max;
+    if (tbl && tbl->tbl_items) {
+        register PTABLE_ENTRY_t * * const array = tbl->tbl_ary;
+        UV riter = tbl->tbl_max;
 
-    if (!tbl || !tbl->tbl_items) {
-	return;
+        do {
+            PTABLE_ENTRY_t *entry = array[riter];
+
+            while (entry) {
+                PTABLE_ENTRY_t * const oentry = entry;
+                entry = entry->next;
+                Safefree(oentry);
+            }
+
+            /* chocolateboy 2008-01-08
+	     *
+             * make sure we clear the array entry, so that subsequent probes fail
+             */
+
+            array[riter] = NULL;
+        } while (riter--);
+
+        tbl->tbl_items = 0;
     }
-
-    array = tbl->tbl_ary;
-    entry = array[0];
-    max = tbl->tbl_max;
-
-    for (;;) {
-	if (entry) {
-	    oentry = entry;
-	    entry = entry->next;
-	    Safefree(oentry);
-	}
-	if (!entry) {
-	    if (++riter > max) {
-		break;
-	    }
-	    entry = array[riter];
-	}
-    }
-
-    tbl->tbl_items = 0;
 }
 
 /* clear and free a ptr table */
@@ -166,9 +154,8 @@ PTABLE_clear(PTABLE_t *tbl)
 static void
 PTABLE_free(PTABLE_t *tbl)
 {
-    /* Perl_warn(aTHX_ "freeing ptr table\n"); */
     if (!tbl) {
-	return;
+        return;
     }
     PTABLE_clear(tbl);
     Safefree(tbl->tbl_ary);
