@@ -12,43 +12,43 @@ autobox - use builtin data types as first-class objects
 
     # integers
 
-	my $range = 10->to(1); # [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ]
+        my $range = 10->to(1); # [ 10, 9, 8, 7, 6, 5, 4, 3, 2, 1 ]
 
     # floats
 
-	my $error = 3.1415927->minus(22/7)->abs();
+        my $error = 3.1415927->minus(22/7)->abs();
 
     # strings
 
-	my $uri = 'www.%s.com/foo.pl?arg=%s'->f($domain, $arg->escape());
-	my $links = 'autobox'->google();
+        my $uri = 'www.%s.com/foo.pl?arg=%s'->f($domain, $arg->escape());
+        my $links = 'autobox'->google();
 
-	my $word = 'rubicund';
-	my $definition = $word->lookup_on_dictionary_dot_com();
+        my $word = 'rubicund';
+        my $definition = $word->lookup_on_dictionary_dot_com();
 
-	my $greeting = "Hello, World"->upper(); # "HELLO, WORLD"
+        my $greeting = "Hello, World"->upper(); # "HELLO, WORLD"
 
-	$greeting->to_lower(); # greeting is now "hello, world"
-	$greeting->for_each(\&character_handler);
+        $greeting->to_lower(); # greeting is now "hello, world"
+        $greeting->for_each(\&character_handler);
 
     # ARRAY refs
 
-	my $schwartzian = [ @_ ]->map(...)->sort(...)->map(...);
-	my $sd = [ 1, 8, 3, 3, 2, 9 ]->standard_deviation();
+        my $schwartzian = [ @_ ]->map(...)->sort(...)->map(...);
+        my $sd = [ 1, 8, 3, 3, 2, 9 ]->standard_deviation();
 
     # HASH refs
 
-	{ alpha => 'beta', gamma => 'vlissides' }->for_each(...);
+        { alpha => 'beta', gamma => 'vlissides' }->for_each(...);
 
     # CODE refs
 
-	my $plus_five = (\&add)->curry()->(5);
-	my $minus_three = sub { $_[0] - $_[1] }->reverse->curry->(3);
+        my $plus_five = (\&add)->curry()->(5);
+        my $minus_three = sub { $_[0] - $_[1] }->reverse->curry->(3);
 
     # can() and isa() work as expected
 
-	if ("Hello, World"->can('foo')) ...
-	if (3.1415927->isa('SCALAR')) ...
+        if ("Hello, World"->can('foo')) ...
+        if (3.1415927->isa('SCALAR')) ...
 
 =head1 DESCRIPTION
 
@@ -91,41 +91,42 @@ can be associated with a class).
 
 Thus:
 
-    use autobox SCALAR	=> 'Foo';
-    use autobox SCALAR	=> 'Bar';
+    use autobox SCALAR => 'Foo';
+    use autobox SCALAR => 'Bar';
 
 - associates SCALAR types with a synthetic class whose C<@ISA> includes both C<Foo> and C<Bar> (in that order).
 
 Likewise:
 
-    use autobox SCALAR	=> 'Foo';
-    use autobox ARRAY	=> 'Bar';
+    use autobox SCALAR => 'Foo';
+    use autobox ARRAY  => 'Bar';
 
 - binds SCALAR types to the C<Foo> class and ARRAY types to C<Bar>.  
 
-C<autobox> is lexically scoped, and handlers (see below) for an outer scope
+C<autobox> is lexically scoped, and bindings for an outer scope
 can be overridden or countermanded in a nested scope:
 
     {
-	use autobox; # default handlers: autobox all builtins
-	...
+        use autobox; # default bindings: autobox all builtins
+        ...
 
-	{
-	    use autobox SCALAR => 'MyScalar'; # appends 'MyScalar' to the @ISA associated with SCALAR types
-	    ...
-	}
+        {
+            # appends 'MyScalar' to the @ISA associated with SCALAR types
+            use autobox SCALAR => 'MyScalar';
+            ...
+        }
 
-	# back to the default (no MyScalar)
-	...
+        # back to the default (no MyScalar)
+        ...
     }
 
 Autoboxing can be turned off entirely by using the C<no> syntax:
 
     {
-	use autobox;
-	...
-	no autobox;
-	...
+        use autobox;
+        ...
+        no autobox;
+        ...
     }
 
 - or can be selectively reset or disabled by passing arguments to the C<no autobox> statement:
@@ -183,10 +184,10 @@ Thus:
 - is equivalent to:
 
     use autobox
-	SCALAR	=> 'SCALAR',
-	ARRAY	=> 'ARRAY',
-	HASH	=> 'HASH',
-	CODE	=> 'CODE';
+        SCALAR => 'SCALAR',
+        ARRAY  => 'ARRAY',
+        HASH   => 'HASH',
+        CODE   => 'CODE';
 
 This facilitates one-liners and prototypes:
 
@@ -200,18 +201,21 @@ This facilitates one-liners and prototypes:
 However, using these builtin bindings is not recommended as there's no guarantee that another 
 piece of code won't trample over the same namespace/methods.
 
+=head2 Options
+
 A mapping from the builtin type to the user-defined class can be specified
 by passing a list of key/value pairs to the C<use autobox> statement.
 
 The following example shows the range of valid arguments:
 
-    use autobox SCALAR  => 'MyScalar'				# class name
-		ARRAY   => 'MyNamespace::',			# class prefix (ending in '::')
-		HASH	=> [ 'MyScalar', 'MyNamespace::' ],	# one or more class names and/or prefixes
-		CODE    => ...,					# any of the 3 value types above
-		UNDEF   => ...,					# any of the 3 value types above
-		DEFAULT => ...,					# any of the 3 value types above
-		DEBUG   => ...;					# boolean or coderef
+    use autobox
+      SCALAR  => 'MyScalar'                     # class name
+      ARRAY   => 'MyNamespace::',               # class prefix (ending in '::')
+      HASH    => [ 'MyHash', 'MyNamespace::' ], # one or more class names and/or prefixes
+      CODE    => ...,                           # any of the 3 value types above
+      UNDEF   => ...,                           # any of the 3 value types above
+      DEFAULT => ...,                           # any of the 3 value types above
+      DEBUG   => ...;                           # boolean or coderef
 
 The SCALAR, ARRAY, HASH, CODE, UNDEF and DEFAULT keys can take three different types of value:
 
@@ -230,8 +234,9 @@ the corresponding 'value'.
 If a class name is supplied for DEFAULT, it becomes the default class for all unspecified cases for that
 invocation of C<use autobox>. Thus:
 
-    use autobox ARRAY	=> 'MyArray',
-		DEFAULT => 'MyDefault';
+    use autobox
+        ARRAY   => 'MyArray',
+        DEFAULT => 'MyDefault';
 
 - will invoke ARRAY methods on MyArray and all other methods on MyDefault.
 
@@ -248,8 +253,9 @@ binds ARRAY types to the Prelude::ARRAY class.
 
 As with the class name form, specifying a default namespace e.g.
 
-    use autobox SCALAR	=> 'MyScalar',
-		DEFAULT => 'MyNamespace::';
+    use autobox
+        SCALAR  => 'MyScalar',
+        DEFAULT => 'MyNamespace::';
 
 binds MyNamespace::ARRAY, MyNamespace::HASH &c. to the corresponding builtin
 types.
@@ -264,7 +270,7 @@ specified builtin type.
 In addition to the SCALAR, ARRAY, HASH, CODE and DEFAULT options, there are two additional keys:
 UNDEF and DEBUG.
 
-=head2 UNDEF
+=head3 UNDEF
 
 The pseudotype, UNDEF, can be used to autobox undefined values. These are
 not autoboxed by default.
@@ -287,9 +293,9 @@ So does this:
 
     undef->foo(); # ok
 
-=head2 DEBUG
+=head3 DEBUG
 
-DEBUG exposes the current handlers for the scope in which C<use autobox> is called by means of a callback, or a
+DEBUG exposes the current bindings for the scope in which C<use autobox> is called by means of a callback, or a
 static debugging function.
 
 This allows the computed bindings to be seen in 'longhand'.
@@ -297,9 +303,9 @@ This allows the computed bindings to be seen in 'longhand'.
 Debugging is ignored if the value corresponding to the DEBUG key is false.
 
 If the value is a CODE ref, then this sub is called with a reference to
-the hash containing the computed handlers for the current scope.
+the hash containing the computed bindings for the current scope.
 
-Finally, if DEBUG is true but not a CODE ref, the handlers are dumped
+Finally, if DEBUG is true but not a CODE ref, the bindings are dumped
 to STDERR.
 
 Thus:
@@ -313,8 +319,8 @@ or
 or
 
     sub my_callback ($) {
-	my $hashref = shift;
-	...
+        my $hashref = shift;
+        ...
     }
 
     use autobox DEBUG => \&my_callback, ...
@@ -323,8 +329,8 @@ or
 
 On its own, C<autobox> doesn't implement any methods that can be called on builtin types (apart from C<can> and C<isa>).
 However, it does implement two methods that subclasses can override to provide C<autobox> extensions i.e. bundles of
-methods for one or more builtin types. These can be composed both "horizontally" (multiple modules for the same type)
-and "vertically" (multiple modules for different types).
+methods for one or more builtin types. These can be composed both "horizontally" (multiple classes for the same type)
+and "vertically" (multiple classes for different types).
 
 =head2 import
 
@@ -336,17 +342,17 @@ This allows subclasses to effectively translate C<use MyModule> into a bespoke C
     use base qw(autobox);
 
     sub import {
-	my $class = shift;
-	$class->SUPER::import(SCALAR => 'String::Trim::Scalar');
+        my $class = shift;
+        $class->SUPER::import(SCALAR => 'String::Trim::Scalar');
     }
 
     package String::Trim::Scalar;
 
     sub trim {
-	my $string = shift;
-	$string =~ s/^\s+//;
-	$string =~ s/\s+$//;
-	$string;
+        my $string = shift;
+        $string =~ s/^\s+//;
+        $string =~ s/\s+$//;
+        $string;
     }
 
     1;
@@ -360,10 +366,9 @@ Clients can now use this module to enable the trim method in the current lexical
 
     print "  Hello, world!  "->trim();
 
-
 =head2 defaults
 
-For more extensive wrappers, C<autobox> implements a C<defaults> method that returns a HASH ref that
+For more exotic wrappers, C<autobox> implements a C<defaults> method that returns a HASH ref that
 defines the module's default bindings.
 
     package Prelude;
@@ -371,52 +376,59 @@ defines the module's default bindings.
     use base qw(autobox);
 
     sub defaults {
-	my $class = shift;
+        my $class = shift;
 
-	return {
-	    SCALAR	=> 'Foo::Scalar',
-	    ARRAY	=> 'Bar::Array',
-	    HASH	=> [ qw(Baz::Hash Quux::Hash) ],
-	    UNDEF	=> undef,
-	    DEFAULT	=> undef
-	};
+        return {
+            SCALAR  => 'Foo::Scalar',
+            ARRAY   => 'Bar::Array',
+            HASH    => [ qw(Baz::Hash Quux::Hash) ],
+            UNDEF   => undef,
+            DEFAULT => undef
+        };
     }
 
     1;
 
-The HASH ref returned by the C<defaults> method serves three purposes: 1) its keys constrain the valid keys
-that can be supplied to the C<use Prelude> statement (in the above example, C<use Prelude CODE => 'MyCode'>
-triggers a compile-time error as CODE is not is not included in the default keys); 2) it can define a DEFAULT binding
-for all undefined types; and 3) it can supply default bindings when C<use Prelude> is called
-with no arguments e.g.:
+The HASH ref returned by the C<defaults> method serves three purposes.
+
+=over
+
+=item *
+
+its keys constrain the valid keys that can be supplied to the C<use Prelude> statement. In the above example,
+
+    use Prelude CODE => 'MyCode';
+    
+would trigger a compile-time error as CODE is not is not included in the default keys.
+
+=item *
+
+it can define a DEFAULT binding for all types omitted from the C<use Prelude> statement.
+
+=item *
+
+it specifies the default bindings when C<use Prelude> is called with no arguments. e.g.:
 
     use Prelude;
+
+and
+
+    use Prelude DEBUG => 1;
+
+are equivalent to:
     
-    # equivalent to use autobox SCALAR => 'Foo::Scalar', ARRAY => 'Bar::Array' &c.
+    use autobox
+        SCALAR => 'Foo::Scalar',
+        ARRAY  => 'Bar::Array',
+        HASH   => [ qw(Baz::Hash Quux::Hash) ];
 
-Modules without options can simply ignore arguments passed in the C<use> statement to provide full
-control over autobox's bindings:
-
-    package NoArgs;
-
-    sub defaults { ... }
-
-    sub import {
-	my $class = shift;
-	my $defaults = $class->defaults;
-	$class->SUPER::import(%$defaults);
-    }
-
-    1;
-
-Clients of C<NoArgs> cannot customize or override its bindings, although, of course, other invocations of C<use autobox>
-or the use of other subclasses of autobox in the same or nested scopes can. 
+=back
 
 The C<defaults> method can also be used to enable autoboxing for new types such as LVALUEs, GLOBs, or FORMATs.
 
 =head1 CAVEATS
 
-=head2 PERFORMANCE
+=head2 Performance
 
 Autoboxing comes at a price. Calling
 
@@ -426,7 +438,7 @@ is slightly slower than the equivalent method call on a string-like class, and s
 
     length("Hello, world!")
 
-=head2 GOTCHAS
+=head2 Gotchas
 
 Due to Perl's precedence rules, some autoboxed literals may need to be parenthesized:
 
@@ -508,7 +520,7 @@ Though, of course:
     print MyScalar->VERSION(), $/;
 
 and
-	
+        
     print $MyScalar::VERSION, $/;
 
 continue to work.
@@ -516,19 +528,23 @@ continue to work.
 This is due to a limitation in perl's implementation of C<use> and C<no>.
 Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 
-    'Foo'->import() # equivalent to Foo->import() rather than MyScalar->import('Foo')
+    # equivalent to Foo->import() rather than MyScalar->import('Foo')
+    'Foo'->import()
 
-    []->import()  # error: Can't call method "import" on unblessed reference
-	
+    # error: Can't call method "import" on unblessed reference
+    []->import()
+        
 =head1 VERSION
 
-2.01
+2.02
 
 =head1 SEE ALSO
 
 =over
 
 =item * L<autobox::Core|autobox::Core>
+
+=item * L<autobox::DateTime::Duration|autobox::DateTime::Duration>
 
 =item * L<autobox::Encode|autobox::Encode>
 

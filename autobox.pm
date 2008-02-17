@@ -9,14 +9,14 @@ use XSLoader;
 use Scalar::Util qw(blessed);
 use Scope::Guard;
 
-our $VERSION = '2.01';
+our $VERSION = '2.02';
 
 XSLoader::load 'autobox', $VERSION;
 
 ############################################# PRIVATE ###############################################
 
 my $SEQ   = 0;
-my $CACHE = {};    # hold a reference to the handlers hashes
+my $CACHE = {};    # hold a reference to the bindings hashes
 
 # create a shim class - actual methods are implemented by the classes in its @ISA
 sub _generate_class($) {
@@ -37,13 +37,13 @@ sub _universalize ($) {
 }
 
 # default method called when the DEBUG option is supplied with a true value
-# prints the assigned handlers for the current scope along with a list of classes in their @ISA
+# prints the assigned bindings for the current scope along with a list of classes in their @ISA
 sub _debug ($) {
-    my $handlers = annotate(shift);
+    my $bindings = annotate(shift);
     require Data::Dumper;
     no warnings qw(once);
     local ($|, $Data::Dumper::Indent, $Data::Dumper::Terse) = (1, 1, 1);
-    print STDERR Data::Dumper::Dumper($handlers), $/;
+    print STDERR Data::Dumper::Dumper($bindings), $/;
 }
 
 # return true if $ref ISA class - works with non-references, unblessed references and objects
@@ -82,7 +82,7 @@ sub defaults {
     };
 }
 
-# This undocumented method takes a handlers hash and appends a list of superclasses to its values
+# This undocumented method takes a bindings hash and appends a list of superclasses to its values
 # It's used by the test suite (hence the public-looking name) but is otherwise private
 sub annotate($) {
     my $hash = { %{ shift() } };
@@ -103,29 +103,29 @@ sub import {
     %args = %$defaults unless (%args);
 
     my $default = exists $args{DEFAULT} ? delete $args{DEFAULT} : $defaults->{DEFAULT};
-    my $handlers;    # custom typemap
-    my $augment = 0; # is this call augmenting the current scope's handlers?
+    my $bindings;    # custom typemap
+    my $augment = 0; # is this call augmenting the current scope's bindings?
 
     # this is %^H as an integer - it changes as scopes are entered/left
     # we don't need to stack/unstack it in %^H as %^H itself takes care of that
     my $scope = Autobox::scope();
 
-    # if we're calling "use autobox" again in the same scope (i.e. augmenting the handlers)
-    # a "use autobox ..." following an initial "no autobox" would be an apparent augment, even though the handlers
+    # if we're calling "use autobox" again in the same scope (i.e. augmenting the bindings)
+    # a "use autobox ..." following an initial "no autobox" would be an apparent augment, even though the bindings
     # hash has not been initialized, so don't assume "same scope" means it's already there
     if ($^H{autobox} && $^H{autobox_scope} && (($^H & 0x120000) == 0x120000) && ($^H{autobox_scope} == $scope)) {
         $augment  = 1;
-        $handlers = $^H{autobox};    # as of 5.10 this gets stringified at runtime, but we don't need it then
+        $bindings = $^H{autobox};    # as of 5.10 this gets stringified at runtime, but we don't need it then
     } else {
-        # clone the outer handlers hash if available
-        # we may be assigning to it, and we don't want to contaminate the outer hash with nested handlers
-        $handlers = $^H{autobox} ? { %{ $^H{autobox} } } : {};
+        # clone the outer bindings hash if available
+        # we may be assigning to it, and we don't want to contaminate the outer hash with nested bindings
+        $bindings = $^H{autobox} ? { %{ $^H{autobox} } } : {};
     }
 
     # fill in defaults for unhandled cases; namespace expansion is handled below
     if (defined $default) {
         for my $key (keys %$defaults) {
-            next if (exists $args{$key});    # don't supply a default if the handler is already explicitly defined
+            next if (exists $args{$key});    # don't supply a default if the binding is already explicitly defined
             next if ($key eq 'UNDEF');       # UNDEF must be autoboxed explicitly - DEFAULT doesn't include it
             next if ($key eq 'DEFAULT');     # already merged into $default above
 
@@ -134,7 +134,7 @@ sub import {
     }
 
     # sanity check %args, expand the namespace prefixes into class names,
-    # and copy defined values to the $handlers hash
+    # and copy defined values to the $bindings hash
     for my $key (keys %args) {
         confess("unrecognised option: '", (defined $key ? $key : '<undef>'), "'") unless (exists $defaults->{$key});
 
@@ -142,7 +142,7 @@ sub import {
 
         next unless (defined $value);
 
-        my $outer_class = exists($handlers->{$key}) ? $handlers->{$key} : undef; # don't autovivify
+        my $outer_class = exists($bindings->{$key}) ? $bindings->{$key} : undef; # don't autovivify
         my $new_synthetic_class = 0;
         my $synthetic_class;
 
@@ -168,7 +168,7 @@ sub import {
         # we can't use UNIVERSAL::isa to test if $value is an array ref
         # if the value is 'ARRAY', and that package exists, then UNIVERSAL::isa('ARRAY', 'ARRAY') is true!
 
-        $value = [$value] unless (_isa($value, 'ARRAY'));
+        $value = [ $value ] unless (_isa($value, 'ARRAY'));
 
         for my $user_class (@$value) {
             $user_class = "$user_class$key" if ($user_class =~ /::$/);           # handle namespace expansion
@@ -178,20 +178,20 @@ sub import {
 
         if ($new_synthetic_class) {
 	    _universalize($synthetic_class);
-            $handlers->{$key} = $synthetic_class;
+            $bindings->{$key} = $synthetic_class;
         }
     }
 
     unless ($augment) {
         $^H |= 0x120000; # set HINT_LOCALIZE_HH + an unused bit to work around a %^H bug
-        $^H{autobox}        = $handlers;
+        $^H{autobox}        = $bindings;
         $^H{autobox_scope}  = $scope;
-        $CACHE->{$handlers} = $handlers;                                         # keep the $handlers hash alive
+        $CACHE->{$bindings} = $bindings;                                         # keep the $bindings hash alive
     }
 
     if ($debug) {
         $debug = \&_debug unless (ref($debug) eq 'CODE');
-        $debug->($handlers);
+        $debug->($bindings);
     }
 
     return if ($augment);
@@ -209,12 +209,12 @@ sub import {
     # rather than in the ISA hierarchy with its attendant AUTOLOAD-related overhead
 
     my $leave_scope = sub {
-        for my $key (keys %$handlers) {
-            my $class = $handlers->{$key};
+        for my $key (keys %$bindings) {
+            my $class = $bindings->{$key};
             my @isa   = _get_isa($class);
             if (@isa == 1) {
 		$class = $isa[0];
-                $handlers->{$key} = $class;
+                $bindings->{$key} = $class;
 		_universalize($class);
             }
         }
@@ -240,7 +240,7 @@ sub unimport {
         }
     } else {
 
-        # a nested "no autobox" doesn't disable autoboxing for the scope; it just clears the $handlers hash
+        # a nested "no autobox" doesn't disable autoboxing for the scope; it just clears the $bindings hash
         for my $key (keys %{ $^H{autobox} }) {
             delete $^H{autobox}->{$key};    # don't delete the hash - augment may still expect it to be there
         }

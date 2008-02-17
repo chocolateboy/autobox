@@ -17,7 +17,6 @@ OP * autobox_ck_subr(pTHX_ OP *o);
 OP * autobox_method_named(pTHX);
 
 OP * autobox_ck_subr(pTHX_ OP *o) {
-
     /*
      * work around a %^H scoping bug by checking that PL_hints (which is properly scoped) & an unused
      * PL_hints bit (0x100000) is true
@@ -62,24 +61,24 @@ OP* autobox_method_named(pTHX) {
 	if (SvGMAGICAL(sv))
 	    mg_get(sv);
 
-	/* this is the "handlers hash" that maps datatypes to package names */
-	HV * autobox_handlers = (HV *)(PTABLE_fetch(AUTOBOX_OP_MAP, PL_op));
+	/* this is the "bindings hash" that maps datatypes to package names */
+	HV * autobox_bindings = (HV *)(PTABLE_fetch(AUTOBOX_OP_MAP, PL_op));
 
-	if (autobox_handlers) {
-	    const char * reftype; /* autobox_handlers key */
-	    SV **svp; /* pointer to autobox_handlers value */
+	if (autobox_bindings) {
+	    const char * reftype; /* autobox_bindings key */
+	    SV **svp; /* pointer to autobox_bindings value */
 
 	    /*
 	     * the package is either the receiver's reftype(), "SCALAR" if it's not a ref, or UNDEF if
 	     * it's not defined
 	     */
 	    reftype = SvOK(sv) ? sv_reftype((SvROK(sv) ? SvRV(sv) : sv), 0) : "UNDEF";
-	    svp = hv_fetch(autobox_handlers, reftype, strlen(reftype), 0);
+	    svp = hv_fetch(autobox_bindings, reftype, strlen(reftype), 0);
 
 	    if (svp && SvOK(*svp)) {
 		SV * packsv = *svp;
 		STRLEN packlen;
-                HE *he;
+                const HE * he;
 		HV * stash;
 		GV * gv;
 		const char * packname = SvPV_const(packsv, packlen);

@@ -1,4 +1,4 @@
-autobox version 2.01
+autobox version 2.02
 ====================
 
 The autobox pragma endows Perl's core datatypes with the capabilities of
@@ -8,7 +8,7 @@ references. The autoboxing is transparent: boxed values are not blessed
 into their (user-defined) implementation class (unless the method elects to
 bestow such a blessing) - they simply use its methods as though they are.
 
-autobox is lexically scoped, and handlers for an outer scope
+autobox is lexically scoped, and bindings for an outer scope
 can be overridden or countermanded in a nested scope.
 
 See the POD for more details.

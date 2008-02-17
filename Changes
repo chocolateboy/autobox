@@ -1,5 +1,9 @@
 Revision history for Perl extension autobox
 
+2.02  Sun Feb 17 16:59:28 2008
+    - doc tweak
+    - POD formatting
+
 2.01  Sun Feb 17 03:56:22 2008
     - documentation fix:
 	rm reference to $class->SUPER::import(TYPE => __PACKAGE__) and explain why an auxiliary class should be used
