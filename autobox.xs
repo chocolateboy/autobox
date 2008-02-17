@@ -91,13 +91,10 @@ OP* autobox_method_named(pTHX) {
                 /* SvSHARED_HASH(meth): the hash code of the method name */
                 he = hv_fetch_ent(stash, meth, 0, SvSHARED_HASH(meth)); /* shortcut for simple names */
 
-		// warn("*** AUTOBOX 1 ***");
                 if (he) {
-                    // warn("*** AUTOBOX 2 ***");
                     gv = (GV*)HeVAL(he);
                     if (isGV(gv) && GvCV(gv) && (!GvCVGEN(gv) || GvCVGEN(gv) == PL_sub_generation)) {
                         dSP;
-                        // warn("*** AUTOBOX 3 ***");
                         XPUSHs((SV*)GvCV(gv));
                         RETURN;
                     }
@@ -107,7 +104,6 @@ OP* autobox_method_named(pTHX) {
 		gv = gv_fetchmethod(stash ? stash : (HV*)packsv, SvPVX_const(meth));
 
 		if (gv) {
-                    // warn("*** AUTOBOX 4 ***");
 		    dSP;
 		    XPUSHs(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
 		    RETURN;
@@ -116,7 +112,6 @@ OP* autobox_method_named(pTHX) {
 	}
     }
 
-    // warn("*** AUTOBOX 5 ***");
     return PL_ppaddr[OP_METHOD_NAMED](aTHX);
 }
 
@@ -138,7 +133,7 @@ enterscope()
 	    /*
 	     * capture the check routine in scope when autobox is used.
 	     * usually, this will be Perl_ck_subr, though, in principle,
-	     * it could be bespoke checkers spliced in by another module.
+	     * it could be bespoke handlers spliced in by another module.
 	     */
 	    autobox_old_ck_subr = PL_check[OP_ENTERSUB];
 	    PL_check[OP_ENTERSUB] = autobox_ck_subr;

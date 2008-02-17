@@ -1,5 +1,9 @@
 Revision history for Perl extension autobox
 
+2.01  Sun Feb 17 03:56:22 2008
+    - documentation fix:
+	rm reference to $class->SUPER::import(TYPE => __PACKAGE__) and explain why an auxiliary class should be used
+
 2.00  Sun Feb 17 02:29:11 2008
     - API changes:
 	autobox with one or more args leaves the unspecified types unboxed

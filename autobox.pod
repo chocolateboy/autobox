@@ -337,8 +337,10 @@ This allows subclasses to effectively translate C<use MyModule> into a bespoke C
 
     sub import {
 	my $class = shift;
-	$class->SUPER::import(SCALAR => __PACKAGE__);
+	$class->SUPER::import(SCALAR => 'String::Trim::Scalar');
     }
+
+    package String::Trim::Scalar;
 
     sub trim {
 	my $string = shift;
@@ -349,7 +351,10 @@ This allows subclasses to effectively translate C<use MyModule> into a bespoke C
 
     1;
 
-Clients can then use this module to enable the trim method in the current lexical scope. e.g.:
+Note that C<trim> is defined in an auxilliary class rather than in C<String::Trim> itself to prevent
+C<String::Trim>'s own methods (i.e. the methods it inherits from C<autobox>) being exposed to SCALAR types.
+
+Clients can now use this module to enable the trim method in the current lexical scope. e.g.:
 
     use String::Trim;
 
@@ -517,7 +522,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 	
 =head1 VERSION
 
-2.00
+2.01
 
 =head1 SEE ALSO
 

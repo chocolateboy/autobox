@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                autobox
-version:             2.00
+version:             2.01
 abstract:            use builtin data types as first-class objects
 license:             ~
 author:              

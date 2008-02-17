@@ -9,7 +9,7 @@ use XSLoader;
 use Scalar::Util qw(blessed);
 use Scope::Guard;
 
-our $VERSION = '2.00';
+our $VERSION = '2.01';
 
 XSLoader::load 'autobox', $VERSION;
 
