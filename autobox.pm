@@ -8,9 +8,8 @@ use Carp qw(confess);
 use XSLoader;
 use Scalar::Util qw(blessed);
 use Scope::Guard;
-use Storable ();
 
-our $VERSION = '2.10';
+our $VERSION = '2.11';
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -66,9 +65,6 @@ sub _get_isa($) {
 # install a new set of bindings for the current scope
 sub _register ($) {
     my $bindings = shift;
-
-    # don't bother if there's no change
-    return if ($^{autobox} && (Storable::freeze($^{autobox}) eq Storable::freeze($bindings)));
 
     # As an optimization, the synthetic class is replaced with the actual class if there's
     # only one. This speeds up method lookup as the method can (often) be found directly in the stash
@@ -160,8 +156,6 @@ sub import {
 
     $bindings = $^H{autobox} ? { %{ $^H{autobox} } } : {};
 
-    _register($bindings);
-
     # fill in defaults for unhandled cases; namespace expansion is handled below
     if (defined $default) {
         for my $key (keys %$defaults) {
@@ -241,6 +235,9 @@ sub import {
     # It needs to be set unconditionally because it may have been unset in unimport
     $^H |= 0x120000; # set HINT_LOCALIZE_HH + an unused bit to work around a %^H bug
 
+    # install the specified bindings in the current scope
+    _register($bindings);
+
     if ($debug) {
         $debug = \&_debug unless (_isa($debug, 'CODE'));
         $debug->($bindings);
@@ -269,7 +266,7 @@ sub import {
 # delete one or more bindings; if none remain, turn off the autoboxing flag
 #
 # note: the housekeeping data structures are not deleted: import still needs to know if we're in the same scope
-# (autobox_scope); we also need a new bindings hash: if one or more bindings is being disabled, we need
+# (autobox_scope) &c.; we also need a new bindings hash: if one or more bindings is being disabled, we need
 # to create a new hash (a clone of the current hash) so that the previous hash (if any) is not contaminated
 # by new deletions(s)
 #

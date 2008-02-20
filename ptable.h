@@ -114,7 +114,7 @@ PTABLE_grow(PTABLE_t *tbl)
                 continue;
             } else {
                 entp = &ent->next;
-	    }
+            }
         }
     }
 }
@@ -138,7 +138,7 @@ PTABLE_clear(PTABLE_t *tbl)
             }
 
             /* chocolateboy 2008-01-08
-	     *
+             *
              * make sure we clear the array entry, so that subsequent probes fail
              */
 

@@ -1,5 +1,9 @@
 Revision history for Perl extension autobox
 
+2.11  Wed Feb 20 21:06:25 2008
+    - Windows portability fix: ANSIfy C99-ism (thanks Taro Nishino)
+    - revert broken micro-optimization
+
 2.10  Wed Feb 20 02:16:42 2008
     - fix + tests:
         unimport

@@ -533,7 +533,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
         
 =head1 VERSION
 
-2.10
+2.11
 
 =head1 SEE ALSO
 

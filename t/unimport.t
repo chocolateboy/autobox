@@ -22,7 +22,6 @@ BEGIN {
     no autobox;
 
     BEGIN {
-	BAIL_OUT("string not defined") unless (defined $string);
 	eval { $string->test() };
 	ok ($@ && ($@ =~ /^$string_error/));
     }
