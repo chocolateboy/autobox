@@ -1,26 +1,36 @@
 Revision history for Perl extension autobox
 
+2.10  Wed Feb 20 02:16:42 2008
+    - fix + tests:
+        unimport
+        default namespace(s) in an array ref
+
 2.02  Sun Feb 17 16:59:28 2008
     - doc tweak
     - POD formatting
 
 2.01  Sun Feb 17 03:56:22 2008
     - documentation fix:
-	rm reference to $class->SUPER::import(TYPE => __PACKAGE__) and explain why an auxiliary class should be used
+        rm reference to $class->SUPER::import(TYPE => __PACKAGE__)
+            and explain why an auxiliary class should be used
+        
 
 2.00  Sun Feb 17 02:29:11 2008
     - API changes:
-	autobox with one or more args leaves the unspecified types unboxed
-	multiple autobox (or autobox subclass) invocations in the same lexical scope are merged (thanks Matsuno Tokuhiro)
-	multiple bindings for each type can be supplied as an ARRAY ref of classes or namespaces
-	"no autobox qw(...)" disables/resets bindings for the specified type(s)
+        autobox with one or more args leaves the unspecified types unboxed
+        multiple autobox (or autobox subclass) invocations in the same lexical scope
+            are merged (thanks Matsuno Tokuhiro)
+        multiple bindings for each type can be supplied as an ARRAY ref of classes
+            or namespaces
+        "no autobox qw(...)" disables/resets bindings for the specified type(s)
 
     - fixed incorrect bareword handling
     - perl 5.10 compatibility fixes (thanks Andreas Koenig)
     - document previously undocumented features
     - document subclassing
     - merge.t: test merging
-    - beef up the default DEBUG handler so that it shows the superclasses of the synthetic classes
+    - beef up the default DEBUG handler so that it shows the superclasses
+      of the synthetic classes
     - Windows compatibilty fix (thanks Alexandr Ciornii)
     - misc optimizations, cleanups
 

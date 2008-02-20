@@ -1,7 +1,7 @@
 --- #YAML:1.0
 name:                autobox
-version:             2.02
-abstract:            use builtin data types as first-class objects
+version:             2.10
+abstract:            call methods on builtin types
 license:             ~
 author:              
     - chocolateboy <chocolate.boy@email.com>

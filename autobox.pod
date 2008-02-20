@@ -2,13 +2,11 @@
 
 =head1 NAME
 
-autobox - use builtin data types as first-class objects
+autobox - call methods on builtin types
 
 =head1 SYNOPSIS
 
     use autobox;
-
-    # call methods on builtin values and literals
 
     # integers
 
@@ -104,7 +102,7 @@ Likewise:
 - binds SCALAR types to the C<Foo> class and ARRAY types to C<Bar>.  
 
 C<autobox> is lexically scoped, and bindings for an outer scope
-can be overridden or countermanded in a nested scope:
+can be extended or countermanded in a nested scope:
 
     {
         use autobox; # default bindings: autobox all builtins
@@ -129,7 +127,7 @@ Autoboxing can be turned off entirely by using the C<no> syntax:
         ...
     }
 
-- or can be selectively reset or disabled by passing arguments to the C<no autobox> statement:
+- or can be selectively disabled by passing arguments to the C<no autobox> statement:
 
     use autobox; # default bindings
 
@@ -327,7 +325,7 @@ or
 
 =head1 METHODS
 
-On its own, C<autobox> doesn't implement any methods that can be called on builtin types (apart from C<can> and C<isa>).
+On its own, C<autobox> doesn't implement any methods that can be called on builtin types.
 However, it does implement two methods that subclasses can override to provide C<autobox> extensions i.e. bundles of
 methods for one or more builtin types. These can be composed both "horizontally" (multiple classes for the same type)
 and "vertically" (multiple classes for different types).
@@ -525,7 +523,6 @@ and
 
 continue to work.
 
-This is due to a limitation in perl's implementation of C<use> and C<no>.
 Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 
     # equivalent to Foo->import() rather than MyScalar->import('Foo')
@@ -536,13 +533,15 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
         
 =head1 VERSION
 
-2.02
+2.10
 
 =head1 SEE ALSO
 
 =over
 
 =item * L<autobox::Core|autobox::Core>
+
+=item * L<autobox::Closure::Attributes|autobox::Closure::Attributes>
 
 =item * L<autobox::DateTime::Duration|autobox::DateTime::Duration>
 
