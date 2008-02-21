@@ -15,6 +15,7 @@ WriteMakefile(
         'Test::More'     => 0,
         'Scope::Guard'   => '0.03',
         'Scalar::Util'   => '1.19',
+        'Storable'       => 0,
     }, # e.g., Module::Name => 1.1
     ABSTRACT_FROM        => 'autobox.pod', # retrieve abstract from module
     AUTHOR               => 'chocolateboy <chocolate.boy@email.com>',

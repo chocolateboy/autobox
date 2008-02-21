@@ -1,4 +1,4 @@
-autobox version 2.11
+autobox version 2.20
 ====================
 
 The autobox pragma endows Perl's core datatypes with the capabilities of
@@ -27,7 +27,6 @@ DEPENDENCIES
 This module requires these other modules and libraries:
 
   Scope::Guard
-  Scalar::Util
 
 COPYRIGHT AND LICENCE
 

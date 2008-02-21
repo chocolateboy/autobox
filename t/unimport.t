@@ -5,7 +5,7 @@ use warnings;
 
 use Test::More tests => 11;
 
-use vars qw($string $string_error $unblessed_error);
+use vars qw($string $string_error);
 
 BEGIN {
     $string_error = qr{Can't locate object method "test" via package "Hello, World!"};

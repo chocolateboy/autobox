@@ -1,5 +1,10 @@
 Revision history for Perl extension autobox
 
+2.20  Thu Feb 21 23:30:53 GMT 2008
+    - Fix broken merging
+        - corrected merge.t
+        - added time_travel.t to verify correctness
+
 2.11  Wed Feb 20 21:06:25 2008
     - Windows portability fix: ANSIfy C99-ism (thanks Taro Nishino)
     - revert broken micro-optimization

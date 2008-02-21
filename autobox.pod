@@ -18,21 +18,19 @@ autobox - call methods on builtin types
 
     # strings
 
-        my $uri = 'www.%s.com/foo.pl?arg=%s'->f($domain, $arg->escape());
-        my $links = 'autobox'->google();
+        my @list = 'SELECT * FROM foo'->list();
 
         my $word = 'rubicund';
-        my $definition = $word->lookup_on_dictionary_dot_com();
+        my $links = $word->google();
 
-        my $greeting = "Hello, World"->upper(); # "HELLO, WORLD"
+        my $greeting = "Hello, world!"->upper(); # "HELLO, WORLD!"
 
-        $greeting->to_lower(); # greeting is now "hello, world"
         $greeting->for_each(\&character_handler);
 
     # ARRAY refs
 
         my $schwartzian = [ @_ ]->map(...)->sort(...)->map(...);
-        my $sd = [ 1, 8, 3, 3, 2, 9 ]->standard_deviation();
+        my $hash = [ 'SELECT * FROM foo WHERE id IN (?, ?)', 1, 2 ]->hash();
 
     # HASH refs
 
@@ -45,7 +43,7 @@ autobox - call methods on builtin types
 
     # can() and isa() work as expected
 
-        if ("Hello, World"->can('foo')) ...
+        if ("Hello, world!"->can('foo')) ...
         if (3.1415927->isa('SCALAR')) ...
 
 =head1 DESCRIPTION
@@ -69,11 +67,11 @@ their associated classes.
 As with regular objects, autoboxed values are passed as the first argument of the specified method.
 Consequently, given a vanilla C<use autobox>:
 
-    "hello, world"->upper()
+    "Hello, world!"->upper()
 
 is invoked as:
 
-    SCALAR::upper("hello, world")
+    SCALAR::upper("hello, world!")
 
 while:
 
@@ -97,9 +95,15 @@ Thus:
 Likewise:
 
     use autobox SCALAR => 'Foo';
-    use autobox ARRAY  => 'Bar';
+    use autobox SCALAR => 'Bar';
+    use autobox ARRAY  => 'Baz';
 
-- binds SCALAR types to the C<Foo> class and ARRAY types to C<Bar>.  
+and
+
+    use autobox SCALAR => [ 'Foo', 'Bar' ];
+    use autobox ARRAY  => 'Baz';
+
+- binds SCALAR types to the C<Foo> and C<Bar> classes and ARRAY types to C<Baz>.  
 
 C<autobox> is lexically scoped, and bindings for an outer scope
 can be extended or countermanded in a nested scope:
@@ -135,7 +139,7 @@ Autoboxing can be turned off entirely by using the C<no> syntax:
 
     []->foo(); # OK: ARRAY::foo([])
 
-    "hello"->bar(); # runtime error
+    "Hello, world!"->bar(); # runtime error
 
 Autoboxing is not performed for barewords i.e. 
 
@@ -432,7 +436,7 @@ Autoboxing comes at a price. Calling
 
     "Hello, world!"->length()
 
-is slightly slower than the equivalent method call on a string-like class, and significantly slower than
+is slightly slower than the equivalent method call on a string-like object, and significantly slower than
 
     length("Hello, world!")
 
@@ -511,7 +515,7 @@ This doesn't:
 
     use autobox SCALAR => MyScalar;
 
-    print "Hello, World"->VERSION(), $/;
+    print "Hello, world!"->VERSION(), $/;
 
 Though, of course:
 
@@ -533,7 +537,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
         
 =head1 VERSION
 
-2.11
+2.20
 
 =head1 SEE ALSO
 

@@ -134,7 +134,7 @@ enterscope()
             /*
              * capture the check routine in scope when autobox is used.
              * usually, this will be Perl_ck_subr, though, in principle,
-             * it could be bespoke handlers spliced in by another module.
+             * it could be a bespoke checker spliced in by another module.
              */
             autobox_old_ck_subr = PL_check[OP_ENTERSUB];
             PL_check[OP_ENTERSUB] = autobox_ck_subr;
