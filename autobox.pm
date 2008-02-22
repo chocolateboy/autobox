@@ -11,7 +11,7 @@ use Scalar::Util;
 use Scope::Guard;
 use Storable;
 
-our $VERSION = '2.20';
+our $VERSION = '2.21';
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -62,7 +62,7 @@ sub _universalize ($) {
     }
 }
 
-# pretty-print the bindings hash by showing its values as the types classes rather than the synthetic class
+# pretty-print the bindings hash by showing its values as the inherited classes rather than the synthetic class
 sub _annotate($) {
     my $hash = { %{ shift() } };
 
@@ -79,10 +79,10 @@ sub _annotate($) {
 }
 
 # default method called when the DEBUG option is supplied with a true value
-# prints the assigned bindings for the current scope along with a list of classes in their @ISA
+# prints the assigned bindings for the current scope
 
 sub _debug ($) {
-    my $bindings = _annotate(shift);
+    my $bindings = shift;
     require Data::Dumper;
     no warnings qw(once);
     local ($|, $Data::Dumper::Indent, $Data::Dumper::Terse, $Data::Dumper::Sortkeys) = (1, 1, 1, 1);
@@ -95,7 +95,7 @@ sub _isa($$) {
     return Scalar::Util::blessed($ref) ? $ref->isa($class) : ref($ref) eq $class;
 }
 
-# get the @ISA for the specified class
+# get/autovivify the @ISA for the specified class
 sub _get_isa($) {
     my $class = shift;
     my $isa   = do {
@@ -106,7 +106,8 @@ sub _get_isa($) {
 }
 
 # install a new set of bindings for the current scope
-# XXX this could be refined to reuse the same hashref if its contents have already already seen,
+#
+# XXX this could be refined to reuse the same hashref if its contents have already been seen,
 # but that requires each (frozen) hash to be cached; at best, it may not be much of a win, and at
 # worst it will increase bloat
 
@@ -213,7 +214,7 @@ sub import {
             # squashed bug: if $class is a default namespace that was passed in an array ref,
             # then that array ref may have been assigned (above) as the default for multiple types
             #
-            # mutating it (e.g. $class = "$class::$type") mutates it for all
+            # mutating it (e.g. $class = "$class$type") mutates it for all
             # the types that default to this namespace (due to the aliasing semantics of foreach). which
             # means defaulted types all inherit MyNamespace::CODE (or whatever comes first)
             #
@@ -250,7 +251,7 @@ sub import {
     # Autobox::enterscope splices in the autobox method call checker and method call op if they're not already
     # active
     #
-    # Autobox::leavescope performs the neccessary housekeeping to ensure that the default checker and op are restored
+    # Autobox::leavescope performs the necessary housekeeping to ensure that the default checker and op are restored
     # when autobox is no longer in scope
 
     my $leave_scope = sub {
@@ -266,7 +267,7 @@ sub import {
 # delete one or more bindings; if none remain, turn off the autoboxing flag
 #
 # note: the housekeeping data structures are not deleted: import still needs to know if we're in the same scope
-# (autobox_scope) &c.; we also need a new bindings hash: if one or more bindings is being disabled, we need
+# (autobox_scope) &c.; we also need a new bindings hash: if one or more bindings are being disabled, we need
 # to create a new hash (a clone of the current hash) so that the previous hash (if any) is not contaminated
 # by new deletions(s)
 #
@@ -290,7 +291,7 @@ sub unimport {
     @args = keys(%$defaults) unless (@args);
 
     for my $arg (@args) {
-        Carp::confess("unrecognised option: '", (defined $arg ? $arg : '<undef>'), "'")
+        Carp::confess("unrecognized option: '", (defined $arg ? $arg : '<undef>'), "'")
             unless (exists $defaults->{$arg});
         delete $bindings->{$arg};
     }

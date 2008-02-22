@@ -1,6 +1,10 @@
 Revision history for Perl extension autobox
 
-2.20  Thu Feb 21 23:30:53 GMT 2008
+2.21  Fri Feb 22 21:40:54 2008
+    - merge unimport.t and time_travel.t into unmerge.t
+    - more tests
+
+2.20  Thu Feb 21 23:30:53 2008
     - Fix broken merging
         - corrected merge.t
         - added time_travel.t to verify correctness

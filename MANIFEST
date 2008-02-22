@@ -13,5 +13,4 @@ t/autobox_scope_1.pm
 t/autobox_scope_2.pm
 t/merge.t
 t/pod.t
-t/time_travel.t
-t/unimport.t
+t/unmerge.t
