@@ -12,7 +12,6 @@
 static PTABLE_t *AUTOBOX_OP_MAP = NULL;
 static U32 AUTOBOX_SCOPE_DEPTH = 0;
 static OP *(*autobox_old_ck_subr)(pTHX_ OP *op) = NULL;
-static U32 AUTOBOX_OLD_HINTS; /* snapshot of the original hints flags */
 
 OP * autobox_ck_subr(pTHX_ OP *o);
 OP * autobox_method_named(pTHX);
@@ -139,7 +138,6 @@ enterscope()
              */
             autobox_old_ck_subr = PL_check[OP_ENTERSUB];
             PL_check[OP_ENTERSUB] = autobox_ck_subr;
-            AUTOBOX_OLD_HINTS = PL_hints;
         }
 
 void
@@ -151,7 +149,6 @@ leavescope()
         } else {
             AUTOBOX_SCOPE_DEPTH = 0;
             PL_check[OP_ENTERSUB] = autobox_old_ck_subr;
-            PL_hints = AUTOBOX_OLD_HINTS; /* restore the original hints */
         }
 
 void

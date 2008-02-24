@@ -1,7 +1,9 @@
 Revision history for Perl extension autobox
 
+2.23  Sun Feb 24 15:17:05 2008
+    -rm redundant $^H hacking
+
 2.22  Sun Feb 24 14:44:58 2008
-    - fully disable autobox out of scope
     - added hints.t
 
 2.21  Fri Feb 22 21:40:54 2008
