@@ -1,5 +1,9 @@
 Revision history for Perl extension autobox
 
+2.22  Sun Feb 24 14:44:58 2008
+    - fully disable autobox out of scope
+    - added hints.t
+
 2.21  Fri Feb 22 21:40:54 2008
     - merge unimport.t and time_travel.t into unmerge.t
     - more tests

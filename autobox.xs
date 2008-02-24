@@ -12,6 +12,7 @@
 static PTABLE_t *AUTOBOX_OP_MAP = NULL;
 static U32 AUTOBOX_SCOPE_DEPTH = 0;
 static OP *(*autobox_old_ck_subr)(pTHX_ OP *op) = NULL;
+static U32 AUTOBOX_OLD_HINTS; /* snapshot of the original hints flags */
 
 OP * autobox_ck_subr(pTHX_ OP *o);
 OP * autobox_method_named(pTHX);
@@ -71,7 +72,7 @@ OP* autobox_method_named(pTHX) {
             SV **svp; /* pointer to autobox_bindings value */
 
             /*
-             * the package is either the receiver's reftype(), "SCALAR" if it's not a ref, or UNDEF if
+             * the type is either the receiver's reftype(), "SCALAR" if it's not a ref, or UNDEF if
              * it's not defined
              */
             reftype = SvOK(sv) ? sv_reftype((SvROK(sv) ? SvRV(sv) : sv), 0) : "UNDEF";
@@ -138,6 +139,7 @@ enterscope()
              */
             autobox_old_ck_subr = PL_check[OP_ENTERSUB];
             PL_check[OP_ENTERSUB] = autobox_ck_subr;
+            AUTOBOX_OLD_HINTS = PL_hints;
         }
 
 void
@@ -149,6 +151,7 @@ leavescope()
         } else {
             AUTOBOX_SCOPE_DEPTH = 0;
             PL_check[OP_ENTERSUB] = autobox_old_ck_subr;
+            PL_hints = AUTOBOX_OLD_HINTS; /* restore the original hints */
         }
 
 void

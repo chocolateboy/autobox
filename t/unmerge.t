@@ -19,122 +19,101 @@ BEGIN {
     }
 }
 
+no autobox;
+
+BEGIN {
+    eval { $string->test() };
+    ok ($@ && ($@ =~ /^$string_error/));
+}
+
+eval { $string->test() };
+ok ($@ && ($@ =~ /^$string_error/));
+
+use autobox SCALAR => 'Scalar1';
+
+BEGIN { is($string->test(), 'Scalar1') }
+
+is($string->test(), 'Scalar1');
+
+no autobox qw(SCALAR);
+
+BEGIN {
+    eval { $string->test() };
+    ok ($@ && ($@ =~ /^$string_error/));
+}
+
+eval { $string->test() };
+ok ($@ && ($@ =~ /^$string_error/));
+
 {
+    use autobox SCALAR => 'Scalar2';
+
+    BEGIN { is($string->test(), 'Scalar2') }
+
+    is($string->test(), 'Scalar2');
+
     no autobox;
+}
 
-    BEGIN {
-        eval { $string->test() };
-        ok ($@ && ($@ =~ /^$string_error/));
-    }
+use autobox;
 
-    eval { $string->test() };
-    ok ($@ && ($@ =~ /^$string_error/));
-
-    use autobox SCALAR => 'Scalar1';
-
-    BEGIN {
-        is($string->test(), 'Scalar1');
-    }
-
-    is($string->test(), 'Scalar1');
-
-    no autobox qw(SCALAR);
-
-    BEGIN {
-        eval { $string->test() };
-        ok ($@ && ($@ =~ /^$string_error/));
-    }
-
-    eval { $string->test() };
-    ok ($@ && ($@ =~ /^$string_error/));
-
-    {
-        use autobox SCALAR => 'Scalar2';
-
-        BEGIN {
-            is($string->test(), 'Scalar2');
-        }
-
-        is($string->test(), 'Scalar2');
-
-        no autobox;
-    }
-
-    use autobox;
-
-    BEGIN {
-        is(''->test(), 'SCALAR');
-        is([]->test(), 'ARRAY');
-        is({}->test(), 'HASH');
-        is(sub {}->test(), 'CODE');
-    }
-
+BEGIN {
     is(''->test(), 'SCALAR');
     is([]->test(), 'ARRAY');
     is({}->test(), 'HASH');
     is(sub {}->test(), 'CODE');
+}
 
-    no autobox qw(SCALAR);
+is(''->test(), 'SCALAR');
+is([]->test(), 'ARRAY');
+is({}->test(), 'HASH');
+is(sub {}->test(), 'CODE');
 
-    BEGIN {
-        eval { $string->test() };
-        ok ($@ && ($@ =~ /^$string_error/));
-    }
+no autobox qw(SCALAR);
 
+BEGIN {
     eval { $string->test() };
     ok ($@ && ($@ =~ /^$string_error/));
+}
 
-    BEGIN {
-        is([]->test(), 'ARRAY');
-        is({}->test(), 'HASH');
-        is(sub {}->test(), 'CODE');
-    }
+eval { $string->test() };
+ok ($@ && ($@ =~ /^$string_error/));
 
+BEGIN {
     is([]->test(), 'ARRAY');
     is({}->test(), 'HASH');
     is(sub {}->test(), 'CODE');
+}
 
-    no autobox qw(ARRAY HASH);
+is([]->test(), 'ARRAY');
+is({}->test(), 'HASH');
+is(sub {}->test(), 'CODE');
 
-    BEGIN {
-        eval { $string->test() };
-        ok ($@ && ($@ =~ /^$string_error/));
-    }
+no autobox qw(ARRAY HASH);
 
+BEGIN {
     eval { $string->test() };
     ok ($@ && ($@ =~ /^$string_error/));
-
-    BEGIN {
-        eval { []->test() };
-        ok ($@ && ($@ =~ /^$unblessed_error/));
-        eval { {}->test() };
-        ok ($@ && ($@ =~ /^$unblessed_error/));
-    }
-
     eval { []->test() };
     ok ($@ && ($@ =~ /^$unblessed_error/));
     eval { {}->test() };
     ok ($@ && ($@ =~ /^$unblessed_error/));
+}
 
-    BEGIN {
-        is(sub {}->test(), 'CODE');
-    }
+eval { $string->test() };
+ok ($@ && ($@ =~ /^$string_error/));
+eval { []->test() };
+ok ($@ && ($@ =~ /^$unblessed_error/));
+eval { {}->test() };
+ok ($@ && ($@ =~ /^$unblessed_error/));
 
-    is(sub {}->test(), 'CODE');
+BEGIN { is(sub {}->test(), 'CODE') }
 
-    no autobox;
+is(sub {}->test(), 'CODE');
 
-    BEGIN {
-        eval { $string->test() };
-        ok ($@ && ($@ =~ /^$string_error/));
-        eval { []->test() };
-        ok ($@ && ($@ =~ /^$unblessed_error/));
-        eval { {}->test() };
-        ok ($@ && ($@ =~ /^$unblessed_error/));
-        eval { sub {}->test() };
-        ok ($@ && ($@ =~ /^$unblessed_error/));
-    }
+no autobox;
 
+BEGIN {
     eval { $string->test() };
     ok ($@ && ($@ =~ /^$string_error/));
     eval { []->test() };
@@ -144,3 +123,14 @@ BEGIN {
     eval { sub {}->test() };
     ok ($@ && ($@ =~ /^$unblessed_error/));
 }
+
+eval { $string->test() };
+ok ($@ && ($@ =~ /^$string_error/));
+eval { []->test() };
+ok ($@ && ($@ =~ /^$unblessed_error/));
+eval { {}->test() };
+ok ($@ && ($@ =~ /^$unblessed_error/));
+eval { sub {}->test() };
+ok ($@ && ($@ =~ /^$unblessed_error/));
+
+use autobox; # try to cause havoc with a stray trailing "use autobox"
