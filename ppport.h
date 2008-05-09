@@ -4,7 +4,7 @@
 /*
 ----------------------------------------------------------------------
 
-    ppport.h -- Perl/Pollution/Portability Version 3.12
+    ppport.h -- Perl/Pollution/Portability Version 3.13
 
     Automatically created by Devel::PPPort running under perl 5.008008.
 
@@ -21,7 +21,7 @@ SKIP
 
 =head1 NAME
 
-ppport.h - Perl/Pollution/Portability version 3.12
+ppport.h - Perl/Pollution/Portability version 3.13
 
 =head1 SYNOPSIS
 
@@ -371,7 +371,7 @@ use strict;
 # Disable broken TRIE-optimization
 BEGIN { eval '${^RE_TRIE_MAXBUF} = -1' if $] >= 5.009004 && $] <= 5.009005 }
 
-my $VERSION = 3.12;
+my $VERSION = 3.13;
 
 my %opt = (
   quiet     => 0,
@@ -3834,7 +3834,7 @@ extern U32 DPPP_(my_PL_signals);
  * automatically be defined as the correct argument.
  */
 
-#if (PERL_BCDVERSION <= 0x5005004)
+#if (PERL_BCDVERSION <= 0x5005005)
 /* Replace: 1 */
 #  define PL_ppaddr                 ppaddr
 #  define PL_no_modify              no_modify

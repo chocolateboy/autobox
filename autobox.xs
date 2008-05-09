@@ -7,7 +7,6 @@
 #include "ppport.h"
 
 #include "ptable.h"
-/* #include <assert.h> */
 
 static PTABLE_t *AUTOBOX_OP_MAP = NULL;
 static U32 AUTOBOX_SCOPE_DEPTH = 0;
@@ -15,6 +14,8 @@ static OP *(*autobox_old_ck_subr)(pTHX_ OP *op) = NULL;
 
 OP * autobox_ck_subr(pTHX_ OP *o);
 OP * autobox_method_named(pTHX);
+OP * autobox_method(pTHX);
+static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp); 
 
 OP * autobox_ck_subr(pTHX_ OP *o) {
     /*
@@ -29,31 +30,71 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
         for (cvop = o2; cvop->op_sibling; cvop = cvop->op_sibling);
 
         /* don't autobox if the receiver is a bareword */
-        if ((cvop->op_type == OP_METHOD_NAMED) && !(o2->op_private & OPpCONST_BARE)) {
+        if ((cvop->op_type == OP_METHOD) || ((cvop->op_type == OP_METHOD_NAMED) && !(o2->op_private & OPpCONST_BARE))) {
             const char * meth = SvPVX_const(((SVOP *)cvop)->op_sv);
 
             /*
              * the bareword flag is not set on the receivers of the import, unimport
              * and VERSION messages faked up by use() and no(), so exempt them
              */
-            if (strNE(meth, "import") && strNE(meth, "unimport") && strNE(meth, "VERSION")) {
+            if ((cvop->op_type == OP_METHOD) ||
+		(strNE(meth, "import") && strNE(meth, "unimport") && strNE(meth, "VERSION"))) {
                 HV *table = GvHV(PL_hintgv);
                 SV **svp;
 
                 if (table && (svp = hv_fetch(table, "autobox", 7, FALSE)) && *svp && SvOK(*svp)) {
                     cvop->op_flags |= OPf_SPECIAL;
-                    cvop->op_ppaddr = autobox_method_named;
+                    cvop->op_ppaddr = cvop->op_type == OP_METHOD ? autobox_method : autobox_method_named;
                     PTABLE_store(AUTOBOX_OP_MAP, cvop, SvRV(*svp));
                 }
             }
         }
     }
 
-    /* assert(autobox_old_ck_subr != autobox_ck_subr); */
     return autobox_old_ck_subr(aTHX_ o);
 }
 
+OP* autobox_method(pTHX) {
+    dVAR; dSP;
+    SV * const sv = TOPs;
+    SV * cv;
+    
+    if (SvROK(sv)) {
+        cv = SvRV(sv);
+        if (SvTYPE(cv) == SVt_PVCV) {
+            SETs(cv);
+            RETURN;
+        }
+    }
+
+    cv = autobox_method_common(aTHX_ sv, NULL);
+
+    if (cv) {
+        SETs(cv);
+        RETURN;
+    } else {
+        return PL_ppaddr[OP_METHOD](aTHXR);
+    }
+}
+
 OP* autobox_method_named(pTHX) {
+    dVAR; dSP;
+    SV * const sv = cSVOP_sv;
+    U32 hash = SvSHARED_HASH(sv);
+    SV * cv;
+
+    cv = autobox_method_common(aTHX_ sv, &hash);
+
+    if (cv) {
+        XPUSHs(cv);
+        RETURN;
+    } else {
+        return PL_ppaddr[OP_METHOD_NAMED](aTHXR);
+    }
+}
+
+/* returns either the method, or NULL, meaning delegate to the original op */
+static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
     SV * const sv = *(PL_stack_base + TOPMARK + 1);
 
     /* if autobox is enabled (in scope) for this op and the receiver isn't an object... */
@@ -71,7 +112,7 @@ OP* autobox_method_named(pTHX) {
             SV **svp; /* pointer to autobox_bindings value */
 
             /*
-             * the type is either the receiver's reftype(), "SCALAR" if it's not a ref, or UNDEF if
+             * the type is either the receiver's reftype() ("SCALAR" if it's not a ref), or UNDEF if
              * it's not defined
              */
             reftype = SvOK(sv) ? sv_reftype((SvROK(sv) ? SvRV(sv) : sv), 0) : "UNDEF";
@@ -80,24 +121,21 @@ OP* autobox_method_named(pTHX) {
             if (svp && SvOK(*svp)) {
                 SV * packsv = *svp;
                 STRLEN packlen;
-                const HE * he;
                 HV * stash;
                 GV * gv;
                 const char * packname = SvPV_const(packsv, packlen);
-                SV * meth = cSVOP_sv;
 
                 /* NOTE: stash may be null, hope hv_fetch_ent and gv_fetchmethod can cope (it seems they can) */
                 stash = gv_stashpvn(packname, packlen, FALSE);
 
-                /* SvSHARED_HASH(meth): the hash code of the method name */
-                he = hv_fetch_ent(stash, meth, 0, SvSHARED_HASH(meth)); /* shortcut for simple names */
+                if (hashp) {
+                    const HE* const he = hv_fetch_ent(stash, meth, 0, *hashp);  /* shortcut for simple names */
 
-                if (he) {
-                    gv = (GV*)HeVAL(he);
-                    if (isGV(gv) && GvCV(gv) && (!GvCVGEN(gv) || GvCVGEN(gv) == PL_sub_generation)) {
-                        dSP;
-                        XPUSHs((SV*)GvCV(gv));
-                        RETURN;
+                    if (he) {
+                        gv = (GV*)HeVAL(he);
+                        if (isGV(gv) && GvCV(gv) && (!GvCVGEN(gv) || GvCVGEN(gv) == PL_sub_generation)) {
+                            return ((SV*)GvCV(gv));
+                        }
                     }
                 }
 
@@ -105,15 +143,13 @@ OP* autobox_method_named(pTHX) {
                 gv = gv_fetchmethod(stash ? stash : (HV*)packsv, SvPVX_const(meth));
 
                 if (gv) {
-                    dSP;
-                    XPUSHs(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
-                    RETURN;
+                    return(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
                 }
             }
         }
     }
 
-    return PL_ppaddr[OP_METHOD_NAMED](aTHX);
+    return NULL;
 }
 
 MODULE = autobox                PACKAGE = Autobox

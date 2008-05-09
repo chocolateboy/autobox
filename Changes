@@ -1,7 +1,12 @@
 Revision history for Perl extension autobox
 
+2.30  Fri May  9 01:52:19 2008
+    - support [ ... ]->$method, where $method is a method name or subroutine reference:
+        - t/name.t
+        - t/coderef.t
+
 2.23  Sun Feb 24 15:17:05 2008
-    -rm redundant $^H hacking
+    - rm redundant $^H hacking
 
 2.22  Sun Feb 24 14:44:58 2008
     - added hints.t

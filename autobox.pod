@@ -48,8 +48,7 @@ autobox - call methods on builtin types
 
 =head1 DESCRIPTION
 
-The autobox pragma endows Perl's core data types with the capabilities of
-first-class objects. This allows methods to be called on ARRAY refs,
+The autobox pragma allows methods to be called on ARRAY refs,
 HASH refs, CODE refs and raw scalars in exactly the same manner as blessed
 references. The autoboxing is transparent: boxed values are not blessed
 into their (user-defined) implementation class (unless the method elects to
@@ -103,7 +102,7 @@ and
     use autobox SCALAR => [ 'Foo', 'Bar' ];
     use autobox ARRAY  => 'Baz';
 
-- binds SCALAR types to the C<Foo> and C<Bar> classes and ARRAY types to C<Baz>.  
+- bind SCALAR types to the C<Foo> and C<Bar> classes and ARRAY types to C<Baz>.  
 
 C<autobox> is lexically scoped, and bindings for an outer scope
 can be extended or countermanded in a nested scope:
@@ -151,17 +150,17 @@ and:
 
 behave as expected.
 
-In addition, it only covers named methods, so while this works:
+Methods are called on primitive values by using the L<arrow operator|perlop/"The Arrow Operator">. As with
+regular objects, the right hand side of the operator can either be a bare method name or a variable containing
+a method name or subroutine reference. Thus the following are all valid:
 
-    my $foobar = { foo => 'bar' }->some_method();
+    sub method1 { ... }
+    my $method2 = 'some_method';
+    my $method3 = \&HASH::some_method;
 
-These don't:
-
-    my $method1 = 'some_method';
-    my $method2 = \&HASH::some_method;
-
-    my $error1 = { foo => 'bar' }->$method1();
-    my $error2 = { foo => 'bar' }->$method2();
+    { foo => 'bar' }->method1();
+    { foo => 'bar' }->$method2();
+    { foo => 'bar' }->$method3();
 
 A builtin type is only asociated with a class if the type => class mapping
 is supplied in the C<use autobox> statement. Thus the following will not work:
@@ -302,7 +301,7 @@ static debugging function.
 
 This allows the computed bindings to be seen in 'longhand'.
 
-Debugging is ignored if the value corresponding to the DEBUG key is false.
+The option is ignored if the value corresponding to the DEBUG key is false.
 
 If the value is a CODE ref, then this sub is called with a reference to
 the hash containing the computed bindings for the current scope.
@@ -537,15 +536,15 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
         
 =head1 VERSION
 
-2.23
+2.30
 
 =head1 SEE ALSO
 
 =over
 
-=item * L<autobox::Core|autobox::Core>
-
 =item * L<autobox::Closure::Attributes|autobox::Closure::Attributes>
+
+=item * L<autobox::Core|autobox::Core>
 
 =item * L<autobox::DateTime::Duration|autobox::DateTime::Duration>
 
@@ -556,8 +555,6 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 =item * L<Perl6::Contexts|Perl6::Contexts>
 
 =item * L<Scalar::Properties|Scalar::Properties>
-
-=item * L<Set::Array|Set::Array>
 
 =item * L<Shell::Autobox|Shell::Autobox>
 

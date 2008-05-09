@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                autobox
-version:             2.23
+version:             2.30
 abstract:            call methods on builtin types
 license:             ~
 author:              

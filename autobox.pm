@@ -11,7 +11,7 @@ use Scalar::Util;
 use Scope::Guard;
 use Storable;
 
-our $VERSION = '2.23';
+our $VERSION = '2.30';
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -258,8 +258,8 @@ sub import {
         Autobox::leavescope();
     };
 
-    my $sg = Scope::Guard->new($leave_scope);
-    $^H{autobox_leavescope} = $sg;
+    my $guard = Scope::Guard->new($leave_scope);
+    $^H{autobox_leavescope} = $guard;
 
     Autobox::enterscope();
 }

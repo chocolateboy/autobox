@@ -11,7 +11,9 @@ README
 t/all.t
 t/autobox_scope_1.pm
 t/autobox_scope_2.pm
+t/coderef.t
 t/hints.t
 t/merge.t
+t/name.t
 t/pod.t
 t/unmerge.t
