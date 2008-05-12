@@ -1,9 +1,16 @@
 Revision history for Perl extension autobox
 
+2.40  Mon May 12 23:51:26 2008
+    - support @array->method, %hash->method, @{ ... }->method and %{ ... }->method
+      (thanks Yuval Kogman (nothingmuch) and Matthijs van Duin (xmath)
+        - added t/autoref.t
+    - fix [ ... ]->$method segfault with undef, integer, float &c. (i.e. non-string)
+      method names (thanks John Goulah)
+
 2.30  Fri May  9 01:52:19 2008
     - support [ ... ]->$method, where $method is a method name or subroutine reference:
-        - t/name.t
-        - t/coderef.t
+        - added t/name.t
+        - added t/coderef.t
 
 2.23  Sun Feb 24 15:17:05 2008
     - rm redundant $^H hacking

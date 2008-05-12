@@ -57,7 +57,6 @@ sub test { 'rubicund' }
 
 package main;
 
-use blib;
 use strict;
 use warnings;
 

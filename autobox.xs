@@ -31,27 +31,70 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
 
         /* don't autobox if the receiver is a bareword */
         if ((cvop->op_type == OP_METHOD) || ((cvop->op_type == OP_METHOD_NAMED) && !(o2->op_private & OPpCONST_BARE))) {
-            const char * meth = SvPVX_const(((SVOP *)cvop)->op_sv);
-
+            const char * meth;
             /*
              * the bareword flag is not set on the receivers of the import, unimport
              * and VERSION messages faked up by use() and no(), so exempt them
              */
             if ((cvop->op_type == OP_METHOD) ||
-		(strNE(meth, "import") && strNE(meth, "unimport") && strNE(meth, "VERSION"))) {
+                (((meth = SvPVX_const(((SVOP *)cvop)->op_sv))) && /* SvPVX_const should be sane for method_named */
+                strNE(meth, "import") && strNE(meth, "unimport") && strNE(meth, "VERSION"))) {
                 HV *table = GvHV(PL_hintgv);
                 SV **svp;
 
+                /* if there are bindings for this scope */
                 if (table && (svp = hv_fetch(table, "autobox", 7, FALSE)) && *svp && SvOK(*svp)) {
+                    /*
+                     * if the receiver is an @array, %hash, @{ ... } or %{ ... }, then "autoref" it
+                     * i.e. insert (in the op tree) a backslash before it
+                     */
+                    OP *refgen;
+                    U32 toggled = 0;
+
+                    switch (o2->op_type) {
+                        case OP_RV2AV:
+                        case OP_RV2HV:
+                        case OP_PADAV:
+                        case OP_PADHV:
+                            /*
+                             * perlref:
+                             *
+                             *   As a special case, "\(@foo)" returns a list of references to the contents of @foo,
+                             *   not a reference to @foo itself. Likewise for %foo, except that the key references
+                             *   are to copies (since the keys are just strings rather than full-fledged scalars).
+                             *
+                             * we don't want that (it results in the receiver being a reference to the last element
+                             * of the list), so we toggle the parentheses off while creating the reference
+                             * then toggle them back on in case they're needed elsewhere
+                             *
+                             */
+                            if (o2->op_flags & OPf_PARENS) {
+                                o2->op_flags &= ~OPf_PARENS;
+                                toggled = 1;
+                            }
+
+                            refgen = newUNOP(OP_REFGEN, 0, o2);
+                            prev->op_sibling = refgen;
+                            refgen->op_sibling = o2->op_sibling;
+                            o2->op_sibling = NULL;
+
+                            /* Restore the parentheses in case something else expects them */
+                            if (toggled) {
+                                o2->op_flags |= OPf_PARENS;
+                            }
+                        /* otherwise do nothing */
+                    }
+
                     cvop->op_flags |= OPf_SPECIAL;
                     cvop->op_ppaddr = cvop->op_type == OP_METHOD ? autobox_method : autobox_method_named;
                     PTABLE_store(AUTOBOX_OP_MAP, cvop, SvRV(*svp));
                 }
+
             }
         }
     }
 
-    return autobox_old_ck_subr(aTHX_ o);
+    return CALL_FPTR(autobox_old_ck_subr)(aTHX_ o);
 }
 
 OP* autobox_method(pTHX) {
@@ -101,8 +144,7 @@ static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
     if ((PL_op->op_flags & OPf_SPECIAL) && !(SvOBJECT(SvROK(sv) ? SvRV(sv) : sv))) {
         HV * autobox_bindings;
 
-        if (SvGMAGICAL(sv))
-            mg_get(sv);
+        SvGETMAGIC(sv);
 
         /* this is the "bindings hash" that maps datatypes to package names */
         autobox_bindings = (HV *)(PTABLE_fetch(AUTOBOX_OP_MAP, PL_op));
@@ -139,8 +181,11 @@ static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
                     }
                 }
 
-                /* SvPVX_const(meth): the method name as a const char * */
-                gv = gv_fetchmethod(stash ? stash : (HV*)packsv, SvPVX_const(meth));
+                /*
+                 * SvPV_nolen_const returns the method name as a const char *, stringifying methods that
+                 * are not strings (e.g. undef, SvIV,  SvNV &c.) - see segfault.t
+                 */
+                gv = gv_fetchmethod(stash ? stash : (HV*)packsv, SvPV_nolen_const(meth));
 
                 if (gv) {
                     return(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
