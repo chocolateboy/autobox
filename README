@@ -1,4 +1,4 @@
-autobox version 2.41
+autobox version 2.42
 ====================
 
 The autobox pragma allows methods to be called on primitive Perl values (numbers, strings,

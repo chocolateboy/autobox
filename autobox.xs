@@ -46,7 +46,7 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
                 if (table && (svp = hv_fetch(table, "autobox", 7, FALSE)) && *svp && SvOK(*svp)) {
                     /*
                      * if the receiver is an @array, %hash, @{ ... } or %{ ... }, then "autoref" it
-                     * i.e. insert (in the op tree) a backslash before it
+                     * i.e. the op tree equivalent of inserting a backslash before it
                      */
                     OP *refgen;
                     U32 toggled = 0;
@@ -89,7 +89,6 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
                     cvop->op_ppaddr = cvop->op_type == OP_METHOD ? autobox_method : autobox_method_named;
                     PTABLE_store(AUTOBOX_OP_MAP, cvop, SvRV(*svp));
                 }
-
             }
         }
     }
@@ -182,12 +181,10 @@ static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
                 }
 
                 /*
-                 * SvPV_nolen_const returns the method name as a const char *, stringifying methods that
+                 * SvPV_nolen_const returns the method name as a const char *, stringifying names that
                  * are not strings (e.g. undef, SvIV,  SvNV &c.) - see name.t
                  */
-
-                /* temp workaround for RT #35835: SvPV_nolen_const(meth) is broken prior to 5.8.8 */
-                gv = gv_fetchmethod(stash ? stash : (HV*)packsv, SvPV_const(meth, PL_na));
+                gv = gv_fetchmethod(stash ? stash : (HV*)packsv, SvPV_nolen_const(meth));
 
                 if (gv) {
                     return(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);

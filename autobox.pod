@@ -93,7 +93,7 @@ are equivalent to:
     ARRAY::join(\@array, ', ')
     ARRAY::length(\@{ ... })
     HASH::keys(\%hash)
-    HASH::values(\%{ ... })
+    HASH::values(\%$hash)
 
 Multiple C<use autobox> statements can appear in the same scope. These are merged both "horizontally" (i.e.
 mutiple classes can be associated with a particular builtin type) and "vertically" (i.e. a previously unboxed type
@@ -165,7 +165,7 @@ and:
 
 behave as expected.
 
-Methods are called on primitive values by means of the L<arrow operator|perlop/"The Arrow Operator___">. As with
+Methods are called on primitive values by means of the L<arrow operator|perlop/"The_Arrow_Operator___">. As with
 regular objects, the right hand side of the operator can either be a bare method name or a variable containing
 a method name or subroutine reference. Thus the following are all valid:
 
@@ -553,7 +553,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
         
 =head1 VERSION
 
-2.41
+2.42
 
 =head1 SEE ALSO
 

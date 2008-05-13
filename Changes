@@ -1,11 +1,14 @@
 Revision history for Perl extension autobox
 
+2.42  Tue May 13 22:22:55 2008
+    - upgrade ppport.h to 3.13_03 to s/workaround/fix/
+
 2.41  Tue May 13 20:02:37 2008
-    - fix $value->$method segfault under perl <= 5.8.8
+    - workaround $value->$method segfault with non-string method names under perls <= 5.8.8
     - added license info
 
 2.40  Mon May 12 23:51:26 2008
-    - support @array and %hash values (thanks Yuval Kogman (nothingmuch) and Matthijs van Duin (xmath)
+    - support @array and %hash (thanks Yuval Kogman (nothingmuch) and Matthijs van Duin (xmath))
         - added t/autoref.t
     - fix $value->$method segfault with undef, integer, float &c. (i.e. non-string)
       method names (thanks John Goulah)
