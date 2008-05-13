@@ -81,7 +81,7 @@ resolves to:
 
     ARRAY::for_each([ 1 .. 10 ], sub { ... })
 
-Values beginning with the array C<@> and hash C<%> sigils are passed by reference, so:
+Values beginning with the array C<@> and hash C<%> sigils are passed by reference, i.e. under the default bindings:
 
     @array->join(', ')
     @{ ... }->length()
@@ -165,7 +165,7 @@ and:
 
 behave as expected.
 
-Methods are called on primitive values by means of the L<arrow operator|perlop/"The Arrow Operator   ">. As with
+Methods are called on primitive values by means of the L<arrow operator|perlop/"The Arrow Operator___">. As with
 regular objects, the right hand side of the operator can either be a bare method name or a variable containing
 a method name or subroutine reference. Thus the following are all valid:
 
@@ -553,7 +553,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
         
 =head1 VERSION
 
-2.40
+2.41
 
 =head1 SEE ALSO
 

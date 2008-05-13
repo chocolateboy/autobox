@@ -52,7 +52,7 @@ like($@, qr{^Can't call method "join" on unblessed reference\b}, 'autobox not en
     like($@, qr{^Can't call method "$int" on unblessed reference\b}, 'handle integer method');
 
     eval { []->$float };
-    like($@, qr{^Can't call method "\Q$float\E" on unblessed reference}, 'handle float method');
+    like($@, qr{^Can't call method "\Q$float\E" on unblessed reference\b}, 'handle float method');
 
     no autobox;
 

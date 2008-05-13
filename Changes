@@ -1,14 +1,17 @@
 Revision history for Perl extension autobox
 
+2.41  Tue May 13 20:02:37 2008
+    - fix $value->$method segfault under perl <= 5.8.8
+    - added license info
+
 2.40  Mon May 12 23:51:26 2008
-    - support @array->method, %hash->method, @{ ... }->method and %{ ... }->method
-      (thanks Yuval Kogman (nothingmuch) and Matthijs van Duin (xmath)
+    - support @array and %hash values (thanks Yuval Kogman (nothingmuch) and Matthijs van Duin (xmath)
         - added t/autoref.t
-    - fix [ ... ]->$method segfault with undef, integer, float &c. (i.e. non-string)
+    - fix $value->$method segfault with undef, integer, float &c. (i.e. non-string)
       method names (thanks John Goulah)
 
 2.30  Fri May  9 01:52:19 2008
-    - support [ ... ]->$method, where $method is a method name or subroutine reference:
+    - support $value->$method, where $method is a method name or subroutine reference:
         - added t/name.t
         - added t/coderef.t
 

@@ -139,9 +139,9 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ($float->test(), 'MyScalar', 'override package: $float');
 
     is ('Hello, world'->test(), 'MyScalar',
-	'override package: single quoted string literal');
+        'override package: single quoted string literal');
     is ("Hello, world"->test(), 'MyScalar',
-	'override package: double quoted string literal');
+        'override package: double quoted string literal');
     is ($string->test(), 'MyScalar', 'override package: $string');
 }
 
@@ -157,25 +157,25 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 
     is (3->test(), 'MyNamespace::SCALAR', 'override namespace: integer literal');
     is ((-3)->test(), 'MyNamespace::SCALAR',
-	'override namespace: negative integer literal');
+        'override namespace: negative integer literal');
     is ((+3)->test(), 'MyNamespace::SCALAR',
-	'override namespace: positive integer literal');
+        'override namespace: positive integer literal');
     is ($int->test(), 'MyNamespace::SCALAR',
-	'override namespace: $int');
+        'override namespace: $int');
 
     is (3.1415927->test(), 'MyNamespace::SCALAR',
-	'override namespace: float literal');
+        'override namespace: float literal');
     is ((-3.1415927)->test(), 'MyNamespace::SCALAR',
-	'override namespace: negative float literal');
+        'override namespace: negative float literal');
     is ((+3.1415927)->test(), 'MyNamespace::SCALAR',
-	'override namespace: positive float literal');
+        'override namespace: positive float literal');
     is ($float->test(), 'MyNamespace::SCALAR',
-	'override namespace: $float');
+        'override namespace: $float');
 
     is ('Hello, world'->test(), 'MyNamespace::SCALAR',
-	'override namespace: single quoted string literal');
+        'override namespace: single quoted string literal');
     is ("Hello, world"->test(), 'MyNamespace::SCALAR',
-	'override namespace: double quoted string literal');
+        'override namespace: double quoted string literal');
     is ($string->test(), 'MyNamespace::SCALAR', 'override namespace: $string');
 }
 
@@ -200,9 +200,9 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ($float->test(), 'MyDefault', 'default package: $float');
 
     is ('Hello, world'->test(), 'MyDefault',
-	'default package: single quoted string literal');
+        'default package: single quoted string literal');
     is ("Hello, world"->test(), 'MyDefault',
-	'default package: double quoted string literal');
+        'default package: double quoted string literal');
     is ($string->test(), 'MyDefault', 'default package: $string');
 
     is ([ 0 .. 9 ]->test(), 'MyDefault', 'default package: ARRAY ref');
@@ -228,24 +228,24 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 
     is (3->test(), 'MyNamespace::SCALAR', 'default namespace: integer literal');
     is ((-3)->test(), 'MyNamespace::SCALAR',
-	'default namespace: negative integer literal');
+        'default namespace: negative integer literal');
     is ((+3)->test(), 'MyNamespace::SCALAR',
-	'default namespace: positive integer literal');
+        'default namespace: positive integer literal');
     is ($int->test(), 'MyNamespace::SCALAR', 'default namespace: $int');
 
     is (3.1415927->test(), 'MyNamespace::SCALAR',
-	'default namespace: float literal');
+        'default namespace: float literal');
     is ((-3.1415927)->test(), 'MyNamespace::SCALAR',
-	'default namespace: negative float literal');
+        'default namespace: negative float literal');
     is ((+3.1415927)->test(), 'MyNamespace::SCALAR',
-	'default namespace: positive float literal');
+        'default namespace: positive float literal');
     is ($float->test(), 'MyNamespace::SCALAR',
-	'default namespace: $float');
+        'default namespace: $float');
 
     is ('Hello, world'->test(), 'MyNamespace::SCALAR',
-	'default namespace: single quoted string literal');
+        'default namespace: single quoted string literal');
     is ("Hello, world"->test(), 'MyNamespace::SCALAR',
-	'default namespace: double quoted string literal');
+        'default namespace: double quoted string literal');
     is ($string->test(), 'MyNamespace::SCALAR', 'default namespace: $string');
 
     is ([ 0 .. 9 ]->test(), 'MyNamespace::ARRAY', 'default namespace: ARRAY ref');
@@ -285,9 +285,9 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 # test all 1
 {
     use autobox 
-	SCALAR	=> 'MyScalar',	    # specific package
-	HASH	=> undef,	    # don't autobox
-	DEFAULT => 'MyNamespace::'; # use MyNamespace:: namespace for CODE
+        SCALAR        => 'MyScalar',            # specific package
+        HASH        => undef,            # don't autobox
+        DEFAULT => 'MyNamespace::'; # use MyNamespace:: namespace for CODE
 
     my $object = Test->new();
     is (ref $object, 'Test', 'test all 1: Test->new() - bareword not autoboxed');
@@ -306,15 +306,15 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ($float->test(), 'MyScalar', 'test all 1: $float');
 
     is ('Hello, world'->test(), 'MyScalar',
-	'test all 1: single quoted string literal');
+        'test all 1: single quoted string literal');
     is ("Hello, world"->test(), 'MyScalar',
-	'test all 1: double quoted string literal');
+        'test all 1: double quoted string literal');
     is ($string->test(), 'MyScalar', 'test all 1: $string');
 
     my $error = q{Can't call method "test" on unblessed reference};
     eval { ({ 0 .. 9 })->test() };
     ok (($@ && ($@ =~ /^$error/)), 'test all 1: HASH ref: not autoboxed');
-	
+        
     is ((\&add)->test(), 'MyNamespace::CODE', 'test all 1: CODE ref');
     is (sub { $_[0] + $_[1] }->test(), 'MyNamespace::CODE', 'test all 1: ANON sub');
     is ($code->test(), 'MyNamespace::CODE', 'test all 1: $code');
@@ -323,9 +323,9 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 # test all 2
 {
     use autobox 
-	SCALAR	=> 'MyScalar',	    # specific package
-	HASH	=> undef,	    # don't autobox
-	DEFAULT => 'MyDefault';	    # use MyDefault package for CODE
+        SCALAR        => 'MyScalar',            # specific package
+        HASH        => undef,            # don't autobox
+        DEFAULT => 'MyDefault';            # use MyDefault package for CODE
 
     my $object = Test->new();
     is (ref $object, 'Test', 'test all 2: Test->new() - bareword not autoboxed');
@@ -344,15 +344,15 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ($float->test(), 'MyScalar', 'test all 2: $float');
 
     is ('Hello, world'->test(), 'MyScalar',
-	'test all 2: single quoted string literal');
+        'test all 2: single quoted string literal');
     is ("Hello, world"->test(), 'MyScalar',
-	'test all 2: double quoted string literal');
+        'test all 2: double quoted string literal');
     is ($string->test(), 'MyScalar', 'test all 2: $string');
 
     my $error = q{Can't call method "test" on unblessed reference};
     eval { ({ 0 .. 9 })->test() };
     ok (($@ && ($@ =~ /^$error/)), 'test all 2: HASH ref: not autoboxed');
-	
+        
     is ((\&add)->test(), 'MyDefault', 'test all 2: CODE ref');
     is (sub { $_[0] + $_[1] }->test(), 'MyDefault', 'test all 2: ANON sub');
     is ($code->test(), 'MyDefault', 'test all 2: $code');
@@ -361,9 +361,9 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 # test all 3
 {
     use autobox 
-	SCALAR	=> 'MyScalar',	    # specific package
-	HASH	=> undef,	    # don't autobox
-	DEFAULT => 'CODE';	    # use CODE package for CODE
+        SCALAR        => 'MyScalar',            # specific package
+        HASH        => undef,            # don't autobox
+        DEFAULT => 'CODE';            # use CODE package for CODE
 
     my $object = Test->new();
     is (ref $object, 'Test', 'test all 3: Test->new() - bareword not autoboxed');
@@ -382,15 +382,15 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ($float->test(), 'MyScalar', 'test all 3: $float');
 
     is ('Hello, world'->test(), 'MyScalar',
-	'test all 3: single quoted string literal');
+        'test all 3: single quoted string literal');
     is ("Hello, world"->test(), 'MyScalar',
-	'test all 3: double quoted string literal');
+        'test all 3: double quoted string literal');
     is ($string->test(), 'MyScalar', 'test all 3: $string');
 
     my $error = q{Can't call method "test" on unblessed reference};
     eval { ({ 0 .. 9 })->test() };
     ok (($@ && ($@ =~ /^$error/)), 'test all 3: HASH ref: not autoboxed');
-	
+        
     is ((\&add)->test(), 'CODE', 'test all 3: CODE ref');
     is (sub { $_[0] + $_[1] }->test(), 'CODE', 'test all 3: ANON sub');
     is ($code->test(), 'CODE', 'test all 3: $code');
@@ -399,8 +399,8 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
 # test all 4
 {
     use autobox 
-	SCALAR	=> 'MyScalar',	    # specific package
-	DEFAULT => undef;	    # don't autobox ARRAY, HASH or CODE
+        SCALAR        => 'MyScalar',            # specific package
+        DEFAULT => undef;            # don't autobox ARRAY, HASH or CODE
 
     my $object = Test->new();
     is (ref $object, 'Test', 'test all 4: Test->new() - bareword not autoboxed');
@@ -419,9 +419,9 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ($float->test(), 'MyScalar', 'test all 4: $float');
 
     is ('Hello, world'->test(), 'MyScalar',
-	'test all 4: single quoted string literal');
+        'test all 4: single quoted string literal');
     is ("Hello, world"->test(), 'MyScalar',
-	'test all 4: double quoted string literal');
+        'test all 4: double quoted string literal');
     is ($string->test(), 'MyScalar', 'test all 4: $string');
 
     my $error = q{Can't call method "test" on unblessed reference};
@@ -500,25 +500,25 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     is ($int->test(), 'SCALAR', 'nested (outer): $integer');
 
     {
-	use autobox DEFAULT => 'MyNamespace::';
+        use autobox DEFAULT => 'MyNamespace::';
 
-	is ('Hello, world'->test(), 'SCALAR', 'nested (inner): single quoted string literal');
-	is ("Hello, world"->test(), 'SCALAR', 'nested (inner): double quoted string literal');
-	is ($string->test(), 'SCALAR', 'nested (inner): $string');
-	is ([ 0 .. 9 ]->test(), 'ARRAY', 'nested (inner): ARRAY ref');
-	is ($array->test(), 'ARRAY', 'nested (inner): $array');
+        is ('Hello, world'->test(), 'SCALAR', 'nested (inner): single quoted string literal');
+        is ("Hello, world"->test(), 'SCALAR', 'nested (inner): double quoted string literal');
+        is ($string->test(), 'SCALAR', 'nested (inner): $string');
+        is ([ 0 .. 9 ]->test(), 'ARRAY', 'nested (inner): ARRAY ref');
+        is ($array->test(), 'ARRAY', 'nested (inner): $array');
 
-	ok ('Hello, world'->isa('SCALAR'), 'nested (inner): single quoted string literal isa(OUTER)');
-	ok ("Hello, world"->isa('SCALAR'), 'nested (inner): double quoted string literal isa(OUTER)');
-	ok ($string->isa('SCALAR'), 'nested (inner): $string isa(OUTER)');
-	ok ([ 0 .. 9 ]->isa('ARRAY'), 'nested (inner): ARRAY ref isa(OUTER)');
-	ok ($array->isa('ARRAY'), 'nested (inner): $array isa(OUTER)');
+        ok ('Hello, world'->isa('SCALAR'), 'nested (inner): single quoted string literal isa(OUTER)');
+        ok ("Hello, world"->isa('SCALAR'), 'nested (inner): double quoted string literal isa(OUTER)');
+        ok ($string->isa('SCALAR'), 'nested (inner): $string isa(OUTER)');
+        ok ([ 0 .. 9 ]->isa('ARRAY'), 'nested (inner): ARRAY ref isa(OUTER)');
+        ok ($array->isa('ARRAY'), 'nested (inner): $array isa(OUTER)');
 
-	ok ('Hello, world'->isa('MyNamespace::SCALAR'), 'nested (inner): single quoted string literal isa(INNER)');
-	ok ("Hello, world"->isa('MyNamespace::SCALAR'), 'nested (inner): double quoted string literal isa(INNER)');
-	ok ($string->isa('MyNamespace::SCALAR'), 'nested (inner): $string isa(INNER)');
-	ok ([ 0 .. 9 ]->isa('MyNamespace::ARRAY'), 'nested (inner): ARRAY ref isa(INNER)');
-	ok ($array->isa('MyNamespace::ARRAY'), 'nested (inner): $array isa(INNER)');
+        ok ('Hello, world'->isa('MyNamespace::SCALAR'), 'nested (inner): single quoted string literal isa(INNER)');
+        ok ("Hello, world"->isa('MyNamespace::SCALAR'), 'nested (inner): double quoted string literal isa(INNER)');
+        ok ($string->isa('MyNamespace::SCALAR'), 'nested (inner): $string isa(INNER)');
+        ok ([ 0 .. 9 ]->isa('MyNamespace::ARRAY'), 'nested (inner): ARRAY ref isa(INNER)');
+        ok ($array->isa('MyNamespace::ARRAY'), 'nested (inner): $array isa(INNER)');
     }
 
     is ('Hello, world'->isa('MyNamespace::SCALAR'), '', 'nested (outer): single quoted string literal !isa(INNER)');
@@ -604,7 +604,7 @@ my $undef_error = qr{Can't call method "[^"]+" on an undefined value};
     ok ('Hello, world'->isa('SCALAR'), 'isa SCALAR: single quoted string literal');
     ok ('Hello, world'->isa('UNIVERSAL'), 'isa UNIVERSAL: single quoted string literal');
     is ('Hello, world'->isa('UNKNOWN'), '', 'isa UNKNOWN: single quoted string literal');
-	 
+         
     ok ("Hello, world"->isa('SCALAR'), 'isa SCALAR: double quoted string literal');
     ok ("Hello, world"->isa('UNIVERSAL'), 'isa UNIVERSAL: double quoted string literal');
     is ("Hello, world"->isa('UNKNOWN'), '', 'isa UNKNOWN: double quoted string literal');

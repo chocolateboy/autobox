@@ -52,10 +52,10 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
                     U32 toggled = 0;
 
                     switch (o2->op_type) {
-                        case OP_RV2AV:
-                        case OP_RV2HV:
                         case OP_PADAV:
                         case OP_PADHV:
+                        case OP_RV2AV:
+                        case OP_RV2HV:
                             /*
                              * perlref:
                              *
@@ -183,9 +183,11 @@ static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
 
                 /*
                  * SvPV_nolen_const returns the method name as a const char *, stringifying methods that
-                 * are not strings (e.g. undef, SvIV,  SvNV &c.) - see segfault.t
+                 * are not strings (e.g. undef, SvIV,  SvNV &c.) - see name.t
                  */
-                gv = gv_fetchmethod(stash ? stash : (HV*)packsv, SvPV_nolen_const(meth));
+
+                /* temp workaround for RT #35835: SvPV_nolen_const(meth) is broken prior to 5.8.8 */
+                gv = gv_fetchmethod(stash ? stash : (HV*)packsv, SvPV_const(meth, PL_na));
 
                 if (gv) {
                     return(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);

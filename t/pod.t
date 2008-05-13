@@ -1,8 +1,8 @@
 eval "use Test::Pod";
 
 if ($@) {
-	print "1..0 # Skip Test::Pod not installed", $/;
-	exit;
+    print "1..0 # Skip Test::Pod not installed", $/;
+    exit;
 } 
  
 my @PODS = qw#../blib#;
