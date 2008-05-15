@@ -21,6 +21,8 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
     /*
      * work around a %^H scoping bug by checking that PL_hints (which is properly scoped) & an unused
      * PL_hints bit (0x100000) is true
+     *
+     * XXX this is fixed in #33311: http://www.nntp.perl.org/group/perl.perl5.porters/2008/02/msg134131.html
      */
     if ((PL_hints & 0x120000) == 0x120000) {
         OP *prev = ((cUNOPo->op_first->op_sibling) ? cUNOPo : ((UNOP*)cUNOPo->op_first))->op_first;
@@ -224,6 +226,10 @@ void
 leavescope()
     PROTOTYPE:
     CODE: 
+        if (AUTOBOX_SCOPE_DEPTH == 0) {
+            Perl_warn(aTHX_ "scope underflow");
+        }
+
         if (AUTOBOX_SCOPE_DEPTH > 1) {
             --AUTOBOX_SCOPE_DEPTH;
         } else {
@@ -241,10 +247,9 @@ END()
 
         PTABLE_free(AUTOBOX_OP_MAP);
         AUTOBOX_OP_MAP = NULL;
-        AUTOBOX_SCOPE_DEPTH = 0;
 
 void
 scope()
     PROTOTYPE:
     CODE: 
-        XSRETURN_IV(PTR2IV(GvHV(PL_hintgv)));
+        XSRETURN_UV(PTR2UV(GvHV(PL_hintgv)));

@@ -1,12 +1,14 @@
-# http://module-build.sourceforge.net/META-spec.html
-#XXXXXXX This is a prototype!!!  It will change in the future!!! XXXXX#
-name:         autobox
-version:      2.42
-version_from: autobox.pm
-installdirs:  perl
-license:      perl
-requires:
+--- #YAML:1.0
+name:                autobox
+version:             2.43
+abstract:            call methods on native types
+license:             perl
+author:              
+    - chocolateboy <chocolate.boy@email.com>
+generated_by:        ExtUtils::MakeMaker version 6.42
+distribution_type:   module
+requires:     
     Scope::Guard:                  0.03
-
-distribution_type: module
-generated_by: ExtUtils::MakeMaker version 6.17
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.3.html
+    version: 1.3

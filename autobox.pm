@@ -11,7 +11,7 @@ use Scalar::Util;
 use Scope::Guard;
 use Storable;
 
-our $VERSION = '2.42';
+our $VERSION = '2.43';
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -39,7 +39,9 @@ sub _generate_class($@) {
         return $class;
     }
 
-    my $key = Storable::freeze([ $type, sort(@$isa) ]); # sort() - canonicalize the @isa
+    # don't sort() the @isa as this incorrectly gives "use autobox SCALAR => [ qw(Foo Bar) ]" the same
+    # synthetic class as "use autobox SCALAR => [ qw(Bar Foo) ]" - see isa.t
+    my $key = Storable::freeze([ $type, @$isa ]);
 
     return $CLASS_CACHE->{$key} ||= do {
         my $class = sprintf('autobox::shim::<%d>', ++$SEQ);
@@ -153,19 +155,6 @@ sub import {
     my $default = exists $args{DEFAULT} ? delete $args{DEFAULT} : $defaults->{DEFAULT};
     my $bindings; # custom typemap
 
-    # this is %^H as an integer - it changes as scopes are entered/left
-    # we don't need to stack/unstack it in %^H as %^H itself takes care of that
-    my $scope = Autobox::scope();
-
-    my $new_scope; # is this a new (top-level or nested) scope?
-
-    if ($^H{autobox_scope} && ($^H{autobox_scope} == $scope)) {
-        $new_scope = 0;
-    } else {
-        $^H{autobox_scope} = $scope;
-        $new_scope = 1;
-    }
-
     # clone the bindings hash if available
     #
     # we may be assigning to it, and we don't want to contaminate outer/previous bindings
@@ -244,9 +233,26 @@ sub import {
     # install the specified bindings in the current scope
     _register($bindings);
 
+    # this is %^H as an integer - it changes as scopes are entered/exited
+    # we don't need to stack/unstack it in %^H as %^H itself takes care of that
+    # note: we need to call this *after* %^H is referenced, and possibly created, above
+    my $scope = Autobox::scope();
+    my $old_scope = exists($^H{autobox_scope})? $^H{autobox_scope} : 0;
+    my $new_scope; # is this a new (top-level or nested) scope?
+
+    if ($scope == $old_scope) {
+        $new_scope = 0;
+    } else {
+        $^H{autobox_scope} = $scope;
+        $new_scope = 1;
+    }
+
+    # warn "OLD ($old_scope) => NEW ($scope): $new_scope ", join(':', (caller(1))[0 .. 2]), $/;
+
     return unless ($new_scope);
 
-    # This sub is called when the current scope's %^H is destroyed i.e. at the end of the compilation of the scope
+    # This sub is called when this scope's $^H{autobox_leavescope} is deleted, usually when
+    # %^H is destroyed at the end of the scope, but possibly directly in unimport()
     #
     # Autobox::enterscope splices in the autobox method call checker and method call op if they're not already
     # active
@@ -264,18 +270,19 @@ sub import {
     Autobox::enterscope();
 }
 
-# delete one or more bindings; if none remain, turn off the autoboxing flag
+# delete one or more bindings; if none remain, disable autobox in the current scope
 #
-# note: the housekeeping data structures are not deleted: import still needs to know if we're in the same scope
-# (autobox_scope) &c.; we also need a new bindings hash: if one or more bindings are being disabled, we need
-# to create a new hash (a clone of the current hash) so that the previous hash (if any) is not contaminated
-# by new deletions(s)
+# note: if bindings remain, we need to create a new hash (a clone of the current
+# hash) so that the previous hash (if any) is not contaminated by new deletions(s)
 #
 #   use autobox;
 #
 #       "foo"->bar;
 #
-#   no autobox; # don't clobber the default bindings for "foo"->bar
+#   no autobox qw(SCALAR); # don't clobber the default bindings for "foo"->bar
+#
+# however, if there are no more bindings we can remove all traces of autobox from the
+# current scope.
 
 sub unimport {
     my ($class, @args) = @_;
@@ -296,9 +303,14 @@ sub unimport {
         delete $bindings->{$arg};
     }
 
-    # unset HINT_LOCALIZE_HH + the additional bit if there are no more bindings in this scope
-    $^H &= ~0x120000 unless (%$bindings);
-    _register($bindings);
+    if (%$bindings) {
+        _register($bindings);
+    } else { # remove all traces of autobox from the current scope
+        $^H &= ~0x120000; # unset HINT_LOCALIZE_HH + the additional bit
+        delete $^H{autobox};
+        delete $^H{autobox_scope};
+        delete $^H{autobox_leavescope}; # triggers the leavescope handler
+    }
 }
 
 1;

@@ -19,6 +19,9 @@ BEGIN {
     }
 }
 
+# multiple unimports at the top level
+no autobox;
+no autobox;
 no autobox;
 
 BEGIN {
@@ -46,11 +49,45 @@ eval { $string->test() };
 ok ($@ && ($@ =~ /^$string_error/));
 
 {
+    # multiple unimports in a nested scope before "use autobox"
+    no autobox;
+    no autobox;
+    no autobox;
+
     use autobox SCALAR => 'Scalar2';
 
     BEGIN { is($string->test(), 'Scalar2') }
 
     is($string->test(), 'Scalar2');
+
+    # multiple unimports in a nested scope after "use autobox"
+    no autobox;
+    no autobox;
+    no autobox;
+
+    # attempt to sow confusion
+    use autobox;
+
+    {
+        no autobox;
+        use autobox;
+        use autobox SCALAR => 'Fake1';
+        no autobox;
+        no autobox 'SCALAR';
+        use autobox SCALAR => 'Fake2';
+    }
+
+    no autobox;
+
+    use autobox;
+    no autobox;
+}
+
+# unmatched "no autobox"
+{
+    {
+        use autobox;
+    }
 
     no autobox;
 }

@@ -1,8 +1,8 @@
-autobox version 2.42
+autobox version 2.43
 ====================
 
-The autobox pragma allows methods to be called on primitive Perl values (numbers, strings,
-arrays, hashes and unblessed references) in exactly the same manner as blessed references.
+The autobox pragma allows methods to be called on numbers, strings, arrays, hashes
+and unblessed references in exactly the same manner as blessed references.
 The autoboxing is transparent: boxed values are not blessed into their (user-defined)
 implementation class (unless the method elects to bestow such a blessing) - they simply
 use its methods as though they are.
