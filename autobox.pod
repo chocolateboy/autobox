@@ -49,8 +49,9 @@ autobox - call methods on native types
 
 =head1 DESCRIPTION
 
-The autobox pragma allows methods to be called on numbers, strings, arrays, hashes 
-and unblessed references in exactly the same manner as blessed references.
+The autobox pragma allows methods to be called on integers, floats, strings, arrays,
+hashes, and code references in exactly the same manner as blessed references.
+
 The autoboxing is transparent: boxed values are not blessed into their (user-defined)
 implementation class (unless the method elects to bestow such a blessing) - they simply
 use its methods as though they are.
@@ -58,7 +59,7 @@ use its methods as though they are.
 The classes (packages) into which the native types are boxed are fully configurable.
 By default, a method invoked on a non-object is assumed to be
 defined in a class whose name corresponds to the C<ref()> type of that
-value - or C<SCALAR> if the value is a non-reference.
+value - or SCALAR if the value is a non-reference.
 
 This mapping can be overriden by passing key/value pairs to the C<use autobox>
 statement, in which the keys represent native types, and the values
@@ -230,11 +231,16 @@ The following example shows the range of valid arguments:
         ARRAY   => 'MyNamespace::',               # class prefix (ending in '::')
         HASH    => [ 'MyHash', 'MyNamespace::' ], # one or more class names and/or prefixes
         CODE    => ...,                           # any of the 3 value types above
+        INTEGER => ...,                           # any of the 3 value types above
+        FLOAT   => ...,                           # any of the 3 value types above
+        NUMBER  => ...,                           # any of the 3 value types above
+        STRING  => ...,                           # any of the 3 value types above
         UNDEF   => ...,                           # any of the 3 value types above
         DEFAULT => ...,                           # any of the 3 value types above
         DEBUG   => ...;                           # boolean or coderef
 
-The SCALAR, ARRAY, HASH, CODE, UNDEF and DEFAULT keys can take three different types of value:
+The INTEGER, FLOAT, NUMBER, STRING, SCALAR, ARRAY, HASH, CODE, UNDEF and DEFAULT keys can take
+three different types of value:
 
 =over
 
@@ -242,7 +248,7 @@ The SCALAR, ARRAY, HASH, CODE, UNDEF and DEFAULT keys can take three different t
 
 A class name e.g.
 
-    use autobox SCALAR => 'MyScalar';
+    use autobox INTEGER => 'MyInt';
 
 This binds the specified native type to the specified class. All methods invoked on
 literals or values of type 'key' will be dispatched as methods of the class specified in
@@ -252,15 +258,15 @@ If a class name is supplied for DEFAULT, it becomes the default class for all un
 invocation of C<use autobox>. Thus:
 
     use autobox
-        ARRAY   => 'MyArray',
+        STRING  => 'MyString',
         DEFAULT => 'MyDefault';
 
-- will invoke ARRAY methods on MyArray and all other methods on MyDefault.
+- will invoke STRING methods on MyString and all other methods on MyDefault.
 
 =item *
 
 A namespace: this is a class prefix (up to and including the final '::')
-to which the specified type name (SCALAR, ARRAY, HASH or CODE) will be appended:
+to which the specified type name (INTEGER, FLOAT, STRING &c.) will be appended:
 
 Thus:
 
@@ -271,7 +277,7 @@ binds ARRAY types to the Prelude::ARRAY class.
 As with the class name form, specifying a default namespace e.g.
 
     use autobox
-        SCALAR  => 'MyScalar',
+        FLOAT   => 'MyFloat',
         DEFAULT => 'MyNamespace::';
 
 binds MyNamespace::ARRAY, MyNamespace::HASH &c. to the corresponding types.
@@ -283,8 +289,54 @@ specified type.
 
 =back
 
-In addition to the SCALAR, ARRAY, HASH, CODE and DEFAULT options, there are two additional keys:
-UNDEF and DEBUG.
+=head3 VIRTUAL TYPES
+
+Rather than representing native types, the NUMBER and SCALAR keys function as macros or shortcuts which
+create bindings for their scalar subtypes (INTEGER, FLOAT and STRING).
+
+Thus:
+
+    use autobox NUMBER => 'MyNumber';
+
+is equivalent to:
+
+    use autobox
+        INTEGER => 'MyNumber',
+        FLOAT   => 'MyNumber';
+
+And:
+
+    use autobox SCALAR => 'MyScalar';
+
+is equivalent to:
+
+    use autobox
+        INTEGER => 'MyScalar',
+        FLOAT   => 'MyScalar',
+        STRING  => 'MyScalar';
+
+Bindings for subtypes that are created in this way are automatically deleted when C<no autobox>
+is called with the corresponding virtual type. Thus:
+
+    no autobox qw(NUMBER);
+
+is equivalent to:
+
+    no autobox qw(INTEGER FLOAT);
+
+Subtype bindings can be mixed with virtual type bindings to provide fine-grained control over inheritance and delegation.
+For instance:
+
+    use autobox
+        INTEGER => 'MyInteger',
+        NUMBER  => 'MyNumber',
+        SCALAR  => 'MyScalar';
+
+would result in the methods on the left being looked up (in order) in the classes on the right.
+
+    42->foo             -> [ MyInteger, MyNumber, MyScalar ]
+    3.1415927->bar      -> [ MyNumber, MyScalar ]
+    "Hello, world!->baz -> [ MyScalar ]
 
 =head3 UNDEF
 
@@ -440,7 +492,19 @@ are equivalent to:
 
 =back
 
-The C<defaults> method can also be used to enable autoboxing for new types such as LVALUEs, GLOBs, or FORMATs.
+The C<defaults> method can also be used to enable autoboxing for new types such as LVALUEs, GLOBs, or VSTRINGs.
+
+=head2 type
+
+This method returns the type of its operand within autobox (which is essentially longhand for the type names
+used within perl). This value is used by autobox to associate a method invocant with its designated classes. e.g.
+
+    autobox->type("Hello, world!") # STRING
+    autobox->type(42)              # INTEGER
+    autobox->type([ ])             # ARRAY
+    autobox->type(sub { })         # CODE
+
+&c.
 
 =head1 CAVEATS
 
@@ -551,7 +615,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
         
 =head1 VERSION
 
-2.43
+2.50
 
 =head1 SEE ALSO
 
@@ -577,7 +641,7 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 
 =head1 AUTHOR
     
-chocolateboy: <chocolate.boy@email.com>
+chocolateboy <chocolate.boy@email.com>
 
 =head1 COPYRIGHT
 

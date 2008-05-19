@@ -12,8 +12,8 @@ sub both { __PACKAGE__ }
 
 package main;
 
-use strict;   # global
-use warnings; # global
+use strict;
+use warnings;
 
 use Test::More tests => 32;
 

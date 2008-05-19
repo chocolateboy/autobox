@@ -469,7 +469,7 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
     {
         use autobox DEFAULT => 'MyNamespace::';
 
-        is('Hello, world'->test(), 'SCALAR', 'nested (inner): single quoted string literal');
+	is('Hello, world'->test(), 'SCALAR', 'nested (inner): single quoted string literal');
         is("Hello, world"->test(), 'SCALAR', 'nested (inner): double quoted string literal');
         is($string->test(),        'SCALAR', 'nested (inner): $string');
         is([ 0 .. 9 ]->test(),     'ARRAY',  'nested (inner): ARRAY ref');

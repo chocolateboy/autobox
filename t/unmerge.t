@@ -26,27 +26,27 @@ no autobox;
 
 BEGIN {
     eval { $string->test() };
-    ok ($@ && ($@ =~ /^$string_error/));
+    ok ($@ && ($@ =~ /^$string_error/), 'test 1');
 }
 
 eval { $string->test() };
-ok ($@ && ($@ =~ /^$string_error/));
+ok ($@ && ($@ =~ /^$string_error/). 'test ');
 
 use autobox SCALAR => 'Scalar1';
 
-BEGIN { is($string->test(), 'Scalar1') }
+BEGIN { is($string->test(), 'Scalar1', 'test 2') }
 
-is($string->test(), 'Scalar1');
+is($string->test(), 'Scalar1', 'test ');
 
 no autobox qw(SCALAR);
 
 BEGIN {
     eval { $string->test() };
-    ok ($@ && ($@ =~ /^$string_error/));
+    ok ($@ && ($@ =~ /^$string_error/), 'test 3');
 }
 
 eval { $string->test() };
-ok ($@ && ($@ =~ /^$string_error/));
+ok ($@ && ($@ =~ /^$string_error/), 'test ');
 
 {
     # multiple unimports in a nested scope before "use autobox"
@@ -56,7 +56,7 @@ ok ($@ && ($@ =~ /^$string_error/));
 
     use autobox SCALAR => 'Scalar2';
 
-    BEGIN { is($string->test(), 'Scalar2') }
+    BEGIN { is($string->test(), 'Scalar2', 'test 4') }
 
     is($string->test(), 'Scalar2');
 
@@ -95,10 +95,10 @@ ok ($@ && ($@ =~ /^$string_error/));
 use autobox;
 
 BEGIN {
-    is(''->test(), 'SCALAR');
-    is([]->test(), 'ARRAY');
-    is({}->test(), 'HASH');
-    is(sub {}->test(), 'CODE');
+    is(''->test(), 'SCALAR', 'test 5');
+    is([]->test(), 'ARRAY', 'test 6');
+    is({}->test(), 'HASH', 'test 7');
+    is(sub {}->test(), 'CODE', 'test 8');
 }
 
 is(''->test(), 'SCALAR');
@@ -110,16 +110,16 @@ no autobox qw(SCALAR);
 
 BEGIN {
     eval { $string->test() };
-    ok ($@ && ($@ =~ /^$string_error/));
+    ok ($@ && ($@ =~ /^$string_error/), 'test 9');
 }
 
 eval { $string->test() };
 ok ($@ && ($@ =~ /^$string_error/));
 
 BEGIN {
-    is([]->test(), 'ARRAY');
-    is({}->test(), 'HASH');
-    is(sub {}->test(), 'CODE');
+    is([]->test(), 'ARRAY', 'test 10');
+    is({}->test(), 'HASH', 'test 11');
+    is(sub {}->test(), 'CODE', 'test 12');
 }
 
 is([]->test(), 'ARRAY');
@@ -130,11 +130,11 @@ no autobox qw(ARRAY HASH);
 
 BEGIN {
     eval { $string->test() };
-    ok ($@ && ($@ =~ /^$string_error/));
+    ok ($@ && ($@ =~ /^$string_error/), 'test 13');
     eval { []->test() };
-    ok ($@ && ($@ =~ /^$unblessed_error/));
+    ok ($@ && ($@ =~ /^$unblessed_error/), 'test 14');
     eval { {}->test() };
-    ok ($@ && ($@ =~ /^$unblessed_error/));
+    ok ($@ && ($@ =~ /^$unblessed_error/), 'test 15');
 }
 
 eval { $string->test() };
@@ -144,7 +144,7 @@ ok ($@ && ($@ =~ /^$unblessed_error/));
 eval { {}->test() };
 ok ($@ && ($@ =~ /^$unblessed_error/));
 
-BEGIN { is(sub {}->test(), 'CODE') }
+BEGIN { is(sub {}->test(), 'CODE', 'test 16') }
 
 is(sub {}->test(), 'CODE');
 
@@ -152,13 +152,13 @@ no autobox;
 
 BEGIN {
     eval { $string->test() };
-    ok ($@ && ($@ =~ /^$string_error/));
+    ok ($@ && ($@ =~ /^$string_error/), 'test 17');
     eval { []->test() };
-    ok ($@ && ($@ =~ /^$unblessed_error/));
+    ok ($@ && ($@ =~ /^$unblessed_error/), 'test 18');
     eval { {}->test() };
-    ok ($@ && ($@ =~ /^$unblessed_error/));
+    ok ($@ && ($@ =~ /^$unblessed_error/), 'test 19');
     eval { sub {}->test() };
-    ok ($@ && ($@ =~ /^$unblessed_error/));
+    ok ($@ && ($@ =~ /^$unblessed_error/), 'test 20');
 }
 
 eval { $string->test() };

@@ -1,5 +1,10 @@
 Revision history for Perl extension autobox
 
+2.50  Mon May 19 17:39:22 2008
+    - add support for INTEGER, FLOAT, NUMBER and STRING
+        - added scalar.t
+    - updated documentation
+
 2.43  Thu May 15 21:14:08 2008
     - fix @isa bug
         - added t/isa.t

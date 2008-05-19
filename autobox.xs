@@ -11,11 +11,12 @@
 static PTABLE_t *AUTOBOX_OP_MAP = NULL;
 static U32 AUTOBOX_SCOPE_DEPTH = 0;
 static OP *(*autobox_old_ck_subr)(pTHX_ OP *op) = NULL;
+static SV * autobox_method_common(pTHX_ SV *meth, U32 *hashp); 
+static const char * autobox_type(pTHX_ SV * const sv, STRLEN *len);
 
 OP * autobox_ck_subr(pTHX_ OP *o);
 OP * autobox_method_named(pTHX);
 OP * autobox_method(pTHX);
-static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp); 
 
 OP * autobox_ck_subr(pTHX_ OP *o) {
     /*
@@ -137,6 +138,66 @@ OP* autobox_method_named(pTHX) {
     }
 }
 
+#define AUTOBOX_TYPE_RETURN(type) STMT_START { *len = (sizeof(type) - 1); return type; } STMT_END
+
+static const char *autobox_type(pTHX_ SV * const sv, STRLEN *len) {
+    switch (SvTYPE(sv)) {
+        case SVt_NULL:
+            AUTOBOX_TYPE_RETURN("UNDEF");
+        case SVt_IV:
+        case SVt_PVIV:
+            AUTOBOX_TYPE_RETURN("INTEGER");
+        case SVt_NV:
+        case SVt_PVNV:
+            AUTOBOX_TYPE_RETURN("FLOAT");
+        case SVt_RV:
+        case SVt_PV:
+        case SVt_PVMG:
+#ifdef SvVOK
+            if (SvVOK(sv)) {
+                AUTOBOX_TYPE_RETURN("VSTRING");
+            }
+#endif
+            if (SvROK(sv)) {
+                AUTOBOX_TYPE_RETURN("REF");
+            } else {
+                AUTOBOX_TYPE_RETURN("STRING");
+            }
+        case SVt_PVLV:
+            if (SvROK(sv)) {
+                AUTOBOX_TYPE_RETURN("REF");
+            } else if (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T') { /* tied lvalue */
+                if (SvIOK(sv)) {
+                    AUTOBOX_TYPE_RETURN("INTEGER");
+                } else if (SvNOK(sv)) {
+                    AUTOBOX_TYPE_RETURN("FLOAT");
+                } else {
+                    AUTOBOX_TYPE_RETURN("STRING");
+                }
+            } else {
+                AUTOBOX_TYPE_RETURN("LVALUE");
+            }
+        case SVt_PVAV:
+            AUTOBOX_TYPE_RETURN("ARRAY");
+        case SVt_PVHV:
+            AUTOBOX_TYPE_RETURN("HASH");
+        case SVt_PVCV:
+            AUTOBOX_TYPE_RETURN("CODE");
+        case SVt_PVGV:
+            AUTOBOX_TYPE_RETURN("GLOB");
+        case SVt_PVFM:
+            AUTOBOX_TYPE_RETURN("FORMAT");
+        case SVt_PVIO:
+            AUTOBOX_TYPE_RETURN("IO");
+#ifdef SVt_BIND
+        case SVt_BIND:
+            AUTOBOX_TYPE_RETURN("BIND");
+#endif
+        default:
+            AUTOBOX_TYPE_RETURN("UNKNOWN");
+    }
+}
+
 /* returns either the method, or NULL, meaning delegate to the original op */
 static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
     SV * const sv = *(PL_stack_base + TOPMARK + 1);
@@ -153,13 +214,21 @@ static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
         if (autobox_bindings) {
             const char * reftype; /* autobox_bindings key */
             SV **svp; /* pointer to autobox_bindings value */
+            STRLEN typelen = 0;
 
             /*
-             * the type is either the receiver's reftype() ("SCALAR" if it's not a ref), or UNDEF if
+             * the type is either the receiver's reftype(), a subtype of SCALAR if it's not a ref, or UNDEF if
              * it's not defined
              */
-            reftype = SvOK(sv) ? sv_reftype((SvROK(sv) ? SvRV(sv) : sv), 0) : "UNDEF";
-            svp = hv_fetch(autobox_bindings, reftype, strlen(reftype), 0);
+
+            if (SvOK(sv)) {
+                reftype = autobox_type(aTHX_ (SvROK(sv) ? SvRV(sv) : sv), &typelen);
+            } else {
+                reftype = "UNDEF";
+                typelen = sizeof("UNDEF") - 1;
+            }
+
+            svp = hv_fetch(autobox_bindings, reftype, typelen, 0);
 
             if (svp && SvOK(*svp)) {
                 SV * packsv = *svp;
@@ -168,7 +237,6 @@ static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
                 GV * gv;
                 const char * packname = SvPV_const(packsv, packlen);
 
-                /* NOTE: stash may be null, hope hv_fetch_ent and gv_fetchmethod can cope (it seems they can) */
                 stash = gv_stashpvn(packname, packlen, FALSE);
 
                 if (hashp) {
@@ -198,7 +266,7 @@ static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
     return NULL;
 }
 
-MODULE = autobox                PACKAGE = Autobox
+MODULE = autobox                PACKAGE = autobox
 
 PROTOTYPES: ENABLE
 
@@ -253,3 +321,11 @@ scope()
     PROTOTYPE:
     CODE: 
         XSRETURN_UV(PTR2UV(GvHV(PL_hintgv)));
+
+SV *
+type(SV * self, SV * sv)
+    CODE:
+        (void)(self); /* silence unused var warnings */
+        RETVAL = newSVpv(autobox_type(aTHX_ (SvROK(sv) ? SvRV(sv) : sv), &PL_na), 0);
+    OUTPUT:
+        RETVAL
