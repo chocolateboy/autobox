@@ -3,7 +3,6 @@
 use strict;
 use warnings;
 
-use blib;
 use Test::More tests => 60;
 
 sub INTEGER::inc { $_[0] + 1 }
@@ -16,7 +15,6 @@ my $integer = 42;
 my $float = 3.1415927;
 my $string = 'Hello';
 my $einc = qr{Can't call method "inc" without a package or object reference\b}; 
-my $ekeys = qr{Can't call method "keys" without a package or object reference\b}; 
 my $einc2 = qr{Can't locate object method "inc" via package "Hello"};
 
 {
@@ -146,6 +144,7 @@ my $einc2 = qr{Can't locate object method "inc" via package "Hello"};
 
     eval { $string->inc };
     like ($@, $einc2, '$string->inc');
+
     is (42->inc, 43, '42->inc');
     is ($integer->inc, 43, '$integer->inc');
     is (3.1415927->inc, 4.1415927, '3.1415927->inc');
@@ -155,9 +154,6 @@ my $einc2 = qr{Can't locate object method "inc" via package "Hello"};
 {
     use autobox SCALAR => 'SCALAR';
     no autobox qw(NUMBER);
-
-    is ("Hello"->inc, "Hellp", '"Hello"->inc');
-    is ($string->inc, "Hellp", '$string->inc');
 
     eval { 42->inc };
     like ($@, $einc, '42->inc');
@@ -170,6 +166,9 @@ my $einc2 = qr{Can't locate object method "inc" via package "Hello"};
 
     eval { $float->inc };
     like ($@, $einc, '$float->inc');
+
+    is ("Hello"->inc, "Hellp", '"Hello"->inc');
+    is ($string->inc, "Hellp", '$string->inc');
 }
 
 {

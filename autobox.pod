@@ -19,10 +19,6 @@ autobox - call methods on native types
     # strings
 
         my @list = 'SELECT * FROM foo'->list();
-
-        my $word = 'rubicund';
-        my $links = $word->google();
-
         my $greeting = "Hello, world!"->upper(); # "HELLO, WORLD!"
 
         $greeting->for_each(\&character_handler);
@@ -219,7 +215,7 @@ This facilitates one-liners and prototypes:
 However, using these default bindings is not recommended as there's no guarantee that another 
 piece of code won't trample over the same namespace/methods.
 
-=head2 Options
+=head1 OPTIONS
 
 A mapping from native types to their user-defined classes can be specified
 by passing a list of key/value pairs to the C<use autobox> statement.
@@ -289,9 +285,9 @@ specified type.
 
 =back
 
-=head3 VIRTUAL TYPES
+=head2 Virtual Types
 
-Rather than representing native types, the NUMBER and SCALAR keys function as macros or shortcuts which
+Rather than representing native types, the NUMBER and SCALAR options function as macros or shortcuts which
 create bindings for their scalar subtypes (INTEGER, FLOAT and STRING).
 
 Thus:
@@ -332,13 +328,13 @@ For instance:
         NUMBER  => 'MyNumber',
         SCALAR  => 'MyScalar';
 
-would result in the methods on the left being looked up (in order) in the classes on the right.
+would result in the methods on the left being looked up (in order) in the classes on the right:
 
     42->foo             -> [ MyInteger, MyNumber, MyScalar ]
     3.1415927->bar      -> [ MyNumber, MyScalar ]
     "Hello, world!->baz -> [ MyScalar ]
 
-=head3 UNDEF
+=head2 UNDEF
 
 The pseudotype, UNDEF, can be used to autobox undefined values. These are
 not autoboxed by default.
@@ -361,7 +357,7 @@ So does this:
 
     undef->foo(); # ok
 
-=head3 DEBUG
+=head2 DEBUG
 
 DEBUG exposes the current bindings for the scope in which C<use autobox> is called by means of a callback, or a
 static debugging function.
@@ -496,15 +492,13 @@ The C<defaults> method can also be used to enable autoboxing for new types such 
 
 =head2 type
 
-This method returns the type of its operand within autobox (which is essentially longhand for the type names
+This method returns the type of its argument within autobox (which is essentially longhand for the type names
 used within perl). This value is used by autobox to associate a method invocant with its designated classes. e.g.
 
     autobox->type("Hello, world!") # STRING
     autobox->type(42)              # INTEGER
     autobox->type([ ])             # ARRAY
     autobox->type(sub { })         # CODE
-
-&c.
 
 =head1 CAVEATS
 
@@ -519,6 +513,8 @@ is slightly slower than the equivalent method call on a string-like object, and 
     length("Hello, world!")
 
 =head2 Gotchas
+
+=head3 Precedence
 
 Due to Perl's precedence rules, some autoboxed literals may need to be parenthesized:
 
@@ -545,6 +541,8 @@ The same applies for signed integer and float literals:
     # this works
     my $range = (-10)->to(10);
 
+=head3 print BLOCK
+
 Perl's special-casing for the C<print BLOCK ...> syntax (see L<perlsub>) means that C<print { expression() } ...>
 (where the curly brackets denote an anonymous HASH ref) may require some further disambiguation:
 
@@ -562,7 +560,7 @@ Perl's special-casing for the C<print BLOCK ...> syntax (see L<perlsub>) means t
 
 In the latter case, the solution is to supply something
 other than a HASH ref literal as the first argument
-to print():
+to C<print()>:
 
     # e.g.
     print STDOUT { @_ }->foo() ? 1 : 0;
@@ -579,6 +577,8 @@ to print():
 
     # or even
     { @_ }->print_if_foo(1, 0); 
+
+=head3 UNIVERSAL
 
 Although C<can> and C<isa> are "overloaded" for autoboxed values, the C<VERSION> method isn't.
 Thus, while these work:
@@ -612,10 +612,35 @@ Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
 
     # error: Can't call method "import" on unblessed reference
     []->import()
+
+    autobox
+
+=head3 eval EXPR
+
+Like most pragmas autobox performs some of its operations at compile time, and,
+as a result, runtime string C<eval>s are not executed within its scope i.e. this
+doesn't work:
+
+    use autobox;
+
+    eval "42->foo";
+
+The workaround is to use autobox within the C<eval> e.g.
+
+    eval <<'EOS';
+        use autobox;
+        42->foo(); 
+    EOS
+
+Note that the C<eval BLOCK> form works as expected:
+
+    use autobox;
+    
+    eval { 42->foo() } # OK
         
 =head1 VERSION
 
-2.50
+2.51
 
 =head1 SEE ALSO
 

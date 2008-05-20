@@ -1,5 +1,11 @@
 Revision history for Perl extension autobox
 
+2.51  Tue May 20 10:40:32 2008
+    - fix type identification for former INTEGERs and FLOATs (thanks Mitchell N Charity)
+        - added type.t
+    - fix for perl 5.11 (thanks Andreas Koenig)
+    - document eval EXPR gotcha
+
 2.50  Mon May 19 17:39:22 2008
     - add support for INTEGER, FLOAT, NUMBER and STRING
         - added scalar.t

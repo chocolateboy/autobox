@@ -67,7 +67,7 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
                              *   are to copies (since the keys are just strings rather than full-fledged scalars).
                              *
                              * we don't want that (it results in the receiver being a reference to the last element
-                             * of the list), so we toggle the parentheses off while creating the reference
+                             * in the list), so we toggle the parentheses off while creating the reference
                              * then toggle them back on in case they're needed elsewhere
                              *
                              */
@@ -145,12 +145,24 @@ static const char *autobox_type(pTHX_ SV * const sv, STRLEN *len) {
         case SVt_NULL:
             AUTOBOX_TYPE_RETURN("UNDEF");
         case SVt_IV:
-        case SVt_PVIV:
             AUTOBOX_TYPE_RETURN("INTEGER");
+        case SVt_PVIV:
+            if (SvIOK(sv)) {
+                AUTOBOX_TYPE_RETURN("INTEGER");
+            } else {
+                AUTOBOX_TYPE_RETURN("STRING");
+            }
         case SVt_NV:
-        case SVt_PVNV:
             AUTOBOX_TYPE_RETURN("FLOAT");
+        case SVt_PVNV:
+            if (SvNOK(sv)) {
+                AUTOBOX_TYPE_RETURN("FLOAT");
+            } else {
+                AUTOBOX_TYPE_RETURN("STRING");
+            }
+#ifdef SVt_RV /* no longer defined by default if PERL_CORE is defined */
         case SVt_RV:
+#endif
         case SVt_PV:
         case SVt_PVMG:
 #ifdef SvVOK
@@ -192,6 +204,10 @@ static const char *autobox_type(pTHX_ SV * const sv, STRLEN *len) {
 #ifdef SVt_BIND
         case SVt_BIND:
             AUTOBOX_TYPE_RETURN("BIND");
+#endif
+#ifdef SVt_REGEXP
+        case SVt_REGEXP:
+            AUTOBOX_TYPE_RETURN("REGEXP");
 #endif
         default:
             AUTOBOX_TYPE_RETURN("UNKNOWN");
@@ -325,7 +341,11 @@ scope()
 SV *
 type(SV * self, SV * sv)
     CODE:
-        (void)(self); /* silence unused var warnings */
-        RETVAL = newSVpv(autobox_type(aTHX_ (SvROK(sv) ? SvRV(sv) : sv), &PL_na), 0);
+        (void)(self); /* silence unused var warning */
+        if (sv) {
+            RETVAL = newSVpv(autobox_type(aTHX_ (SvROK(sv) ? SvRV(sv) : sv), &PL_na), 0);
+        } else {
+            RETVAL = newSVpv("UNDEF", 0);
+        }
     OUTPUT:
         RETVAL

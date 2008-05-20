@@ -11,7 +11,7 @@ use Scalar::Util;
 use Scope::Guard;
 use Storable;
 
-our $VERSION = '2.50';
+our $VERSION = '2.51';
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -121,7 +121,7 @@ sub _get_isa($) {
 # but that requires each (frozen) hash to be cached; at best, it may not be much of a win, and at
 # worst it will increase bloat
 
-sub _register ($) {
+sub _install ($) {
     my $bindings = shift;
     $^H{autobox} = $bindings;
     $BINDINGS_CACHE->{$bindings} = $bindings; # keep the $bindings hash alive
@@ -168,7 +168,7 @@ sub defaults {
     return {
         ARRAY   => 'ARRAY',
         CODE    => 'CODE',
-        DEFAULT => undef,    # virtual
+        DEFAULT => undef,
         FLOAT   => undef,
         HASH    => 'HASH',
         INTEGER => undef,
@@ -283,7 +283,7 @@ sub import {
         
         $value = [ $value ] unless (_isa($value, 'ARRAY'));
 
-        # delete empty arrays; empty arrays e.g. use autobox SCALAR => []
+        # delete empty arrays e.g. use autobox SCALAR => []
         if (@$value == 0) {
             delete $bindings->{$type};
         } else {
@@ -304,11 +304,11 @@ sub import {
     }
 
     # install the specified bindings in the current scope
-    _register($bindings);
+    _install($bindings);
 
     # this is %^H as an integer - it changes as scopes are entered/exited
     # we don't need to stack/unstack it in %^H as %^H itself takes care of that
-    # note: we need to call this *after* %^H is referenced, and possibly created, above
+    # note: we need to call this *after* %^H is referenced (and possibly created) above
     my $scope = autobox::scope();
     my $old_scope = exists($^H{autobox_scope})? $^H{autobox_scope} : 0;
     my $new_scope; # is this a new (top-level or nested) scope?
@@ -327,11 +327,11 @@ sub import {
     # This sub is called when this scope's $^H{autobox_leavescope} is deleted, usually when
     # %^H is destroyed at the end of the scope, but possibly directly in unimport()
     #
-    # autobox::enterscope splices in the autobox method call checker and method call op if they're not already
-    # active
+    # autobox::enterscope splices in the autobox method call checker and method call op
+    # if they're not already active
     #
-    # autobox::leavescope performs the necessary housekeeping to ensure that the default checker and op are restored
-    # when autobox is no longer in scope
+    # autobox::leavescope performs the necessary housekeeping to ensure that the default
+    # checker and op are restored when autobox is no longer in scope
 
     my $leave_scope = sub {
         autobox::leavescope();
@@ -345,7 +345,7 @@ sub import {
 
 # delete one or more bindings; if none remain, disable autobox in the current scope
 #
-# note: if bindings remain, we need to create a new hash (a clone of the current
+# note: if bindings remain, we need to create a new hash (initially a clone of the current
 # hash) so that the previous hash (if any) is not contaminated by new deletions(s)
 #
 #   use autobox;
@@ -394,7 +394,7 @@ sub unimport {
     }
 
     if (%$bindings) {
-        _register($bindings);
+        _install($bindings);
     } else { # remove all traces of autobox from the current scope
         $^H &= ~0x120000; # unset HINT_LOCALIZE_HH + the additional bit
         delete $^H{autobox};

@@ -19,4 +19,5 @@ t/merge.t
 t/name.t
 t/pod.t
 t/scalar.t
+t/type.t
 t/unmerge.t

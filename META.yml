@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:                autobox
-version:             2.50
+version:             2.51
 abstract:            call methods on native types
 license:             perl
 author:              
