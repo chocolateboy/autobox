@@ -153,10 +153,16 @@ static const char *autobox_type(pTHX_ SV * const sv, STRLEN *len) {
                 AUTOBOX_TYPE_RETURN("STRING");
             }
         case SVt_NV:
-            AUTOBOX_TYPE_RETURN("FLOAT");
+            if (SvIOK(sv)) {
+                AUTOBOX_TYPE_RETURN("INTEGER");
+            } else {
+                AUTOBOX_TYPE_RETURN("FLOAT");
+            }
         case SVt_PVNV:
             if (SvNOK(sv)) {
                 AUTOBOX_TYPE_RETURN("FLOAT");
+            } else if (SvIOK(sv)) {
+                AUTOBOX_TYPE_RETURN("INTEGER");
             } else {
                 AUTOBOX_TYPE_RETURN("STRING");
             }
@@ -340,12 +346,16 @@ scope()
 
 SV *
 type(SV * self, SV * sv)
+    PREINIT:
+        STRLEN len = 0;
+        const char *type;
     CODE:
         (void)(self); /* silence unused var warning */
-        if (sv) {
-            RETVAL = newSVpv(autobox_type(aTHX_ (SvROK(sv) ? SvRV(sv) : sv), &PL_na), 0);
+        if (SvOK(sv)) {
+            type = autobox_type(aTHX_ (SvROK(sv) ? SvRV(sv) : sv), &len);
+            RETVAL = newSVpv(type, len);
         } else {
-            RETVAL = newSVpv("UNDEF", 0);
+            RETVAL = newSVpv("UNDEF", sizeof("UNDEF") - 1);
         }
     OUTPUT:
         RETVAL

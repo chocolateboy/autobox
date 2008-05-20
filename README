@@ -1,4 +1,4 @@
-autobox version 2.51
+autobox version 2.52
 ====================
 
 The autobox pragma allows methods to be called on integers, floats, strings, arrays,

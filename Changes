@@ -1,5 +1,8 @@
 Revision history for Perl extension autobox
 
+2.52  Tue May 20 12:24:01 2008
+    - more type fixes
+
 2.51  Tue May 20 10:40:32 2008
     - fix type identification for former INTEGERs and FLOATs (thanks Mitchell N Charity)
         - added type.t
