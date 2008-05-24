@@ -5,9 +5,7 @@ use warnings;
 
 use Test::More tests => 23;
 
-use autobox DEFAULT => __PACKAGE__, UNDEF => __PACKAGE__;
-
-sub type { autobox->type(shift) }
+use autobox DEFAULT => 'autobox::universal', UNDEF => 'autobox::universal';
 
 my $undef;
 my $integer = 42;

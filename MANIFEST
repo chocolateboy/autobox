@@ -1,5 +1,3 @@
-autobox.pm
-autobox.pod
 autobox.xs
 Changes
 Makefile.PL
@@ -8,6 +6,9 @@ META.yml
 ppport.h
 ptable.h
 README
+lib/autobox.pm
+lib/autobox.pod
+lib/autobox/universal.pm
 t/all.t
 t/autobox_scope_1.pm
 t/autobox_scope_2.pm

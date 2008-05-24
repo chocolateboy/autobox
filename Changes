@@ -1,5 +1,14 @@
 Revision history for Perl extension autobox
 
+2.53  Sat May 24 22:19:45 2008
+    - add support for UNIVERSAL virtual type
+        - added t/universal.t
+    - moved autobox::type method to autobox::universal::type subroutine
+        - added export.t
+    - added t/default.t
+    - portability fix for non-gcc compilers (thanks chris)
+    - misc code/documentation fixes/cleanups
+
 2.52  Tue May 20 12:24:01 2008
     - more type fixes
 

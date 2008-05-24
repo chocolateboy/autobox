@@ -296,7 +296,7 @@ BOOT:
 AUTOBOX_OP_MAP = PTABLE_new(); if (!AUTOBOX_OP_MAP) Perl_croak(aTHX_ "Can't initialize op map");
 
 void
-enterscope()
+_enter()
     PROTOTYPE:
     CODE: 
         if (AUTOBOX_SCOPE_DEPTH > 0) {
@@ -313,7 +313,7 @@ enterscope()
         }
 
 void
-leavescope()
+_leave()
     PROTOTYPE:
     CODE: 
         if (AUTOBOX_SCOPE_DEPTH == 0) {
@@ -328,6 +328,12 @@ leavescope()
         }
 
 void
+_scope()
+    PROTOTYPE:
+    CODE: 
+        XSRETURN_UV(PTR2UV(GvHV(PL_hintgv)));
+
+void
 END()
     PROTOTYPE:
     CODE: 
@@ -338,19 +344,15 @@ END()
         PTABLE_free(AUTOBOX_OP_MAP);
         AUTOBOX_OP_MAP = NULL;
 
-void
-scope()
-    PROTOTYPE:
-    CODE: 
-        XSRETURN_UV(PTR2UV(GvHV(PL_hintgv)));
+MODULE = autobox                PACKAGE = autobox::universal
 
 SV *
-type(SV * self, SV * sv)
+type(SV * sv)
+    PROTOTYPE:$
     PREINIT:
         STRLEN len = 0;
         const char *type;
     CODE:
-        (void)(self); /* silence unused var warning */
         if (SvOK(sv)) {
             type = autobox_type(aTHX_ (SvROK(sv) ? SvRV(sv) : sv), &len);
             RETVAL = newSVpv(type, len);
