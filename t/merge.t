@@ -129,7 +129,7 @@ BEGIN {
           'CODE' => [ qw(MyDefault2) ],
           'HASH' => [ qw(MyHash1 MyDefault2) ],
           'STRING' => [ qw(MyScalar1 MyScalar2 MyDefault2 MyScalar5) ],
-          'UNDEF' => [ qw(MyUndef5) ]
+          'UNDEF' => [ qw(MyUndef1) ]
         },
 
         # 15 - new scope with "no autobox" (line 285)
@@ -277,7 +277,7 @@ sub sub3 {
     use autobox DEFAULT => 'MyDefault2', DEBUG => \&debug;
     use autobox DEFAULT => 'MyDefault2', DEBUG => \&debug;
     use autobox SCALAR  => 'MyScalar5',  DEBUG => \&debug;
-    use autobox UNDEF   => 'MyUndef5',   DEBUG => \&debug;
+    use autobox UNDEF   => 'MyUndef1',   DEBUG => \&debug;
 }
 
 {

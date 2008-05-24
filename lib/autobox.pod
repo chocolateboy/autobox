@@ -236,7 +236,7 @@ The following example shows the range of valid arguments:
         DEFAULT   => ...,                           # any of the 3 value types above
         DEBUG     => ...;                           # boolean or coderef
 
-The INTEGER, FLOAT, NUMBER, STRING, SCALAR, ARRAY, HASH, CODE, UNDEF, DEFAULT and UNIVERSAL keys can take
+The INTEGER, FLOAT, NUMBER, STRING, SCALAR, ARRAY, HASH, CODE, UNDEF, DEFAULT and UNIVERSAL options can take
 three different types of value:
 
 =over
@@ -273,10 +273,10 @@ specified type.
 
 =head2 DEFAULT
 
-The C<DEFAULT> option specifies bindings for any of the four default types not supplied in the
-C<use autobox> statement. As with the other options, the C<value> corresponding to the C<DEFAULT>
-C<key> can be a class name, a namespace, or a reference to an array containing one or more class names
-and/or namespaces.
+The C<DEFAULT> option specifies bindings for any of the four default types (SCALAR, ARRAY, HASH and CODE)
+not supplied in the C<use autobox> statement. As with the other options, the C<value> corresponding to
+the C<DEFAULT> C<key> can be a class name, a namespace, or a reference to an array containing one or
+more class names and/or namespaces.
 
 Thus:
 
@@ -357,10 +357,10 @@ So does this:
 
     undef->foo(); # ok
 
-=head2 Virtual Types
+=head2 NUMBER, SCALAR and UNIVERSAL
 
-Rather than representing native types, the NUMBER, SCALAR and UNIVERSAL options function as macros or
-shortcuts which create bindings for their subtypes. The type hierarchy is as follows:
+The virtual types NUMBER, SCALAR and UNIVERSAL function as macros or shortcuts which create
+bindings for their subtypes. The type hierarchy is as follows:
 
   UNIVERSAL -+
              |
@@ -401,7 +401,7 @@ is equivalent to:
         FLOAT   => 'MyScalar',
         STRING  => 'MyScalar';
 
-Virtual types can also be passed to C<unimport> via the C<no autobox> syntax. These disable autoboxing
+Virtual types can also be passed to C<unimport> via the C<no autobox> syntax. This disables autoboxing
 for the corresponding subtypes e.g.
 
     no autobox qw(NUMBER);
@@ -434,11 +434,7 @@ is equivalent to:
 
   use autobox
       INTEGER => [ 'MyDefault', 'MyUniversal' ],
-      FLOAT   => [ 'MyDefault', 'MyUniversal' ],
-      STRING  => [ 'MyDefault', 'MyUniversal' ],
-      ARRAY   => [ 'MyDefault', 'MyUniversal' ],
-      HASH    => [ 'MyDefault', 'MyUniversal' ],
-      CODE    => [ 'MyDefault', 'MyUniversal' ];
+      FLOAT   => [ 'MyDefault', 'MyUniversal' ], # ... &c.
 
 =head2 DEBUG
 
@@ -481,7 +477,7 @@ However, its static method, C<import>, can be used to implement C<autobox> exten
 lexically scoped modules that provide C<autobox> bindings for one or more native types without requiring
 calling code to C<use autobox>.
 
-This is done by inheriting from C<autobox> and overriding C<import>. This allows extensions to effectively
+This is done by subclassing C<autobox> and overriding C<import>. This allows extensions to effectively
 translate C<use MyModule> into a bespoke C<use autobox> call. e.g.:
 
     package String::Trim;
@@ -490,7 +486,7 @@ translate C<use MyModule> into a bespoke C<use autobox> call. e.g.:
 
     sub import {
         my $class = shift;
-        $class->SUPER::import(SCALAR => 'String::Trim::Scalar');
+        $class->SUPER::import(STRING => 'String::Trim::Scalar');
     }
 
     package String::Trim::Scalar;
@@ -519,7 +515,7 @@ lexical scope. e.g.:
 =head1 EXPORTS
 
 Although C<autobox> doesn't export anything, it includes an additional module, C<autobox::universal>,
-that exports a single subroutine, C<type>.
+which exports a single subroutine, C<type>.
 
 =head2 type
 
@@ -679,7 +675,7 @@ Note that the C<eval BLOCK> form works as expected:
         
 =head1 VERSION
 
-2.53
+2.54
 
 =head1 SEE ALSO
 
