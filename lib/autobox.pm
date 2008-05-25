@@ -11,7 +11,7 @@ use Scalar::Util;
 use Scope::Guard;
 use Storable;
 
-our $VERSION = '2.54';
+our $VERSION = '2.55';
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -35,10 +35,10 @@ my %TYPES = (
     ARRAY     => 1,
     HASH      => 1,
     CODE      => 1,
-    UNIVERSAL => 0,
+    UNIVERSAL => 0
 );
 
-# type hierarchy: keys are roots, values are (depth, children) pairs
+# type hierarchy: keys are parents, values are (depth, children) pairs
 my %ISA = (
     UNIVERSAL => [ 0, [ qw(SCALAR ARRAY HASH CODE) ] ],
     SCALAR    => [ 1, [ qw(STRING NUMBER) ] ],
@@ -50,7 +50,7 @@ my %DEFAULT = (
     SCALAR => 'SCALAR',
     ARRAY  => 'ARRAY',
     HASH   => 'HASH',
-    CODE   => 'CODE',
+    CODE   => 'CODE'
 );
 
 # reinvent List::MoreUtils::uniq to keep the dependencies light - return a reference
@@ -71,7 +71,7 @@ sub _uniq($) {
 # create a shim class - actual methods are implemented by the classes in its @ISA
 #
 # as an optimization, return the previously-generated class
-# if we've seen the same (canonicalized) type/isa combination before
+# if we've seen the same (canonicalized) @isa before
 sub _generate_class($) {
     my $isa = _uniq(shift);
 
@@ -84,7 +84,7 @@ sub _generate_class($) {
         return $class;
     }
 
-    my $key = ::Storable::freeze($isa);
+    my $key = Storable::freeze($isa);
 
     return $CLASS_CACHE->{$key} ||= do {
         my $class = sprintf('autobox::shim::<%d>', ++$SEQ);
@@ -108,10 +108,10 @@ sub _universalize ($) {
 }
 
 # pretty-print the bindings hash by showing its values as the inherited classes rather than the synthetic class
-sub _annotate($) {
-    my $hash = { %{ shift() } }; # clone the hash to isolate it from the actual bindings hash
+sub _pretty_print($) {
+    my $hash = { %{ shift() } }; # clone the hash to isolate it from the original
 
-    # reverse() turns a hash that maps a type/isa signature to a class name into a hash that maps
+    # reverse() turns a hash that maps an isa signature to a class name into a hash that maps
     # a class name into a boolean
     my %synthetic = reverse(%$CLASS_CACHE);
 
@@ -209,7 +209,7 @@ sub import {
         $default = [ $default ] unless (_isa($default, 'ARRAY')); # no need to clone as we flatten it each time
 
         for my $type (keys %DEFAULT) {
-            # don't default if a binding's already been supplied; this may include an undef value meaning
+            # don't default if a binding has already been supplied; this may include an undef value meaning
             # "don't default this type" e.g.
             #
             #     use autobox
@@ -224,21 +224,21 @@ sub import {
     }
 
     # expand the virtual type "macros" from the root to the leaves
-    for my $virtual (sort { $ISA{$a}->[0] <=> $ISA{$b}->[0] } keys %ISA) {
-        next unless ($args{$virtual});
+    for my $vtype (sort { $ISA{$a}->[0] <=> $ISA{$b}->[0] } keys %ISA) {
+        next unless ($args{$vtype});
 
-        my @types = @{$ISA{$virtual}->[1]};
+        my @types = @{$ISA{$vtype}->[1]};
 
         for my $type (@types) {
-            if (_isa($args{$virtual}, 'ARRAY')) {
-                push @{$args{$type}}, map { _expand_namespace($_, $virtual) } @{$args{$virtual}};
+            if (_isa($args{$vtype}, 'ARRAY')) {
+                push @{$args{$type}}, map { _expand_namespace($_, $vtype) } @{$args{$vtype}};
             } else {
-                # _expand_namespace returns an empty list if $args{$virtual} is undef (or '')
-                push @{$args{$type}}, _expand_namespace($args{$virtual}, $virtual);
+                # _expand_namespace returns an empty list if $args{$vtype} is undef (or '')
+                push @{$args{$type}}, _expand_namespace($args{$vtype}, $vtype);
             }
         }
 
-        delete $args{$virtual};
+        delete $args{$vtype};
     }
 
     my $bindings; # custom typemap
@@ -255,7 +255,7 @@ sub import {
     # sanity check %args, expand the namespace prefixes into class names,
     # and copy values to the $bindings hash
 
-    my %synthetic = reverse (%$CLASS_CACHE); # synthetic class name => bool - see _annotate
+    my %synthetic = reverse (%$CLASS_CACHE); # synthetic class name => bool - see _pretty_print
 
     for my $type (keys %args) {
         # we've handled the virtual types, so we only need to check that this is a valid (real) type
@@ -270,7 +270,7 @@ sub import {
         # perform namespace expansion; dups are removed in _generate_class below
         push @isa, map { _expand_namespace($_, $type) } @{$args{$type}};
 
-        $bindings->{$type} = [ @isa ]; # assign the namespace-expanded @isa to our $bindings hash
+        $bindings->{$type} = [ @isa ]; # assign the (possibly) new @isa for this type
     }
 
     # replace each array ref of classes with the name of the generated class.
@@ -279,14 +279,14 @@ sub import {
     # is created 
 
     for my $type (keys %$bindings) {
-        my $value = $bindings->{$type};
+        my $isa = $bindings->{$type};
 
         # delete empty arrays e.g. use autobox SCALAR => []
-        if (@$value == 0) {
+        if (@$isa == 0) {
             delete $bindings->{$type};
         } else {
             # associate the synthetic/single class with the specified type
-            $bindings->{$type} = _generate_class($value); 
+            $bindings->{$type} = _generate_class($isa); 
         }
     }
 
@@ -296,11 +296,6 @@ sub import {
     # It needs to be set unconditionally because it may have been unset in unimport
 
     $^H |= 0x120000; # set HINT_LOCALIZE_HH + an unused bit to work around a %^H bug
-
-    if ($debug) {
-        $debug = \&_debug unless (_isa($debug, 'CODE'));
-        $debug->(_annotate($bindings));
-    }
 
     # install the specified bindings in the current scope
     _install($bindings);
@@ -321,6 +316,11 @@ sub import {
     }
 
     # warn "OLD ($old_scope) => NEW ($scope): $new_scope ", join(':', (caller(1))[0 .. 2]), $/;
+
+    if ($debug) {
+        $debug = \&_debug unless (_isa($debug, 'CODE'));
+        $debug->(_pretty_print($bindings));
+    }
 
     return unless ($new_scope);
 
@@ -368,14 +368,14 @@ sub unimport {
         my %args = map { $_ => 1 } @args;
 
         # expand any virtual type "macros"
-        for my $virtual (sort { $ISA{$a}->[0] <=> $ISA{$b}->[0] } keys %ISA) {
-            next unless ($args{$virtual});
+        for my $vtype (sort { $ISA{$a}->[0] <=> $ISA{$b}->[0] } keys %ISA) {
+            next unless ($args{$vtype});
 
             # we could delete the types directly from $bindings here, but we may as well pipe them
             # through the option checker below to ensure correctness
-            $args{$_} = 1 for (@{$ISA{$virtual}->[1]});
+            $args{$_} = 1 for (@{$ISA{$vtype}->[1]});
 
-            delete $args{$virtual};
+            delete $args{$vtype};
         }
 
         for my $type (keys %args) {
@@ -396,3 +396,5 @@ sub unimport {
         delete $^H{autobox_leave}; # triggers the leave handler
     }
 }
+
+1;

@@ -1,4 +1,5 @@
 autobox.xs
+Changes
 lib/autobox.pm
 lib/autobox.pod
 lib/autobox/universal.pm
