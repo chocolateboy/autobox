@@ -159,10 +159,11 @@ static const char *autobox_type(pTHX_ SV * const sv, STRLEN *len) {
                 AUTOBOX_TYPE_RETURN("FLOAT");
             }
         case SVt_PVNV:
-            if (SvNOK(sv)) {
-                AUTOBOX_TYPE_RETURN("FLOAT");
-            } else if (SvIOK(sv)) {
+	    /* integer before float: https://rt.cpan.org/Ticket/Display.html?id=46814 */
+            if (SvIOK(sv)) {
                 AUTOBOX_TYPE_RETURN("INTEGER");
+            } else if (SvNOK(sv)) {
+                AUTOBOX_TYPE_RETURN("FLOAT");
             } else {
                 AUTOBOX_TYPE_RETURN("STRING");
             }
@@ -225,7 +226,8 @@ static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
     SV * const sv = *(PL_stack_base + TOPMARK + 1);
 
     /* if autobox is enabled (in scope) for this op and the receiver isn't an object... */
-    if ((PL_op->op_flags & OPf_SPECIAL) && !(SvOBJECT(SvROK(sv) ? SvRV(sv) : sv))) {
+    /* don't use sv_isobject - we don't want to call SvGETMAGIC twice */
+    if ((PL_op->op_flags & OPf_SPECIAL) && ((!SvROK(sv)) || !SvOBJECT(SvRV(sv)))) {
         HV * autobox_bindings;
 
         SvGETMAGIC(sv);

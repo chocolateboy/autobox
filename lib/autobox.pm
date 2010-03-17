@@ -11,7 +11,7 @@ use Scalar::Util;
 use Scope::Guard;
 use Storable;
 
-our $VERSION = '2.55';
+our $VERSION = '2.70';
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -80,30 +80,30 @@ sub _generate_class($) {
     # rather than in the ISA hierarchy with its attendant AUTOLOAD-related overhead
     if (@$isa == 1) {
         my $class = $isa->[0];
-        _universalize($class); # nop if it's already been universalized
+        _make_class_accessor($class); # nop if it's already been universalized
         return $class;
     }
 
     my $key = Storable::freeze($isa);
 
     return $CLASS_CACHE->{$key} ||= do {
-        my $class = sprintf('autobox::shim::<%d>', ++$SEQ);
+        my $class = sprintf('autobox::_shim_%d_', ++$SEQ);
         my $synthetic_class_isa = _get_isa($class); # i.e. autovivify
 
         @$synthetic_class_isa = @$isa;
-        _universalize($class);
+        _make_class_accessor($class);
         $class;
     };
 }
 
-# make can() and isa() work as expected for autoboxed values by calling the method on their associated class
-sub _universalize ($) {
+# expose the autobox class (for can, isa &c.)
+# https://rt.cpan.org/Ticket/Display.html?id=55565
+sub _make_class_accessor ($) {
     my $class = shift;
     return unless (defined $class);
     {
         no strict 'refs';
-        *{"$class\::can"} = sub { shift; UNIVERSAL::can($class, @_) } unless (*{"$class\::can"}{CODE});
-        *{"$class\::isa"} = sub { shift; UNIVERSAL::isa($class, @_) } unless (*{"$class\::isa"}{CODE});
+        *{"$class\::autobox_class"} = sub { $class } unless (*{"$class\::autobox_class"}{CODE});
     }
 }
 

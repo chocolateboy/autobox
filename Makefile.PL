@@ -1,5 +1,8 @@
 use 5.008;
 
+use strict;
+use warnings;
+
 use ExtUtils::MakeMaker;
 use Config;
 
@@ -21,7 +24,7 @@ WriteMakefile(
         'Scope::Guard'   => '0.03',
     },
     ABSTRACT_FROM        => 'lib/autobox.pod',
-    AUTHOR               => 'chocolateboy <chocolate.boy@email.com>',
+    AUTHOR               => 'chocolateboy <chocolate@cpan.org>',
     INC                  => '-I.',
     OPTIMIZE             => $optimize,
     ($ExtUtils::MakeMaker::VERSION >= 6.31 ? (LICENSE => 'perl') : ()),

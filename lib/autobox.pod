@@ -38,10 +38,10 @@ autobox - call methods on native types
         my $plus_five = (\&add)->curry()->(5);
         my $minus_three = sub { $_[0] - $_[1] }->reverse->curry->(3);
 
-    # can() and isa() work as expected
+    # can, isa, VERSION, import and unimport can be accessed via autobox_class
 
-        if ("Hello, world!"->can('foo')) ...
-        if (3.1415927->isa('SCALAR')) ...
+        42->autobox_class->isa('MyNumber')
+        say []->autobox_class->VERSION
 
 =head1 DESCRIPTION
 
@@ -514,10 +514,17 @@ lexical scope. e.g.:
 
 =head1 EXPORTS
 
-Although C<autobox> doesn't export anything, it includes an additional module, C<autobox::universal>,
-which exports a single subroutine, C<type>.
+=head2 autobox_class
+
+C<autobox> makes a single method available to autoboxed types: C<autobox_class>. This can be used to
+call C<isa>, C<can>, C<VERSION>, C<import> and C<unimport>. e.g.
+
+    if (42->autobox_class->isa('SCALAR')) ...
+    if (sub { ... }->autobox_class->can('curry')) ...
 
 =head2 type
+
+C<autobox> includes an additional module, C<autobox::universal>, which exports a single subroutine, C<type>.
 
 This sub returns the type of its argument within C<autobox> (which is essentially longhand for the type names
 used within perl). This value is used by C<autobox> to associate a method invocant with its designated classes. e.g.
@@ -526,7 +533,7 @@ used within perl). This value is used by C<autobox> to associate a method invoca
 
     type("Hello, world!") # STRING
     type(42)              # INTEGER
-    type([ ])             # ARRAY
+    type([])              # ARRAY
     type(sub { })         # CODE
 
 C<autobox::universal> is loaded automatically by C<autobox>, and, as its name suggests, can be used to install
@@ -616,40 +623,6 @@ to C<print()>:
     # or even
     { @_ }->print_if_foo(1, 0); 
 
-=head3 VERSION, import and unimport
-
-Although C<can> and C<isa> work as expected for autoboxed values, the C<VERSION> method doesn't.
-Thus, while these work:
-
-    [ ... ]->can('pop')
-
-    3.1415->isa('MyScalar')
-
-This doesn't:
-
-    use MyScalar 1.23;
-    use autobox SCALAR => 'MyScalar';
-
-    print "Hello, world!"->VERSION();
-
-Though, of course:
-
-    print MyScalar->VERSION();
-
-and
-        
-    print $MyScalar::VERSION;
-
-continue to work.
-
-Likewise, C<import> and C<unimport> are unaffected by the autobox pragma:
-
-    # equivalent to Foo->import() rather than MyScalar->import('Foo')
-    'Foo'->import()
-
-    # error: Can't call method "import" on unblessed reference
-    []->import()
-
 =head3 eval EXPR
 
 Like most pragmas autobox performs some of its operations at compile time, and,
@@ -675,37 +648,29 @@ Note that the C<eval BLOCK> form works as expected:
         
 =head1 VERSION
 
-2.55
+2.70
 
 =head1 SEE ALSO
 
 =over
 
-=item * L<autobox::Closure::Attributes|autobox::Closure::Attributes>
-
 =item * L<autobox::Core|autobox::Core>
-
-=item * L<autobox::DateTime::Duration|autobox::DateTime::Duration>
-
-=item * L<autobox::Encode|autobox::Encode>
 
 =item * L<Moose::Autobox>
 
-=item * L<Perl6::Contexts|Perl6::Contexts>
+=item * L<perl5i|perl5i>
 
 =item * L<Scalar::Properties|Scalar::Properties>
-
-=item * L<Shell::Autobox|Shell::Autobox>
 
 =back
 
 =head1 AUTHOR
     
-chocolateboy <chocolate.boy@email.com>
+chocolateboy <chocolate@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2003-2008, chocolateboy.
+Copyright (c) 2003-2010, chocolateboy.
 
 This module is free software. It may be used, redistributed
 and/or modified under the same terms as Perl itself.
