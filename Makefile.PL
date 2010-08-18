@@ -6,14 +6,15 @@ use warnings;
 use ExtUtils::MakeMaker;
 use Config;
 
-my $optimize;
+my $OPTIMIZE;
 
 if ($Config{gccversion}) {
-    $optimize = '-O3 -Wall';
+    $OPTIMIZE = '-O3 -Wall';
+    $OPTIMIZE .= ' -g -Wextra -Wdeclaration-after-statement' if (-d 'dev');
 } elsif ($Config{osname} eq 'MSWin32') {
-    $optimize = '-O2 -W4';
+    $OPTIMIZE = '-O2 -W4';
 } else {
-    $optimize = $Config{optimize};
+    $OPTIMIZE = $Config{optimize};
 }
 
 WriteMakefile(
@@ -21,11 +22,19 @@ WriteMakefile(
     VERSION_FROM    => 'lib/autobox.pm',
     INSTALLDIRS     => 'perl',
     PREREQ_PM       => {
-        'Scope::Guard'   => '0.03',
+        'Scope::Guard'   => '0.20',
     },
     ABSTRACT_FROM        => 'lib/autobox.pod',
     AUTHOR               => 'chocolateboy <chocolate@cpan.org>',
     INC                  => '-I.',
-    OPTIMIZE             => $optimize,
+    OPTIMIZE             => $OPTIMIZE,
     ($ExtUtils::MakeMaker::VERSION >= 6.31 ? (LICENSE => 'perl') : ()),
+    ($ExtUtils::MakeMaker::VERSION >= 6.46 ?
+        (META_MERGE => {
+            resources => {
+                repository => 'http://github.com/chocolateboy/autobox',
+            },
+        })
+        : ()
+    ),
 );
