@@ -1,5 +1,8 @@
 Revision history for Perl extension autobox
 
+2.71  Thu Sep 23 02:28:10 2010
+    - fix for recent perls: remove cargo-cultism
+
 2.70  Wed Mar 17 19:27:44 2010
     - replace autobox_can and autobox_isa with autobox_class
       this also fixes import, unimport and VERSION

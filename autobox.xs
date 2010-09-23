@@ -96,7 +96,7 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
         }
     }
 
-    return CALL_FPTR(autobox_old_ck_subr)(aTHX_ o);
+    return autobox_old_ck_subr(aTHX_ o);
 }
 
 OP* autobox_method(pTHX) {
@@ -159,7 +159,7 @@ static const char *autobox_type(pTHX_ SV * const sv, STRLEN *len) {
                 AUTOBOX_TYPE_RETURN("FLOAT");
             }
         case SVt_PVNV:
-	    /* integer before float: https://rt.cpan.org/Ticket/Display.html?id=46814 */
+            /* integer before float: https://rt.cpan.org/Ticket/Display.html?id=46814 */
             if (SvIOK(sv)) {
                 AUTOBOX_TYPE_RETURN("INTEGER");
             } else if (SvNOK(sv)) {
