@@ -11,7 +11,7 @@ use Scalar::Util;
 use Scope::Guard;
 use Storable;
 
-our $VERSION = '2.71';
+our $VERSION = '2.72';
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -295,7 +295,7 @@ sub import {
     #
     # It needs to be set unconditionally because it may have been unset in unimport
 
-    $^H |= 0x120000; # set HINT_LOCALIZE_HH + an unused bit to work around a %^H bug
+    $^H |= 0x80020000; # set HINT_LOCALIZE_HH + an unused bit to work around a %^H bug
 
     # install the specified bindings in the current scope
     _install($bindings);
@@ -390,7 +390,7 @@ sub unimport {
     if (%$bindings) {
         _install($bindings);
     } else { # remove all traces of autobox from the current scope
-        $^H &= ~0x120000; # unset HINT_LOCALIZE_HH + the additional bit
+        $^H &= ~0x80020000; # unset HINT_LOCALIZE_HH + the additional bit
         delete $^H{autobox};
         delete $^H{autobox_scope};
         delete $^H{autobox_leave}; # triggers the leave handler

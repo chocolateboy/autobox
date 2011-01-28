@@ -1,5 +1,8 @@
 Revision history for Perl extension autobox
 
+2.72  Fri Jan 28 12:16:34 2011
+    - fix PL_hints conflict with HINT_RE_TAINT (thanks, Peter Rabbitson)
+
 2.71  Thu Sep 23 02:28:10 2010
     - fix for recent perls: remove cargo-cultism
 

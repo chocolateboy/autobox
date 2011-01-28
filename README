@@ -1,4 +1,4 @@
-autobox version 2.71
+autobox version 2.72
 ====================
 
 The autobox pragma allows methods to be called on integers, floats, strings, arrays,
@@ -33,4 +33,4 @@ COPYRIGHT AND LICENCE
 This module is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
 
-Copyright (c) 2003-2010 chocolateboy <chocolate@cpan.org>
+Copyright (c) 2003-2011 chocolateboy <chocolate@cpan.org>

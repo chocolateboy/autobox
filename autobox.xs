@@ -25,7 +25,7 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
      *
      * XXX this is fixed in #33311: http://www.nntp.perl.org/group/perl.perl5.porters/2008/02/msg134131.html
      */
-    if ((PL_hints & 0x120000) == 0x120000) {
+    if ((PL_hints & 0x80020000) == 0x80020000) {
         OP *prev = ((cUNOPo->op_first->op_sibling) ? cUNOPo : ((UNOP*)cUNOPo->op_first))->op_first;
         OP *o2 = prev->op_sibling;
         OP *cvop;
