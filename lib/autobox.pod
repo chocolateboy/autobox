@@ -114,7 +114,7 @@ and
     use autobox SCALAR => [ 'Foo', 'Bar' ];
     use autobox ARRAY  => 'Baz';
 
-- bind SCALAR types to the C<Foo> and C<Bar> classes and ARRAY types to C<Baz>.  
+- bind SCALAR types to the C<Foo> and C<Bar> classes and ARRAY types to C<Baz>.
 
 C<autobox> is lexically scoped, and bindings for an outer scope
 can be extended or countermanded in a nested scope:
@@ -152,7 +152,7 @@ Autoboxing can be turned off entirely by using the C<no> syntax:
 
     "Hello, world!"->bar(); # runtime error
 
-Autoboxing is not performed for barewords i.e. 
+Autoboxing is not performed for barewords i.e.
 
     my $foo = Foo->new();
 
@@ -183,7 +183,7 @@ is supplied in the C<use autobox> statement. Thus the following will not work:
 
     @array->some_array_method();
 
-- as no class is specified for the ARRAY type. Note: the result of calling a method 
+- as no class is specified for the ARRAY type. Note: the result of calling a method
 on a native type that is not associated with a class is the usual runtime error message:
 
     Can't call method "some_array_method" on unblessed reference at ...
@@ -212,7 +212,7 @@ This facilitates one-liners and prototypes:
 
     print "Hello, world!"->split->length();
 
-However, using these default bindings is not recommended as there's no guarantee that another 
+However, using these default bindings is not recommended as there's no guarantee that another
 piece of code won't trample over the same namespace/methods.
 
 =head1 OPTIONS
@@ -347,13 +347,13 @@ This doesn't work:
 
 This works:
 
-    use autobox UNDEF => 'MyUndef'; 
+    use autobox UNDEF => 'MyUndef';
 
     undef->foo(); # ok
 
 So does this:
 
-    use autobox UNDEF => 'MyNamespace::'; 
+    use autobox UNDEF => 'MyNamespace::';
 
     undef->foo(); # ok
 
@@ -379,7 +379,7 @@ bindings for their subtypes. The type hierarchy is as follows:
              +- HASH
              |
              +- CODE
-  
+
 Thus:
 
     use autobox NUMBER => 'MyNumber';
@@ -537,14 +537,14 @@ used within perl). This value is used by C<autobox> to associate a method invoca
     type(sub { })         # CODE
 
 C<autobox::universal> is loaded automatically by C<autobox>, and, as its name suggests, can be used to install
-a universal method (i.e. a method for all C<autobox> types) e.g. 
+a universal method (i.e. a method for all C<autobox> types) e.g.
 
     use autobox UNIVERSAL => 'autobox::universal';
 
     42->type        # INTEGER
     3.1415927->type # FLOAT
     %ENV->type      # HASH
-    
+
 =head1 CAVEATS
 
 =head2 Performance
@@ -601,7 +601,7 @@ Perl's special-casing for the C<print BLOCK ...> syntax (see L<perlsub>) means t
     print { 'foo', 'bar', @_ }->foo();
 
     # but this doesn't
-    print { @_ }->foo() ? 1 : 0 
+    print { @_ }->foo() ? 1 : 0
 
 In the latter case, the solution is to supply something
 other than a HASH ref literal as the first argument
@@ -612,20 +612,20 @@ to C<print()>:
 
     # or
     my $hashref = { @_ };
-    print $hashref->foo() ? 1 : 0; 
+    print $hashref->foo() ? 1 : 0;
 
     # or
-    print '', { @_ }->foo() ? 1 : 0; 
+    print '', { @_ }->foo() ? 1 : 0;
 
     # or
-    print '' . { @_ }->foo() ? 1 : 0; 
+    print '' . { @_ }->foo() ? 1 : 0;
 
     # or even
-    { @_ }->print_if_foo(1, 0); 
+    { @_ }->print_if_foo(1, 0);
 
 =head3 eval EXPR
 
-Like most pragmas autobox performs some of its operations at compile time, and,
+Like most pragmas, autobox performs operations at compile time, and,
 as a result, runtime string C<eval>s are not executed within its scope i.e. this
 doesn't work:
 
@@ -637,15 +637,15 @@ The workaround is to use autobox within the C<eval> e.g.
 
     eval <<'EOS';
         use autobox;
-        42->foo(); 
+        42->foo();
     EOS
 
 Note that the C<eval BLOCK> form works as expected:
 
     use autobox;
-    
+
     eval { 42->foo() }; # OK
-        
+
 =head1 VERSION
 
 2.72
@@ -665,7 +665,7 @@ Note that the C<eval BLOCK> form works as expected:
 =back
 
 =head1 AUTHOR
-    
+
 chocolateboy <chocolate@cpan.org>
 
 =head1 COPYRIGHT
