@@ -11,7 +11,7 @@
 static PTABLE_t *AUTOBOX_OP_MAP = NULL;
 static U32 AUTOBOX_SCOPE_DEPTH = 0;
 static OP *(*autobox_old_ck_subr)(pTHX_ OP *op) = NULL;
-static SV * autobox_method_common(pTHX_ SV *meth, U32 *hashp); 
+static SV * autobox_method_common(pTHX_ SV *meth, U32 *hashp);
 static const char * autobox_type(pTHX_ SV * const sv, STRLEN *len);
 
 OP * autobox_ck_subr(pTHX_ OP *o);
@@ -103,7 +103,7 @@ OP* autobox_method(pTHX) {
     dVAR; dSP;
     SV * const sv = TOPs;
     SV * cv;
-    
+
     if (SvROK(sv)) {
         cv = SvRV(sv);
         if (SvTYPE(cv) == SVt_PVCV) {
@@ -300,7 +300,7 @@ AUTOBOX_OP_MAP = PTABLE_new(); if (!AUTOBOX_OP_MAP) Perl_croak(aTHX_ "Can't init
 void
 _enter()
     PROTOTYPE:
-    CODE: 
+    CODE:
         if (AUTOBOX_SCOPE_DEPTH > 0) {
             ++AUTOBOX_SCOPE_DEPTH;
         } else {
@@ -317,7 +317,7 @@ _enter()
 void
 _leave()
     PROTOTYPE:
-    CODE: 
+    CODE:
         if (AUTOBOX_SCOPE_DEPTH == 0) {
             Perl_warn(aTHX_ "scope underflow");
         }
@@ -332,13 +332,13 @@ _leave()
 void
 _scope()
     PROTOTYPE:
-    CODE: 
+    CODE:
         XSRETURN_UV(PTR2UV(GvHV(PL_hintgv)));
 
 void
 END()
     PROTOTYPE:
-    CODE: 
+    CODE:
         if (autobox_old_ck_subr) { /* make sure we got as far as initializing it */
             PL_check[OP_ENTERSUB] = autobox_old_ck_subr;
         }

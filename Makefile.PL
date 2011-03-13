@@ -28,8 +28,8 @@ WriteMakefile(
     AUTHOR               => 'chocolateboy <chocolate@cpan.org>',
     INC                  => '-I.',
     OPTIMIZE             => $OPTIMIZE,
-    ($ExtUtils::MakeMaker::VERSION ge 6.31 ? (LICENSE => 'perl') : ()),
-    ($ExtUtils::MakeMaker::VERSION ge 6.46 ?
+    (eval($ExtUtils::MakeMaker::VERSION) >= 6.31 ? (LICENSE => 'perl') : ()),
+    (eval($ExtUtils::MakeMaker::VERSION) >= 6.46 ?
         (META_MERGE => {
             resources => {
                 repository => 'http://github.com/chocolateboy/autobox',

@@ -1,5 +1,8 @@
 Revision history for Perl extension autobox
 
+2.73  Sun Mar 13 16:35:28 2011
+    - Makefile.PL fix
+
 2.72  Fri Jan 28 12:16:34 2011
     - fix conflict with use re 'taint' (thanks, Peter Rabbitson)
 
