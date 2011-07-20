@@ -1,5 +1,8 @@
 Revision history for Perl extension autobox
 
+2.74  Wed Jul 20 14:25:52 2011
+    - portability fix for perl >= 5.14 (thanks, chorny)
+
 2.73  Sun Mar 13 16:35:28 2011
     - Makefile.PL fix
 
