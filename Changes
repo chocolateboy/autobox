@@ -1,5 +1,8 @@
 Revision history for Perl extension autobox
 
+2.75  Thu Jul 21 22:07:26 2011
+    - POD spelling fixes (thanks, gregor herrmann)
+
 2.74  Wed Jul 20 14:25:52 2011
     - portability fix for perl >= 5.14 (thanks, chorny)
 
