@@ -30,8 +30,8 @@ my @array  = (1 .. 3);
 my $array = \@array;
 my %hash = (qw(alpha beta gamma vlissides));
 my $hash = \%hash;
-my $ejoin = qr{Can't call method "join" without a package or object reference\b}; 
-my $ekeys = qr{Can't call method "keys" without a package or object reference\b}; 
+my $ejoin = qr{Can't (call|locate object) method "join" (without a|via) package\b};
+my $ekeys = qr{Can't (call|locate object) method "keys" (without a|via) package\b};
 
 # make sure it doesn't work before autobox is enabled
 eval { @array->join(', ') };

@@ -14,7 +14,7 @@ sub SCALAR::inc { my $scalar = shift; ++$scalar }
 my $integer = 42;
 my $float = 3.1415927;
 my $string = 'Hello';
-my $einc = qr{Can't call method "inc" without a package or object reference\b}; 
+my $einc = qr{Can't (call|locate object) method "inc" (without a|via) package\b};
 my $einc2 = qr{Can't locate object method "inc" via package "Hello"};
 
 {

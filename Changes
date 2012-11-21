@@ -1,5 +1,9 @@
 Revision history for Perl extension autobox
 
+2.76  Wed Nov 21 14:35:33 2012
+    - fix breaking tests in perl >= 5.17.5: update error message pattern (thanks, rjbs)
+    - update ppport.h from 3.19 to 3.20
+
 2.75  Thu Jul 21 22:07:26 2011
     - POD spelling fixes (thanks, Jonathan Yu and gregor herrmann)
 
