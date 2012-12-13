@@ -10,7 +10,6 @@ ppport.h
 ptable.h
 README
 t/all.t
-t/autobox_class.t
 t/autobox_scope_1.pm
 t/autobox_scope_2.pm
 t/autoref.t
@@ -27,5 +26,6 @@ t/rt_46814.t
 t/rt_55652.t
 t/scalar.t
 t/type.t
+t/universal_type.t
 t/unmerge.t
 t/version.t

@@ -11,7 +11,7 @@ use Scalar::Util;
 use Scope::Guard;
 use Storable;
 
-our $VERSION = '2.76';
+our $VERSION = '2.77';
 
 XSLoader::load 'autobox', $VERSION;
 
@@ -101,6 +101,7 @@ sub _generate_class($) {
 sub _make_class_accessor ($) {
     my $class = shift;
     return unless (defined $class);
+
     {
         no strict 'refs';
         *{"$class\::autobox_class"} = sub { $class } unless (*{"$class\::autobox_class"}{CODE});

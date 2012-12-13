@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               autobox
-version:            2.76
+version:            2.77
 abstract:           call methods on native types
 author:
     - chocolateboy <chocolate@cpan.org>

@@ -53,7 +53,7 @@ implementation class (unless the method elects to bestow such a blessing) - they
 use its methods as though they are.
 
 The classes (packages) into which the native types are boxed are fully configurable.
-By default, a method invoked on a non-object is assumed to be
+By default, a method invoked on a (non-object) value is assumed to be
 defined in a class whose name corresponds to the C<ref()> type of that
 value - or SCALAR if the value is a non-reference.
 
@@ -472,10 +472,9 @@ or
 
 =head2 import
 
-On its own, C<autobox> doesn't implement any methods that can be called on native types.
-However, its static method, C<import>, can be used to implement C<autobox> extensions i.e.
-lexically scoped modules that provide C<autobox> bindings for one or more native types without requiring
-calling code to C<use autobox>.
+This method sets up C<autobox> bindings for the current lexical scope. It can be used to implement
+C<autobox> extensions i.e. lexically-scoped modules that provide C<autobox> bindings for one or more
+native types without requiring calling code to C<use autobox>.
 
 This is done by subclassing C<autobox> and overriding C<import>. This allows extensions to effectively
 translate C<use MyModule> into a bespoke C<use autobox> call. e.g.:
@@ -512,15 +511,26 @@ lexical scope. e.g.:
 
     print "  Hello, world!  "->trim();
 
-=head1 EXPORTS
+=head1 UNIVERSAL METHODS FOR AUTOBOXED TYPES
 
 =head2 autobox_class
 
-C<autobox> makes a single method available to autoboxed types: C<autobox_class>. This can be used to
-call C<isa>, C<can>, C<VERSION>, C<import> and C<unimport>. e.g.
+C<autobox> adds a single method to all autoboxed types: C<autobox_class>. This can be used to
+call C<can>, C<isa>, C<VERSION>, C<import> and C<unimport>. e.g.
 
-    if (42->autobox_class->isa('SCALAR')) ...
     if (sub { ... }->autobox_class->can('curry')) ...
+    if (42->autobox_class->isa('SCALAR')) ...
+
+Note: C<autobox_class> should B<always> be used when calling these methods. The behaviour when
+these methods are called directly on the native type e.g.:
+
+    42->can('foo')
+    42->can('can')
+    42->can('autobox_class')
+
+- is undefined.
+
+=head1 EXPORTS
 
 =head2 type
 
@@ -648,7 +658,7 @@ Note that the C<eval BLOCK> form works as expected:
 
 =head1 VERSION
 
-2.76
+2.77
 
 =head1 SEE ALSO
 

@@ -1,5 +1,9 @@
 Revision history for Perl extension autobox
 
+2.77  Thu Dec 13 19:59:48 2012
+    - doc tweaks
+    - add multiple-arg autoref tests
+
 2.76  Wed Nov 21 14:35:33 2012
     - fix breaking tests in perl >= 5.17.5: update error message pattern (thanks, rjbs)
     - update ppport.h from 3.19 to 3.20
