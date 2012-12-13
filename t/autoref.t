@@ -82,7 +82,7 @@ like ($@, $ekeys, '%hash->keys fails before autobox is enabled');
     @ISA->push('autobox_test');
     is ($ISA[-1], 'autobox_test', 'tied array');
 
-    # confirm multiple (> 1) args are passed as a) a list (i.e. not an array ref)
+    # confirm multiple (> 1) args are passed a) as a list (i.e. not an array ref)
     # and b) unreferenced e.g. (1, 2, ...) rather than (\1, \2, ...)
     # XXX I can't reproduce an error with perl 5.14, but could have sworn I spotted this
     # not working on older perls...

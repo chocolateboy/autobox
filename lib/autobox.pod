@@ -53,7 +53,7 @@ implementation class (unless the method elects to bestow such a blessing) - they
 use its methods as though they are.
 
 The classes (packages) into which the native types are boxed are fully configurable.
-By default, a method invoked on a (non-object) value is assumed to be
+By default, a method invoked on a non-object value is assumed to be
 defined in a class whose name corresponds to the C<ref()> type of that
 value - or SCALAR if the value is a non-reference.
 
