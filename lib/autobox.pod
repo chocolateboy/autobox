@@ -485,10 +485,10 @@ translate C<use MyModule> into a bespoke C<use autobox> call. e.g.:
 
     sub import {
         my $class = shift;
-        $class->SUPER::import(STRING => 'String::Trim::Scalar');
+        $class->SUPER::import(STRING => 'String::Trim::String');
     }
 
-    package String::Trim::Scalar;
+    package String::Trim::String;
 
     sub trim {
         my $string = shift;
@@ -500,7 +500,7 @@ translate C<use MyModule> into a bespoke C<use autobox> call. e.g.:
     1;
 
 Note that C<trim> is defined in an auxiliary class rather than in C<String::Trim> itself to prevent
-C<String::Trim>'s own methods (i.e. the methods it inherits from C<autobox>) being exposed to SCALAR types.
+C<String::Trim>'s own methods (i.e. the methods it inherits from C<autobox>) being exposed to C<STRING> types.
 
 This module can now be used without a C<use autobox> statement to enable the C<trim> method in the current
 lexical scope. e.g.:
@@ -525,8 +525,8 @@ Note: C<autobox_class> should B<always> be used when calling these methods. The 
 these methods are called directly on the native type e.g.:
 
     42->can('foo')
-    42->can('can')
-    42->can('autobox_class')
+    42->isa('Bar')
+    42->VERSION
 
 - is undefined.
 
