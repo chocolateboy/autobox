@@ -11,7 +11,7 @@ use Scalar::Util;
 use Scope::Guard;
 use Storable;
 
-our $VERSION = '2.78';
+our $VERSION = '2.79';
 
 # Perform (XS) cleanup on global destruction (DESTROY is defined in autobox.xs).
 # END blocks don't work for this: see https://rt.cpan.org/Ticket/Display.html?id=80400
@@ -85,7 +85,7 @@ sub _generate_class($) {
     # rather than in the ISA hierarchy with its attendant AUTOLOAD-related overhead
     if (@$isa == 1) {
         my $class = $isa->[0];
-        _make_class_accessor($class); # nop if it's already been universalized
+        _make_class_accessor($class); # NOP if it has already been added
         return $class;
     }
 
@@ -187,7 +187,8 @@ sub _expand_namespace($$) {
 
 # enable some flavour of autoboxing in the current scope
 sub import {
-    my ($class, %args) = @_;
+    my $class = shift;
+    my %args = ((@_ == 1) && _isa($_[0], 'HASH')) ? %{shift()} : @_; # hash or hashref
     my $debug = delete $args{DEBUG};
 
     %args = %DEFAULT unless (%args); # wait till DEBUG has been deleted
@@ -348,7 +349,7 @@ sub import {
 # delete one or more bindings; if none remain, disable autobox in the current scope
 #
 # note: if bindings remain, we need to create a new hash (initially a clone of the current
-# hash) so that the previous hash (if any) is not contaminated by new deletions(s)
+# hash) so that the previous hash (if any) is not contaminated by new deletion(s)
 #
 #   use autobox;
 #

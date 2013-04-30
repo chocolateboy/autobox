@@ -17,6 +17,7 @@ t/coderef.t
 t/default.t
 t/export.t
 t/hints.t
+t/import_hashref.t
 t/isa.t
 t/lib/Versioned.pm
 t/merge.t

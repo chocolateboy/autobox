@@ -218,11 +218,11 @@ piece of code won't trample over the same namespace/methods.
 =head1 OPTIONS
 
 A mapping from native types to their user-defined classes can be specified
-by passing a list of key/value pairs to the C<use autobox> statement.
+by passing a hashref or a list of key/value pairs to the C<use autobox> statement.
 
 The following example shows the range of valid arguments:
 
-    use autobox
+    use autobox {
         SCALAR    => 'MyScalar'                     # class name
         ARRAY     => 'MyNamespace::',               # class prefix (ending in '::')
         HASH      => [ 'MyHash', 'MyNamespace::' ], # one or more class names and/or prefixes
@@ -234,7 +234,8 @@ The following example shows the range of valid arguments:
         UNDEF     => ...,                           # any of the 3 value types above
         UNIVERSAL => ...,                           # any of the 3 value types above
         DEFAULT   => ...,                           # any of the 3 value types above
-        DEBUG     => ...;                           # boolean or coderef
+        DEBUG     => ...                            # boolean or coderef
+    };
 
 The INTEGER, FLOAT, NUMBER, STRING, SCALAR, ARRAY, HASH, CODE, UNDEF, DEFAULT and UNIVERSAL options can take
 three different types of value:
@@ -485,7 +486,9 @@ translate C<use MyModule> into a bespoke C<use autobox> call. e.g.:
 
     sub import {
         my $class = shift;
-        $class->SUPER::import(STRING => 'String::Trim::String');
+        $class->SUPER::import(
+            STRING => 'String::Trim::String'
+        );
     }
 
     package String::Trim::String;
@@ -658,7 +661,7 @@ Note that the C<eval BLOCK> form works as expected:
 
 =head1 VERSION
 
-2.78
+2.79
 
 =head1 SEE ALSO
 

@@ -1,5 +1,10 @@
 Revision history for Perl extension autobox
 
+2.79 Tue Apr 30 21:22:05 2013
+    - allow import arguments to be passed as a hashref
+      - add t/import_hashref.t
+    - doc tweaks
+
 2.78 Tue Apr 30 18:53:54 2013
     - fix RT #80400 (thanks, Tokuhiro Matsuno)
       - added t/rt_80400.t
@@ -127,7 +132,6 @@ Revision history for Perl extension autobox
     - documentation fix:
         rm reference to $class->SUPER::import(TYPE => __PACKAGE__)
             and explain why an auxiliary class should be used
-        
 
 2.00  Sun Feb 17 02:29:11 2008
     - API changes:
