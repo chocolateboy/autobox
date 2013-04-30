@@ -1,5 +1,9 @@
 Revision history for Perl extension autobox
 
+2.78 Tue Apr 30 18:53:54 2013
+    - fix RT #80400 (thanks, Tokuhiro Matsuno)
+      - added t/rt_80400.t
+
 2.77  Thu Dec 13 19:59:48 2012
     - doc tweaks
     - add multiple-arg autoref tests

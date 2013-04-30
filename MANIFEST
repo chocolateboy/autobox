@@ -24,6 +24,7 @@ t/name.t
 t/pod.t
 t/rt_46814.t
 t/rt_55652.t
+t/rt_80400.t
 t/scalar.t
 t/type.t
 t/universal_type.t

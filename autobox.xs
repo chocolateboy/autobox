@@ -336,15 +336,19 @@ _scope()
         XSRETURN_UV(PTR2UV(GvHV(PL_hintgv)));
 
 void
-END()
-    PROTOTYPE:
+DESTROY(SV * sv)
+    PROTOTYPE:$
     CODE:
+        PERL_UNUSED_VAR(sv); // silence warning
+
         if (autobox_old_ck_subr) { /* make sure we got as far as initializing it */
             PL_check[OP_ENTERSUB] = autobox_old_ck_subr;
         }
 
-        PTABLE_free(AUTOBOX_OP_MAP);
-        AUTOBOX_OP_MAP = NULL;
+        if (AUTOBOX_OP_MAP) {
+            PTABLE_free(AUTOBOX_OP_MAP);
+            AUTOBOX_OP_MAP = NULL;
+        }
 
 MODULE = autobox                PACKAGE = autobox::universal
 
