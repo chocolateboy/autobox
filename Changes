@@ -2,7 +2,7 @@ Revision history for Perl extension autobox
 
 2.79 Tue Apr 30 21:22:05 2013
     - allow import arguments to be passed as a hashref
-      - add t/import_hashref.t
+      - added t/import_hashref.t
     - doc tweaks
 
 2.78 Tue Apr 30 18:53:54 2013
