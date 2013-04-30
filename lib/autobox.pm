@@ -224,7 +224,7 @@ sub import {
             #
             # undefs are winnowed out by _expand_namespace
 
-            next if (@{$args{$type}}); 
+            next if (@{$args{$type}});
             push @{$args{$type}}, map { _expand_namespace($_, $type) } @$default;
         }
     }
@@ -268,7 +268,7 @@ sub import {
         Carp::confess("unrecognized option: '", (defined $type ? $type : '<undef>'), "'") unless ($TYPES{$type});
 
         my (@isa, $class);
-       
+
         if ($class = $bindings->{$type}) {
             @isa = $synthetic{$class} ? _get_isa($class) : ($class);
         }
@@ -282,7 +282,7 @@ sub import {
     # replace each array ref of classes with the name of the generated class.
     # if there's only one class in the type's @ISA (e.g. SCALAR => 'MyScalar') then
     # that class is used; otherwise a shim class whose @ISA contains the two or more classes
-    # is created 
+    # is created
 
     for my $type (keys %$bindings) {
         my $isa = $bindings->{$type};
@@ -292,7 +292,7 @@ sub import {
             delete $bindings->{$type};
         } else {
             # associate the synthetic/single class with the specified type
-            $bindings->{$type} = _generate_class($isa); 
+            $bindings->{$type} = _generate_class($isa);
         }
     }
 

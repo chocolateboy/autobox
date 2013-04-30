@@ -103,7 +103,7 @@ like ($@, $ekeys, '%hash->keys fails before autobox is enabled');
 
     # make sure it doesn't work when autobox is disabled
     eval { @array->join(', ') };
-    like ($@, $ejoin, '@array->join fails after is disabled');
+    like ($@, $ejoin, '@array->join fails after autobox is disabled');
 
     eval { %hash->keys };
     like ($@, $ekeys, '%hash->keys fails after autobox is disabled');
