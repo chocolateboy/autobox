@@ -339,7 +339,7 @@ void
 DESTROY(SV * sv)
     PROTOTYPE:$
     CODE:
-        PERL_UNUSED_VAR(sv); // silence warning
+        PERL_UNUSED_VAR(sv); /* silence warning */
 
         if (autobox_old_ck_subr) { /* make sure we got as far as initializing it */
             PL_check[OP_ENTERSUB] = autobox_old_ck_subr;
