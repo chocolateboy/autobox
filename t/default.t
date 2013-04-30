@@ -12,7 +12,7 @@ sub debug ($) { push @GOT, shift }
 {
     use autobox
         DEFAULT  => 'MyDefault',
-               DEBUG    => \&debug;
+        DEBUG    => \&debug;
 
     my $want = {
         INTEGER => [ 'MyDefault' ],
@@ -29,8 +29,8 @@ sub debug ($) { push @GOT, shift }
 {
     use autobox
         INTEGER => 'MyInteger',
-               DEFAULT => 'MyDefault',
-               DEBUG   => \&debug;
+        DEFAULT => 'MyDefault',
+        DEBUG   => \&debug;
 
     my $want = {
         INTEGER => [ 'MyInteger', 'MyDefault' ],
@@ -47,8 +47,8 @@ sub debug ($) { push @GOT, shift }
 {
     use autobox
         FLOAT   => 'MyFloat',
-               DEFAULT => 'MyDefault',
-               DEBUG   => \&debug;
+        DEFAULT => 'MyDefault',
+        DEBUG   => \&debug;
 
     my $want = {
         INTEGER => [ 'MyDefault' ],
@@ -65,8 +65,8 @@ sub debug ($) { push @GOT, shift }
 {
     use autobox
         STRING  => 'MyString',
-               DEFAULT => 'MyDefault',
-               DEBUG   => \&debug;
+        DEFAULT => 'MyDefault',
+        DEBUG   => \&debug;
 
     my $want = {
         INTEGER => [ 'MyDefault' ],
@@ -83,8 +83,8 @@ sub debug ($) { push @GOT, shift }
 {
     use autobox
         ARRAY   => 'MyArray',
-               DEFAULT => 'MyDefault',
-               DEBUG   => \&debug;
+        DEFAULT => 'MyDefault',
+        DEBUG   => \&debug;
 
     my $want = {
         INTEGER => [ 'MyDefault' ],
@@ -101,8 +101,8 @@ sub debug ($) { push @GOT, shift }
 {
     use autobox
         HASH    => 'MyHash',
-               DEFAULT => 'MyDefault',
-               DEBUG   => \&debug;
+        DEFAULT => 'MyDefault',
+        DEBUG   => \&debug;
 
     my $want = {
         INTEGER => [ 'MyDefault' ],
@@ -119,8 +119,8 @@ sub debug ($) { push @GOT, shift }
 {
     use autobox
         CODE    => 'MyCode',
-               DEFAULT => 'MyDefault',
-               DEBUG   => \&debug;
+        DEFAULT => 'MyDefault',
+        DEBUG   => \&debug;
 
     my $want = {
         INTEGER => [ 'MyDefault' ],
@@ -138,8 +138,8 @@ sub debug ($) { push @GOT, shift }
     use autobox
         INTEGER => 'MyInteger',
         NUMBER  => 'MyNumber',
-               DEFAULT => 'MyDefault',
-               DEBUG   => \&debug;
+        DEFAULT => 'MyDefault',
+        DEBUG   => \&debug;
 
     my $want = {
         INTEGER => [ 'MyInteger', 'MyNumber', 'MyDefault' ],
@@ -158,8 +158,8 @@ sub debug ($) { push @GOT, shift }
         INTEGER => 'MyInteger',
         NUMBER  => 'MyNumber',
         SCALAR  => 'MyScalar',
-               DEFAULT => 'MyDefault',
-               DEBUG   => \&debug;
+        DEFAULT => 'MyDefault',
+        DEBUG   => \&debug;
 
     my $want = {
         INTEGER => [ 'MyInteger', 'MyNumber', 'MyScalar' ],
@@ -179,8 +179,8 @@ sub debug ($) { push @GOT, shift }
         NUMBER    => 'MyNumber',
         SCALAR    => 'MyScalar',
         UNIVERSAL => 'MyUniversal',
-               DEFAULT   => 'MyDefault',
-               DEBUG     => \&debug;
+        DEFAULT   => 'MyDefault',
+        DEBUG     => \&debug;
 
     my $want = {
         INTEGER => [ 'MyInteger', 'MyNumber', 'MyScalar', 'MyUniversal' ],
@@ -200,8 +200,8 @@ sub debug ($) { push @GOT, shift }
         ARRAY   => 'MyArray',
         HASH    => 'MyHash',
         CODE    => 'MyCode',
-               DEFAULT => 'MyDefault',
-               DEBUG   => \&debug;
+        DEFAULT => 'MyDefault',
+        DEBUG   => \&debug;
 
     my $want = {
         INTEGER => [ 'MyScalar' ],
