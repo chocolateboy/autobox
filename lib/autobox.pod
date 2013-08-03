@@ -176,7 +176,7 @@ a method name or subroutine reference. Thus the following are all valid:
     { ... }->$method3();
     sub { ... }->$method4();
 
-A native type is only asociated with a class if the type => class mapping
+A native type is only associated with a class if the type => class mapping
 is supplied in the C<use autobox> statement. Thus the following will not work:
 
     use autobox SCALAR => 'MyScalar';
