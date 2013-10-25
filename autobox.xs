@@ -290,12 +290,22 @@ static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
     return NULL;
 }
 
+static void autobox_cleanup(pTHX_ void * unused) {
+    PERL_UNUSED_VAR(unused);
+
+    if (AUTOBOX_OP_MAP) {
+        PTABLE_free(AUTOBOX_OP_MAP);
+        AUTOBOX_OP_MAP = NULL;
+    }
+}
+
 MODULE = autobox                PACKAGE = autobox
 
 PROTOTYPES: ENABLE
 
 BOOT:
 AUTOBOX_OP_MAP = PTABLE_new(); if (!AUTOBOX_OP_MAP) Perl_croak(aTHX_ "Can't initialize op map");
+Perl_call_atexit(aTHX_ autobox_cleanup, NULL);
 
 void
 _enter()
@@ -334,21 +344,6 @@ _scope()
     PROTOTYPE:
     CODE:
         XSRETURN_UV(PTR2UV(GvHV(PL_hintgv)));
-
-void
-DESTROY(SV * sv)
-    PROTOTYPE:$
-    CODE:
-        PERL_UNUSED_VAR(sv); /* silence warning */
-
-        if (autobox_old_ck_subr) { /* make sure we got as far as initializing it */
-            PL_check[OP_ENTERSUB] = autobox_old_ck_subr;
-        }
-
-        if (AUTOBOX_OP_MAP) {
-            PTABLE_free(AUTOBOX_OP_MAP);
-            AUTOBOX_OP_MAP = NULL;
-        }
 
 MODULE = autobox                PACKAGE = autobox::universal
 

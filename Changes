@@ -1,13 +1,17 @@
 Revision history for Perl extension autobox
 
+2.80 Fri Oct 25 19:32:12 2013
+    - RT #71777: fix segfault in destructor called after global destruction (thanks, Tomas Doran)
+        - added t/rt_71777.t
+
 2.79 Tue Apr 30 21:22:05 2013
     - allow import arguments to be passed as a hashref
-      - added t/import_hashref.t
+        - added t/import_hashref.t
     - doc tweaks
 
 2.78 Tue Apr 30 18:53:54 2013
     - fix RT #80400 (thanks, Tokuhiro Matsuno)
-      - added t/rt_80400.t
+        - added t/rt_80400.t
 
 2.77  Thu Dec 13 19:59:48 2012
     - doc tweaks
@@ -35,17 +39,17 @@ Revision history for Perl extension autobox
 2.70  Wed Mar 17 19:27:44 2010
     - replace autobox_can and autobox_isa with autobox_class
       this also fixes import, unimport and VERSION
-      - added t/version.t
-      - renamed t/universal.t => t/autobox_class.t
+        - added t/version.t
+        - renamed t/universal.t => t/autobox_class.t
 
 2.60  Wed Mar 17 16:34:56 2010
     - fix RT #46814 (thanks Tye McQueen)
-      - added t/rt_46814.t
+        - added t/rt_46814.t
     - fix RT #49273 (thanks Daniel Austin)
     - fix RT #55565 (thanks Schwern)
     - fix RT #55652 (thanks Schwern)
-      - $native->isa and $native->can must now be called as $native->autobox_isa and $native->autobox_can
-      - added t/rt_55652.t
+        - $native->isa and $native->can must now be called as $native->autobox_isa and $native->autobox_can
+        - added t/rt_55652.t
 
 2.55  Sun May 25 03:20:54 2008
     - fix MANIFEST again - restore Changes
@@ -141,7 +145,6 @@ Revision history for Perl extension autobox
         multiple bindings for each type can be supplied as an ARRAY ref of classes
             or namespaces
         "no autobox qw(...)" disables/resets bindings for the specified type(s)
-
     - fixed incorrect bareword handling
     - perl 5.10 compatibility fixes (thanks Andreas Koenig)
     - document previously undocumented features

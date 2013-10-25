@@ -13,11 +13,6 @@ use Storable;
 
 our $VERSION = '2.79';
 
-# Perform (XS) cleanup on global destruction (DESTROY is defined in autobox.xs).
-# END blocks don't work for this: see https://rt.cpan.org/Ticket/Display.html?id=80400
-# according to perlvar, package variables are garbage collected after END blocks
-our $__GLOBAL_DESTRUCTION_MONITOR__ = bless {};
-
 XSLoader::load 'autobox', $VERSION;
 
 use autobox::universal (); # don't import
