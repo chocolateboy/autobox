@@ -13,7 +13,9 @@ use warnings;
 {
     package Foo;
     use autobox;
-    sub DESTROY { $_[0]->{bar}->bar }
+    # no warnings qw(misc): suppress the following distracting (but expected) warning:
+    # "(in cleanup) Can't call method "bar" on an undefined value at -e line 9 during global destruction."
+    sub DESTROY { no warnings qw(misc); $_[0]->{bar}->bar }
 }
 
 {
