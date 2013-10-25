@@ -1,5 +1,8 @@
 Revision history for Perl extension autobox
 
+2.81 Sat Oct 26 11:32:31 2013
+    - fix broken Windows test
+
 2.80 Fri Oct 25 19:32:12 2013
     - RT #71777: fix segfault in destructor called during global destruction (thanks, Tomas Doran)
         - added t/rt_71777.t

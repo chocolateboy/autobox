@@ -291,7 +291,7 @@ static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
 }
 
 static void autobox_cleanup(pTHX_ void * unused) {
-    PERL_UNUSED_VAR(unused);
+    PERL_UNUSED_VAR(unused); /* silence warning */
 
     if (AUTOBOX_OP_MAP) {
         PTABLE_free(AUTOBOX_OP_MAP);
