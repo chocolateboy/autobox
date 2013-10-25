@@ -9,7 +9,7 @@ distribution_type:  module
 configure_requires:
     ExtUtils::MakeMaker:  0
 requires:
-    Scope::Guard:  0.03
+    Scope::Guard:  0.20
 no_index:
     directory:
         - t
