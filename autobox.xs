@@ -304,8 +304,13 @@ MODULE = autobox                PACKAGE = autobox
 PROTOTYPES: ENABLE
 
 BOOT:
-AUTOBOX_OP_MAP = PTABLE_new(); if (!AUTOBOX_OP_MAP) Perl_croak(aTHX_ "Can't initialize op map");
-Perl_call_atexit(aTHX_ autobox_cleanup, NULL);
+/* XXX the BOOT section extends to the next blank line, so don't add one for readability */
+AUTOBOX_OP_MAP = PTABLE_new();
+if (AUTOBOX_OP_MAP) {
+    Perl_call_atexit(aTHX_ autobox_cleanup, NULL);
+} else {
+    Perl_croak(aTHX_ "Can't initialize OP map");
+}
 
 void
 _enter()
