@@ -6,7 +6,7 @@
 use strict;
 use warnings;
 
-use Test::More;
+use Test::More tests => 1;
 
 my $X;
 
@@ -16,7 +16,6 @@ use autobox INTEGER => __PACKAGE__;
 
 sub test {
     is_deeply(\@_, [ 1, 42 ], 'autoboxed method called in END block');
-    done_testing;
 };
 
 $X = sub { 1->test(42) };
