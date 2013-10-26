@@ -11,8 +11,10 @@
 static PTABLE_t *AUTOBOX_OP_MAP = NULL;
 static U32 AUTOBOX_SCOPE_DEPTH = 0;
 static OP *(*autobox_old_ck_subr)(pTHX_ OP *op) = NULL;
+
 static SV * autobox_method_common(pTHX_ SV *meth, U32 *hashp);
 static const char * autobox_type(pTHX_ SV * const sv, STRLEN *len);
+static void autobox_cleanup(pTHX_ void * unused);
 
 OP * autobox_ck_subr(pTHX_ OP *o);
 OP * autobox_method_named(pTHX);

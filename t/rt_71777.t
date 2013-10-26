@@ -35,8 +35,8 @@ print '1..1', $/;
     sub unused { }
 }
 
-my $bar = bless {}, 'Bar';
 my $foo = bless {}, 'Foo';
+my $bar = bless {}, 'Bar';
 
 $foo->{bar} = $bar;
 $bar->{foo} = $foo;
