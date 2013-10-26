@@ -1,10 +1,10 @@
-eval "use Test::Pod";
+#!/usr/bin/env perl
 
-if ($@) {
-    print "1..0 # Skip Test::Pod not installed", $/;
-    exit;
-} 
- 
-my @PODS = qw#../blib#;
+use strict;
+use warnings;
 
-all_pod_files_ok(all_pod_files(@PODS));
+use Test::More;
+
+eval 'use Test::Pod 1.00';
+plan skip_all => 'Test::Pod 1.00 required for testing POD' if ($@);
+all_pod_files_ok();

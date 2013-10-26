@@ -609,38 +609,6 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
     is($code->autobox_class->isa('UNKNOWN'), '', 'isa UNKNOWN: $code');
 }
 
-# test VERSION
-
-=pod
-{
-    use autobox;
-
-    is (3->VERSION(), 0.01, 'can: integer literal');
-    is ((-3)->VERSION(), 0.01, 'can: negative integer literal');
-    is ((+3)->VERSION(), 0.01, 'can: positive integer literal');
-    is ($int->VERSION(), 0.01, 'can: $integer');
-
-    is (3.1415927->VERSION(), 0.01, 'can: float literal');
-    is ((-3.1415927)->VERSION(), 0.01, 'can: negative float literal');
-    is ((+3.1415927)->VERSION(), 0.01, 'can: positive float literal');
-    is ($float->VERSION(), 0.01, 'can: $float');
-
-    is ('Hello, world'->VERSION(), 0.01, 'can: single quoted string literal');
-    is ("Hello, world"->VERSION(), 0.01, 'can: double quoted string literal');
-    is ($string->VERSION(), 0.01, 'can: $string');
-
-    is ([ 0 .. 9 ]->VERSION(), 0.01, 'can: ARRAY ref');
-    is ($array->VERSION(), 0.01, 'can: $array');
-
-    is ({ 0 .. 9 }->VERSION(), 0.01, 'can: HASH ref');
-    is ($hash->VERSION(), 0.01, 'can: $hash');
-
-    is ((\&add)->VERSION(), 0.01, 'can: CODE ref');
-    is (sub { $_[0] + $_[1] }->VERSION(), 0.01, 'can: ANON sub');
-    is ($code->VERSION(), 0.01, 'can: $code');
-}
-=cut
-
 # test undef: by default, undef shouldn't be autoboxed...
 {
     use autobox;
