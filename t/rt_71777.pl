@@ -11,7 +11,7 @@ use blib;
     package Foo;
     use autobox;
     sub DESTROY {
-        # silence distracting (but expected) warning:
+        # silence this distracting (but expected) warning:
         # "(in cleanup) Can't call method "bar" on an undefined value at t/rt_71777.pl line 17 during global destruction."
         no warnings qw(misc);
         $_[0]->{bar}->bar

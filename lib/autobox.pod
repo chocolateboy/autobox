@@ -661,7 +661,7 @@ Note that the C<eval BLOCK> form works as expected:
 
 =head1 VERSION
 
-2.80
+2.81
 
 =head1 SEE ALSO
 
