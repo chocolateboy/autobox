@@ -25,7 +25,6 @@ t/name.t
 t/rt_46814.t
 t/rt_55652.t
 t/rt_71777.t
-t/rt_71777.pl
 t/rt_80400.t
 t/scalar.t
 t/type.t

@@ -21,4 +21,4 @@ requires:
   Scope::Guard: 0.20
 resources:
   repository: http://github.com/chocolateboy/autobox
-version: 2.81
+version: 2.82
