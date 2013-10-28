@@ -9,6 +9,7 @@ Revision history for Perl extension autobox
 2.80 Fri Oct 25 19:32:12 2013
     - RT #71777: fix segfault in destructor called during global destruction (thanks, Tomas Doran)
         - added t/rt_71777.t
+    - fix doc typo (thanks, David Steinbrunner)
 
 2.79 Tue Apr 30 21:22:05 2013
     - allow import arguments to be passed as a hashref
