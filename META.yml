@@ -19,6 +19,8 @@ no_index:
     - inc
 requires:
   Scope::Guard: 0.20
+  perl: 5.008000
 resources:
-  repository: http://github.com/chocolateboy/autobox
+  bugtracker: https://github.com/chocolateboy/autobox/issues
+  repository: https://github.com/chocolateboy/autobox
 version: 2.82

@@ -6,6 +6,7 @@ use warnings;
 use ExtUtils::MakeMaker;
 use Config;
 
+my $EUMM_VERSION = eval($ExtUtils::MakeMaker::VERSION);
 my $OPTIMIZE;
 
 if ($Config{gccversion}) {
@@ -29,11 +30,13 @@ WriteMakefile(
     AUTHOR               => 'chocolateboy <chocolate@cpan.org>',
     INC                  => '-I.',
     OPTIMIZE             => $OPTIMIZE,
-    (eval($ExtUtils::MakeMaker::VERSION) >= 6.31 ? (LICENSE => 'perl') : ()),
-    (eval($ExtUtils::MakeMaker::VERSION) >= 6.46 ?
+    ($EUMM_VERSION >= 6.48 ? (MIN_PERL_VERSION => '5.8.0') : ()),
+    ($EUMM_VERSION >= 6.31 ? (LICENSE => 'perl') : ()),
+    ($EUMM_VERSION >= 6.46 ?
         (META_MERGE => {
             resources => {
-                repository => 'http://github.com/chocolateboy/autobox',
+                repository => 'https://github.com/chocolateboy/autobox',
+                bugtracker => 'https://github.com/chocolateboy/autobox/issues',
             },
         })
         : ()
