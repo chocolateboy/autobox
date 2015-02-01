@@ -1,6 +1,6 @@
 Revision history for Perl extension autobox
 
-2.83 TBC
+2.83 Sun Feb 1 21:34:01 2015
     - RT #100247: fix assertion failures on 5.21.x perls with -DDEBUGGING
       (thanks, ilmari and Father Chrysostomos)
     - RT #100717: don't hide autobox::universal from PAUSE (thanks, ppisar)
