@@ -28,7 +28,8 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
      * XXX this is fixed in #33311: http://www.nntp.perl.org/group/perl.perl5.porters/2008/02/msg134131.html
      */
     if ((PL_hints & 0x80020000) == 0x80020000) {
-        OP *prev = ((cUNOPo->op_first->op_sibling) ? cUNOPo : ((UNOP*)cUNOPo->op_first))->op_first;
+        UNOP *parent = (cUNOPo->op_first->op_sibling) ? cUNOPo : ((UNOP*)cUNOPo->op_first);
+        OP *prev = parent->op_first;
         OP *o2 = prev->op_sibling;
         OP *cvop;
 
@@ -53,7 +54,10 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
                      * if the receiver is an @array, %hash, @{ ... } or %{ ... }, then "autoref" it
                      * i.e. the op tree equivalent of inserting a backslash before it
                      */
+
+#ifndef op_sibling_splice
                     OP *refgen;
+#endif
                     U32 toggled = 0;
 
                     switch (o2->op_type) {
@@ -78,10 +82,28 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
                                 toggled = 1;
                             }
 
+#ifdef op_sibling_splice
+                            op_sibling_splice(
+                                (OP *)parent,
+                                prev,
+                                0,
+                                newUNOP(
+                                    OP_REFGEN,
+                                    0,
+                                    op_sibling_splice(
+                                        (OP *)parent,
+                                        prev,
+                                        1,
+                                        NULL
+                                    )
+                                )
+                            );
+#else
                             refgen = newUNOP(OP_REFGEN, 0, o2);
                             prev->op_sibling = refgen;
                             refgen->op_sibling = o2->op_sibling;
                             o2->op_sibling = NULL;
+#endif
 
                             /* Restore the parentheses in case something else expects them */
                             if (toggled) {
@@ -243,8 +265,8 @@ static SV * autobox_method_common(pTHX_ SV * meth, U32* hashp) {
             STRLEN typelen = 0;
 
             /*
-             * the type is either the receiver's reftype(), a subtype of SCALAR if it's not a ref, or UNDEF if
-             * it's not defined
+             * the type is either the receiver's reftype(), a subtype of SCALAR if it's
+             * not a ref, or UNDEF if it's not defined
              */
 
             if (SvOK(sv)) {

@@ -661,7 +661,7 @@ Note that the C<eval BLOCK> form works as expected:
 
 =head1 VERSION
 
-2.82
+2.83
 
 =head1 SEE ALSO
 
@@ -683,7 +683,7 @@ chocolateboy <chocolate@cpan.org>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2003-2013, chocolateboy.
+Copyright (c) 2003-2015, chocolateboy.
 
 This module is free software. It may be used, redistributed
 and/or modified under the same terms as Perl itself.
