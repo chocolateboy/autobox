@@ -4,6 +4,7 @@ Revision history for Perl extension autobox
     - RT #100247: fix assertion failures on 5.21.x perls with -DDEBUGGING
       (thanks, ilmari and Father Chrysostomos)
     - RT #100717: don't hide autobox::universal from PAUSE (thanks, ppisar)
+    - RT #89754: INSTALLDIRS fix (thanks, Kent Fredric)
 
 2.82 Sat Oct 26 12:44:52 2013
     - simplify test to avoid portability woes
