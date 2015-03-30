@@ -45,10 +45,10 @@ autobox - call methods on native types
 
 =head1 DESCRIPTION
 
-The autobox pragma allows methods to be called on integers, floats, strings, arrays,
+The C<autobox> pragma allows methods to be called on integers, floats, strings, arrays,
 hashes, and code references in exactly the same manner as blessed references.
 
-The autoboxing is transparent: boxed values are not blessed into their (user-defined)
+C<autobox> is transparent: values are not blessed into their (user-defined)
 implementation class (unless the method elects to bestow such a blessing) - they simply
 use its methods as though they are.
 
@@ -638,7 +638,7 @@ to C<print()>:
 
 =head3 eval EXPR
 
-Like most pragmas, autobox performs operations at compile time, and,
+Like most pragmas, C<autobox> performs operations at compile time, and,
 as a result, runtime string C<eval>s are not executed within its scope i.e. this
 doesn't work:
 
@@ -646,7 +646,7 @@ doesn't work:
 
     eval "42->foo";
 
-The workaround is to use autobox within the C<eval> e.g.
+The workaround is to use C<autobox> within the C<eval> e.g.
 
     eval <<'EOS';
         use autobox;
