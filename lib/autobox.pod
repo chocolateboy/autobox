@@ -544,13 +544,13 @@ used within perl). This value is used by C<autobox> to associate a method invoca
 
     use autobox::universal qw(type);
 
-    type("Hello, world!") # STRING
-    type(42)              # INTEGER
-    type([])              # ARRAY
-    type(sub { })         # CODE
+    type("42")  # STRING
+    type(42)    # INTEGER
+    type(42.0)  # FLOAT
+    type(undef) # UNDEF
 
 C<autobox::universal> is loaded automatically by C<autobox>, and, as its name suggests, can be used to install
-a universal method (i.e. a method for all C<autobox> types) e.g.
+a universal C<type> method for autoboxed values e.g.
 
     use autobox UNIVERSAL => 'autobox::universal';
 
@@ -562,7 +562,7 @@ a universal method (i.e. a method for all C<autobox> types) e.g.
 
 =head2 Performance
 
-Autoboxing comes at a price. Calling
+Calling
 
     "Hello, world!"->length()
 
