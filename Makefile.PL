@@ -24,7 +24,7 @@ WriteMakefile(
     # compatibility in case module was previously installed to lib
     INSTALLDIRS     => ($] >= 5.011 ? 'site' : 'perl'),
     PREREQ_PM       => {
-        'Scope::Guard'   => '0.20',
+        'Scope::Guard'   => '0.21',
     },
     ABSTRACT_FROM        => 'lib/autobox.pod',
     AUTHOR               => 'chocolateboy <chocolate@cpan.org>',
