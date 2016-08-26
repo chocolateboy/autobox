@@ -28,12 +28,12 @@ OP * autobox_ck_subr(pTHX_ OP *o) {
      * XXX this is fixed in #33311: http://www.nntp.perl.org/group/perl.perl5.porters/2008/02/msg134131.html
      */
     if ((PL_hints & 0x80020000) == 0x80020000) {
-        UNOP *parent = (cUNOPo->op_first->op_sibling) ? cUNOPo : ((UNOP*)cUNOPo->op_first);
+        UNOP *parent = (OpHAS_SIBLING(cUNOPo->op_first)) ? cUNOPo : ((UNOP*)cUNOPo->op_first);
         OP *prev = parent->op_first;
-        OP *o2 = prev->op_sibling;
+        OP *o2 = OpSIBLING(prev);
         OP *cvop;
 
-        for (cvop = o2; cvop->op_sibling; cvop = cvop->op_sibling);
+        for (cvop = o2; OpHAS_SIBLING(cvop); cvop = OpSIBLING(cvop));
 
         /* don't autobox if the receiver is a bareword */
         if ((cvop->op_type == OP_METHOD) || ((cvop->op_type == OP_METHOD_NAMED) && !(o2->op_private & OPpCONST_BARE))) {
