@@ -1,8 +1,10 @@
 Revision history for Perl extension autobox
 
-2.84 TBC
+2.84 Fri 26 Aug 20:35:48 2016
 
-    - update ppport.h from 3.20 to 3.28
+    - compatibility fix for perl >= 5.25 (thanks, mat813, karenetheridge and eserte)
+    - update ppport.h from 3.20 to 3.35
+    - add .travis.yml
 
 2.83 Sun Feb 1 21:34:01 2015
 
