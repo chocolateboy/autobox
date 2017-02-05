@@ -249,7 +249,7 @@ A class name e.g.
     use autobox INTEGER => 'MyInt';
 
 This binds the specified native type to the specified class. All methods invoked on
-literals or values of type C<key> will be dispatched as methods of the class specified in
+values of type C<key> will be dispatched as methods of the class specified in
 the corresponding C<value>.
 
 =item *
