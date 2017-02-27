@@ -834,7 +834,7 @@ eval { 42->foo() }; # OK
 
 ## AUTHOR
 
-chocolateboy <chocolate@cpan.org>
+[chocolateboy](mailto:chocolate@cpan.org)
 
 ## COPYRIGHT
 
