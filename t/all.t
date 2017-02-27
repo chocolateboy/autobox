@@ -60,12 +60,12 @@ package main;
 use strict;
 use warnings;
 
-use Test::More tests => 292;
+use blib;
 
-BEGIN {
-    chdir 't' if -d 't';
-    unshift @INC, '../lib';
-}
+use FindBin qw($Bin);
+use lib "$Bin/lib";
+
+use Test::More tests => 292;
 
 $| = 1;
 
