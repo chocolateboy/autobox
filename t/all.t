@@ -60,8 +60,6 @@ package main;
 use strict;
 use warnings;
 
-use blib;
-
 use FindBin qw($Bin);
 use lib "$Bin/lib";
 
