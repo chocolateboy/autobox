@@ -1,5 +1,10 @@
 Revision history for Perl extension autobox
 
+2.85 Mon 27 Feb 18:18:19 2017
+
+    - fix failing test under 5.25.10 with -Ddefault_inc_excludes_dot
+      (thanks, Kent Fredric)
+
 2.84 Fri 26 Aug 20:35:48 2016
 
     - compatibility fix for perl >= 5.25 (thanks, mat813, karenetheridge and eserte)

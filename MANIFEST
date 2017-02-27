@@ -10,8 +10,6 @@ ppport.h
 ptable.h
 README
 t/all.t
-t/autobox_scope_1.pm
-t/autobox_scope_2.pm
 t/autoref.t
 t/coderef.t
 t/default.t
@@ -19,6 +17,8 @@ t/export.t
 t/hints.t
 t/import_hashref.t
 t/isa.t
+t/lib/autobox_scope_1.pm
+t/lib/autobox_scope_2.pm
 t/lib/Versioned.pm
 t/merge.t
 t/name.t

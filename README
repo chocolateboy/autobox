@@ -1,4 +1,4 @@
-autobox version 2.84
+autobox version 2.85
 ====================
 
 The autobox pragma allows methods to be called on integers, floats, strings, arrays, hashes, and code references in exactly the same manner as blessed references.
@@ -28,4 +28,4 @@ COPYRIGHT AND LICENCE
 
 This module is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
-Copyright (c) 2003-2016 chocolateboy <chocolate@cpan.org>
+Copyright (c) 2003-2017 chocolateboy <chocolate@cpan.org>
