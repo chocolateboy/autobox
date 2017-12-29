@@ -27,6 +27,7 @@ call methods on native types
     - [Precedence](#precedence)
     - [print BLOCK](#print-block)
     - [eval EXPR](#eval-expr)
+    - [Operator Overloading](#operator-overloading)
 - [VERSION](#version)
 - [SEE ALSO](#see-also)
 - [AUTHOR](#author)
@@ -821,7 +822,7 @@ use autobox;
 eval { 42->foo() }; # OK
 ```
 
-### Operator Overloading
+#### Operator Overloading
 
 Operator overloading via the `overload` pragma doesn't (automatically) work. `autobox`
 works by lexically overriding the [arrow operator](https://metacpan.org/pod/perlop#The-Arrow-Operator).
