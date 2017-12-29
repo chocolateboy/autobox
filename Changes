@@ -1,5 +1,9 @@
 Revision history for Perl extension autobox
 
+TBD
+
+    - add operator-overloading section to gotchas (GH #7)
+
 2.85 Mon 27 Feb 18:18:19 2017
 
     - fix failing test under 5.25.10 with -Ddefault_inc_excludes_dot
