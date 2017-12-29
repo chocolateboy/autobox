@@ -824,7 +824,7 @@ eval { 42->foo() }; # OK
 
 #### Operator Overloading
 
-Operator overloading via the `overload` pragma doesn't (automatically) work. `autobox`
+Operator overloading via the [overload](https://metacpan.org/pod/overload) pragma doesn't (automatically) work. `autobox`
 works by lexically overriding the [arrow operator](https://metacpan.org/pod/perlop#The-Arrow-Operator).
 It doesn't bless primitives into objects, so overloading — or any other kind of "magic" which depends on values being
 blessed — doesn't apply.
