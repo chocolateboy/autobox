@@ -18,7 +18,7 @@ call methods on native types
 - [METHODS](#methods)
   - [import](#import)
 - [UNIVERSAL METHODS FOR AUTOBOXED TYPES](#universal-methods-for-autoboxed-types)
-- [autobox\_class](#autobox%5C_class)
+- [autobox_class](#autobox_class)
 - [EXPORTS](#exports)
   - [type](#type)
 - [CAVEATS](#caveats)
@@ -649,7 +649,7 @@ print "  Hello, world!  "->trim();
 
 ## UNIVERSAL METHODS FOR AUTOBOXED TYPES
 
-## autobox\_class
+## autobox_class
 
 `autobox` adds a single method to all autoboxed types: `autobox_class`. This can be used to
 call `can`, `isa`, `VERSION`, `import` and `unimport`. e.g.
