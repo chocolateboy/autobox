@@ -31,7 +31,7 @@ call methods on native types
 - [VERSION](#version)
 - [SEE ALSO](#see-also)
 - [AUTHOR](#author)
-- [COPYRIGHT](#copyright)
+- [COPYRIGHT AND LICENSE](#copyright-and-license)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -844,7 +844,7 @@ blessed — doesn't apply.
 
 [chocolateboy](mailto:chocolate@cpan.org)
 
-## COPYRIGHT
+## COPYRIGHT AND LICENSE
 
 Copyright (c) 2003-2018, chocolateboy.
 
