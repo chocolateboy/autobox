@@ -702,9 +702,9 @@ chocolateboy <chocolate@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright © 2008-2016 by chocolateboy.
+Copyright (c) 2008-2016 by chocolateboy.
 
-This module is free software; you can redistribute it and/or modify it under the
+This is free software; you can redistribute it and/or modify it under the
 terms of the Artistic License 2.0.
 
 =cut
