@@ -1,13 +1,13 @@
 # autobox
 
-[![CPAN version](https://badge.fury.io/pl/autobox.svg)](http://badge.fury.io/pl/autobox)
-[![build status](https://secure.travis-ci.org/chocolateboy/autobox.svg)](http://travis-ci.org/chocolateboy/autobox)
-
-call methods on native types
+[![Build Status](https://secure.travis-ci.org/chocolateboy/autobox.svg)](http://travis-ci.org/chocolateboy/autobox)
+[![CPAN Version](https://badge.fury.io/pl/autobox.svg)](http://badge.fury.io/pl/autobox)
+[![License](https://img.shields.io/badge/license-artistic-blue.svg)](https://github.com/chocolateboy/autobox/blob/master/LICENSE.md)
 
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
+- [NAME](#name)
 - [SYNOPSIS](#synopsis)
 - [DESCRIPTION](#description)
 - [OPTIONS](#options)
@@ -18,7 +18,7 @@ call methods on native types
 - [METHODS](#methods)
   - [import](#import)
 - [UNIVERSAL METHODS FOR AUTOBOXED TYPES](#universal-methods-for-autoboxed-types)
-- [autobox_class](#autobox_class)
+  - [autobox_class](#autobox_class)
 - [EXPORTS](#exports)
   - [type](#type)
 - [CAVEATS](#caveats)
@@ -35,7 +35,12 @@ call methods on native types
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-## SYNOPSIS
+
+# NAME
+
+autobox - call methods on native types
+
+# SYNOPSIS
 
 ```perl
 use autobox;
@@ -76,7 +81,7 @@ use autobox;
     say []->autobox_class->VERSION
 ```
 
-## DESCRIPTION
+# DESCRIPTION
 
 The `autobox` pragma allows methods to be called on integers, floats, strings, arrays,
 hashes, and code references in exactly the same manner as blessed references.
@@ -289,7 +294,7 @@ print "Hello, world!"->split->length();
 However, using these default bindings is not recommended as there's no guarantee that another
 piece of code won't trample over the same namespace/methods.
 
-## OPTIONS
+# OPTIONS
 
 A mapping from native types to their user-defined classes can be specified
 by passing a hashref or a list of key/value pairs to the `use autobox` statement.
@@ -344,7 +349,7 @@ use autobox ARRAY => 'Prelude::ARRAY';
 - A reference to an array of class names and/or namespaces. This associates multiple classes with the
 specified type.
 
-### DEFAULT
+## DEFAULT
 
 The `DEFAULT` option specifies bindings for any of the four default types (SCALAR, ARRAY, HASH and CODE)
 not supplied in the `use autobox` statement. As with the other options, the `value` corresponding to
@@ -426,7 +431,7 @@ use autobox {
 %INC->baz; # not ok: runtime error
 ```
 
-### UNDEF
+## UNDEF
 
 The pseudotype, UNDEF, can be used to autobox undefined values. These are not autoboxed by default.
 
@@ -454,7 +459,7 @@ use autobox UNDEF => 'MyNamespace::';
 undef->foo(); # ok
 ```
 
-### NUMBER, SCALAR and UNIVERSAL
+## NUMBER, SCALAR and UNIVERSAL
 
 The virtual types NUMBER, SCALAR and UNIVERSAL function as macros or shortcuts which create
 bindings for their subtypes. The type hierarchy is as follows:
@@ -560,7 +565,7 @@ use autobox {
 }
 ```
 
-### DEBUG
+## DEBUG
 
 `DEBUG` exposes the current bindings for the scope in which `use autobox` is called by means
 of a callback, or a static debugging function.
@@ -598,9 +603,9 @@ sub my_callback ($) {
 use autobox DEBUG => \&my_callback, ...
 ```
 
-## METHODS
+# METHODS
 
-### import
+## import
 
 This method sets up `autobox` bindings for the current lexical scope. It can be used to implement
 `autobox` extensions i.e. lexically-scoped modules that provide `autobox` bindings for one or more
@@ -647,7 +652,7 @@ use String::Trim;
 print "  Hello, world!  "->trim();
 ```
 
-## UNIVERSAL METHODS FOR AUTOBOXED TYPES
+# UNIVERSAL METHODS FOR AUTOBOXED TYPES
 
 ## autobox_class
 
@@ -670,9 +675,9 @@ these methods are called directly on the native type e.g.:
 
 \- is undefined.
 
-## EXPORTS
+# EXPORTS
 
-### type
+## type
 
 `autobox` includes an additional module, `autobox::universal`, which exports a single subroutine, `type`.
 
@@ -699,9 +704,9 @@ use autobox UNIVERSAL => 'autobox::universal';
 %ENV->type      # HASH
 ```
 
-## CAVEATS
+# CAVEATS
 
-### Performance
+## Performance
 
 Calling
 
@@ -715,9 +720,9 @@ is slightly slower than the equivalent method call on a string-like object, and 
 length("Hello, world!")
 ```
 
-### Gotchas
+## Gotchas
 
-#### Precedence
+### Precedence
 
 Due to Perl's precedence rules, some autoboxed literals may need to be parenthesized:
 
@@ -752,7 +757,7 @@ my $range = -10->to(10);
 my $range = (-10)->to(10);
 ```
 
-#### print BLOCK
+### print BLOCK
 
 Perl's special-casing for the `print BLOCK ...` syntax (see [perlsub](https://metacpan.org/pod/perlsub)) means that `print { expression() } ...`
 (where the curly brackets denote an anonymous HASH ref) may require some further disambiguation:
@@ -793,7 +798,7 @@ print '' . { @_ }->foo() ? 1 : 0;
 { @_ }->print_if_foo(1, 0);
 ```
 
-#### eval EXPR
+### eval EXPR
 
 Like most pragmas, `autobox` performs operations at compile time, and,
 as a result, runtime string `eval`s are not executed within its scope i.e. this
@@ -822,31 +827,31 @@ use autobox;
 eval { 42->foo() }; # OK
 ```
 
-#### Operator Overloading
+### Operator Overloading
 
 Operator overloading via the [overload](https://metacpan.org/pod/overload) pragma doesn't (automatically) work. `autobox`
 works by lexically overriding the [arrow operator](https://metacpan.org/pod/perlop#The-Arrow-Operator).
 It doesn't bless native types into objects, so overloading — or any other kind of "magic" which depends on values being
 blessed — doesn't apply.
 
-## VERSION
+# VERSION
 
 2.85
 
-## SEE ALSO
+# SEE ALSO
 
 - [autobox::Core](https://metacpan.org/pod/autobox::Core)
 - [Moose::Autobox](https://metacpan.org/pod/Moose::Autobox)
 - [perl5i](https://metacpan.org/pod/perl5i)
 - [Scalar::Properties](https://metacpan.org/pod/Scalar::Properties)
 
-## AUTHOR
+# AUTHOR
 
 [chocolateboy](mailto:chocolate@cpan.org)
 
-## COPYRIGHT AND LICENSE
+# COPYRIGHT AND LICENSE
 
-Copyright (c) 2003-2018, chocolateboy.
+Copyright © 2008-2016 by chocolateboy.
 
-This module is free software; you can redistribute it and/or modify it under the
-terms of the [Artistic License 2.0](http://www.opensource.org/licenses/artistic-license-2.0.php).
+autobox is free software; you can redistribute it and/or modify it under the terms of the
+[Artistic License 2.0](http://www.opensource.org/licenses/artistic-license-2.0.php).
