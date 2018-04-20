@@ -834,7 +834,7 @@ blessed — doesn't apply.
 
 # VERSION
 
-2.85
+2.86
 
 # SEE ALSO
 
@@ -849,7 +849,7 @@ blessed — doesn't apply.
 
 # COPYRIGHT AND LICENSE
 
-Copyright © 2008-2016 by chocolateboy.
+Copyright © 2003-2018 by chocolateboy.
 
 This is free software; you can redistribute it and/or modify it under the terms of the
 [Artistic License 2.0](http://www.opensource.org/licenses/artistic-license-2.0.php).
