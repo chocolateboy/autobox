@@ -63,7 +63,7 @@ use warnings;
 use FindBin qw($Bin);
 use lib "$Bin/lib";
 
-use Test::More tests => 292;
+use Test::More tests => 302;
 
 $| = 1;
 
@@ -76,6 +76,7 @@ my $string          = 'Hello, world!';
 my $array           = [ 0 .. 9 ];
 my $hash            = { 0 .. 9 };
 my $code            = \&add;
+my $test            = 'test';
 my $error           = qr{Can't (call|locate object) method "test" (without a|via) package\b};
 my $string_error    = qr{Can't locate object method "test" via package "Hello, world!"};
 my $unblessed_error = qr{Can't call method "test" on unblessed reference};
@@ -87,6 +88,7 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
 
     my $object = Test->new();
     is(ref $object, 'Test', 'no args: Test->new() - bareword not autoboxed');
+    is(Test->$test, 'rubicund', 'no args: Test->$test() - bareword not autoboxed');
 
     my $result = $object->test();
     is($result, 'rubicund', 'no args: $object->test() - object not autoboxed');
@@ -122,6 +124,7 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
 
     my $object = Test->new();
     is(ref $object, 'Test', 'override package: Test->new() - bareword not autoboxed');
+    is(Test->$test, 'rubicund', 'override package: Test->$test() - bareword not autoboxed');
 
     my $result = $object->test();
     is($result, 'rubicund', 'override package: $object->test() - object not autoboxed');
@@ -147,6 +150,7 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
 
     my $object = Test->new();
     is(ref $object, 'Test', 'override namespace: Test->new() - bareword not autoboxed');
+    is(Test->$test, 'rubicund', 'override namespace: Test->$test() - bareword not autoboxed');
 
     my $result = $object->test();
     is($result, 'rubicund', 'override namespace: $object->test() - object not autoboxed');
@@ -172,6 +176,7 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
 
     my $object = Test->new();
     is(ref $object, 'Test', 'default package: Test->new() - bareword not autoboxed');
+    is(Test->$test, 'rubicund', 'default package: Test->$test() - bareword not autoboxed');
 
     my $result = $object->test();
     is($result, 'rubicund', 'default package: $object->test() - object not autoboxed');
@@ -207,6 +212,7 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
 
     my $object = Test->new();
     is(ref $object, 'Test', 'default namespace: Test->new() - bareword not autoboxed');
+    is(Test->$test, 'rubicund', 'default namespace: Test->$test() - bareword not autoboxed');
 
     my $result = $object->test();
     is($result, 'rubicund', 'default namespace: $object->test() - object not autoboxed');
@@ -268,6 +274,7 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
 
     my $object = Test->new();
     is(ref $object, 'Test', 'test all 1: Test->new() - bareword not autoboxed');
+    is(Test->$test, 'rubicund', 'test all 1: Test->$test() - bareword not autoboxed');
 
     my $result = $object->test();
     is($result, 'rubicund', 'test all 1: $object->test() - object not autoboxed');
@@ -303,6 +310,7 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
 
     my $object = Test->new();
     is(ref $object, 'Test', 'test all 2: Test->new() - bareword not autoboxed');
+    is(Test->$test, 'rubicund', 'test all 2: Test->$test() - bareword not autoboxed');
 
     my $result = $object->test();
     is($result, 'rubicund', 'test all 2: $object->test() - object not autoboxed');
@@ -338,6 +346,7 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
 
     my $object = Test->new();
     is(ref $object, 'Test', 'test all 3: Test->new() - bareword not autoboxed');
+    is(Test->$test, 'rubicund', 'test all 3: Test->$test() - bareword not autoboxed');
 
     my $result = $object->test();
     is($result, 'rubicund', 'test all 3: $object->test() - object not autoboxed');
@@ -372,6 +381,7 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
 
     my $object = Test->new();
     is(ref $object, 'Test', 'test all 4: Test->new() - bareword not autoboxed');
+    is(Test->$test, 'rubicund', 'test all 4: Test->$test() - bareword not autoboxed');
 
     my $result = $object->test();
     is($result, 'rubicund', 'test all 4: $object->test() - object not autoboxed');
@@ -455,6 +465,7 @@ my $undef_error     = qr{Can't call method "[^"]+" on an undefined value};
 
     my $object = Test->new();
     is(ref $object, 'Test', 'nested (outer): Test->new() - bareword not autoboxed');
+    is(Test->$test, 'rubicund', 'nested (outer): Test->$test() - bareword not autoboxed');
 
     my $result = $object->test();
     is($result, 'rubicund', 'nested (outer): $object->test() - object not autoboxed');
