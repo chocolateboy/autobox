@@ -565,15 +565,14 @@ use autobox {
 
 ## DEBUG
 
-`DEBUG` exposes the current bindings for the scope in which `use autobox` is called by means
-of a callback, or a static debugging function.
-
+`DEBUG` allows the autobox bindings for the current scope to be inspected,
+either by dumping them to the console or passing them to a callback function.
 This allows the computed bindings to be seen in "longhand".
 
 The option is ignored if the value corresponding to the `DEBUG` key is false.
 
-If the value is a CODE ref, then this sub is called with a reference to
-the hash containing the computed bindings for the current scope.
+If the value is a CODE ref, it is called with a reference to the hash
+containing the computed bindings for the current scope.
 
 Finally, if `DEBUG` is true but not a CODE ref, the bindings are dumped
 to STDERR.
