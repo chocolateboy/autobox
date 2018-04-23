@@ -28,6 +28,10 @@ void auto_ref(pTHX_ OP *invocant, UNOP *parent, OP *prev);
  *     @foo->bar -> (\@foo)->bar
  */
 void auto_ref(pTHX_ OP *invocant, UNOP *parent, OP *prev) {
+#ifndef op_sibling_splice
+    OP *refgen = newUNOP(OP_REFGEN, 0, invocant);
+#endif
+
     /*
      * perlref:
      *
@@ -66,7 +70,6 @@ void auto_ref(pTHX_ OP *invocant, UNOP *parent, OP *prev) {
     );
 #else
     /* XXX if this (old?) way works, why do we need both? */
-    OP *refgen = newUNOP(OP_REFGEN, 0, invocant);
     prev->op_sibling = refgen;
     refgen->op_sibling = invocant->op_sibling;
     invocant->op_sibling = NULL;
