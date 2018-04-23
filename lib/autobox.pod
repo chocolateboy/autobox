@@ -530,7 +530,7 @@ lexical scope e.g.:
 =head2 autobox_class
 
 C<autobox> adds a single method to all autoboxed types: C<autobox_class>. This can be used to
-call C<can>, C<isa>, C<VERSION>, C<import> and C<unimport> e.g.
+call L<UNIVERSAL|UNIVERSAL> methods i.e. C<can>, C<DOES>, C<import>, C<isa>, C<unimport> and C<VERSION> e.g.
 
     if (sub { ... }->autobox_class->can('curry')) ...
     if (42->autobox_class->isa('SCALAR')) ...

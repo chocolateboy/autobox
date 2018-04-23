@@ -15,4 +15,5 @@ MYMETA.yml
 *.o
 *.bs
 autobox.c
+autobox.i
 dev/

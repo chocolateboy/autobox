@@ -654,7 +654,7 @@ print "  Hello, world!  "->trim();
 ## autobox_class
 
 `autobox` adds a single method to all autoboxed types: `autobox_class`. This can be used to
-call `can`, `isa`, `VERSION`, `import` and `unimport` e.g.
+call [UNIVERSAL](https://metacpan.org/pod/UNIVERSAL) methods i.e. `can`, `DOES`, `import`, `isa`, `unimport` and `VERSION` e.g.
 
 ```perl
 if (sub { ... }->autobox_class->can('curry')) ...

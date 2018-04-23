@@ -3,11 +3,12 @@ Revision history for Perl extension autobox
 3.0.0 TBC
 
     - breaking change:
-      - the behaviour of $native->can and $native->isa is now defined
-        as being the same as when autobox is not enabled rather than
-        "undefined". (technically, this still falls under the rubric of
-        "undefined", but the switch from "don't know" to "don't" could
-        break buggy code, so bump for safety)
+      - the behaviour of UNIVERSAL methods like $native->can and
+        $native->isa is now defined as being the same as when autobox
+        is not enabled rather than "undefined". (technically, this
+        still falls under the rubric of "undefined", but the switch
+        from "don't know" to "don't" could break buggy code, so bump
+        for safety)
     - switch to SemVer i.e. 2.86 (v2.860.0) -> 3.0.0 (v3.0.0)
     - upgrade ppport.h from 3.35 -> 3.42
 

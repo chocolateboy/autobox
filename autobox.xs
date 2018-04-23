@@ -29,7 +29,7 @@ void auto_ref(pTHX_ OP *invocant, UNOP *parent, OP *prev);
  */
 void auto_ref(pTHX_ OP *invocant, UNOP *parent, OP *prev) {
 #ifndef op_sibling_splice
-    OP *refgen = newUNOP(OP_REFGEN, 0, invocant);
+    OP *refgen;
 #endif
 
     /*
@@ -70,6 +70,8 @@ void auto_ref(pTHX_ OP *invocant, UNOP *parent, OP *prev) {
     );
 #else
     /* XXX if this (old?) way works, why do we need both? */
+    PERL_UNUSED_ARG(parent); /* silence warning on perl v5.8 */
+    refgen = newUNOP(OP_REFGEN, 0, invocant);
     prev->op_sibling = refgen;
     refgen->op_sibling = invocant->op_sibling;
     invocant->op_sibling = NULL;
@@ -146,12 +148,16 @@ OP * autobox_check_entersub(pTHX_ OP *o) {
      * e.g. []->VERSION or {}->import, but we don't, for consistency. even if
      * OP_CONST invocants had the correct bareword flags, it's far more likely
      * to be a bug for e.g. []->VERSION to differ from ARRAY->VERSION than
-     * a deliberate feature.
+     * a deliberate feature. [2]
      *
      * likewise, we also exempt $native->can and $native->isa here, neither
      * of which are well-defined as instance methods.
      *
      * [1] XXX this is a bug (in perl)
+     *
+     * [2] although if these barewords did have the correct flag, we could
+     *     forward (non-bareword) calls to these methods to autobox_class
+     *     automatically rather than requiring the user to do it manually
      */
     if (cvop->op_type == OP_METHOD_NAMED) {
         /* SvPVX_const should be sane for the method name */
@@ -159,6 +165,7 @@ OP * autobox_check_entersub(pTHX_ OP *o) {
 
         if (
             strEQ(method_name, "can")      ||
+            strEQ(method_name, "DOES")     ||
             strEQ(method_name, "import")   ||
             strEQ(method_name, "isa")      ||
             strEQ(method_name, "unimport") ||
@@ -422,7 +429,7 @@ static SV * autobox_method_common(pTHX_ SV * method, U32* hashp) {
 }
 
 static void autobox_cleanup(pTHX_ void * unused) {
-    PERL_UNUSED_VAR(unused); /* silence warning */
+    PERL_UNUSED_ARG(unused); /* silence warning on perl v5.8 */
 
     if (AUTOBOX_OP_MAP) {
         PTABLE_free(AUTOBOX_OP_MAP);
@@ -439,6 +446,7 @@ BOOT:
  * XXX the BOOT section extends to the next blank line, so don't add one
  * for readability
  */
+PERL_UNUSED_ARG(cv); /* silence warning on perl v5.8 */
 AUTOBOX_OP_MAP = PTABLE_new();
 if (AUTOBOX_OP_MAP) {
     Perl_call_atexit(aTHX_ autobox_cleanup, NULL);
@@ -450,6 +458,8 @@ void
 _enter()
     PROTOTYPE:
     CODE:
+        PERL_UNUSED_ARG(cv); /* silence warning on perl v5.8 */
+
         if (AUTOBOX_SCOPE_DEPTH > 0) {
             ++AUTOBOX_SCOPE_DEPTH;
         } else {
@@ -467,6 +477,8 @@ void
 _leave()
     PROTOTYPE:
     CODE:
+        PERL_UNUSED_ARG(cv); /* silence warning on perl v5.8 */
+
         if (AUTOBOX_SCOPE_DEPTH == 0) {
             Perl_warn(aTHX_ "scope underflow");
         }
@@ -482,6 +494,7 @@ void
 _scope()
     PROTOTYPE:
     CODE:
+        PERL_UNUSED_ARG(cv); /* silence warning on perl v5.8 */
         XSRETURN_UV(PTR2UV(GvHV(PL_hintgv)));
 
 MODULE = autobox                PACKAGE = autobox::universal
@@ -493,6 +506,8 @@ type(SV * sv)
         STRLEN len = 0;
         const char *type;
     CODE:
+        PERL_UNUSED_ARG(cv); /* silence warning on perl v5.8 */
+
         if (SvOK(sv)) {
             type = autobox_type(aTHX_ (SvROK(sv) ? SvRV(sv) : sv), &len);
             RETVAL = newSVpv(type, len);
