@@ -81,7 +81,7 @@ use autobox;
 
 # DESCRIPTION
 
-The `autobox` pragma allows methods to be called on integers, floats, strings, arrays,
+The autobox pragma allows methods to be called on integers, floats, strings, arrays,
 hashes, and code references in exactly the same manner as blessed references.
 
 Autoboxing is transparent: values are not blessed into their (user-defined)
@@ -151,7 +151,7 @@ use autobox SCALAR => 'Foo';
 use autobox SCALAR => 'Bar';
 ```
 
-\- associates SCALAR types with a synthetic class whose `@ISA` includes both `Foo` and `Bar` (in that order).
+\- associates SCALAR types with a synthetic class whose `@ISA` includes both Foo and Bar (in that order).
 
 Likewise:
 
@@ -168,10 +168,9 @@ use autobox SCALAR => [ 'Foo', 'Bar' ];
 use autobox ARRAY  => 'Baz';
 ```
 
-\- bind SCALAR types to the `Foo` and `Bar` classes and ARRAY types to `Baz`.
+\- bind SCALAR types to the Foo and Bar classes and ARRAY types to Baz.
 
-`autobox` is lexically scoped, and bindings for an outer scope
-can be extended or countermanded in a nested scope:
+autobox is lexically scoped, and bindings for an outer scope can be extended or countermanded in a nested scope:
 
 ```perl
 {
@@ -604,11 +603,11 @@ use autobox DEBUG => \&my_callback, ...
 
 ## import
 
-This method sets up `autobox` bindings for the current lexical scope. It can be used to implement
-`autobox` extensions i.e. lexically-scoped modules that provide `autobox` bindings for one or more
+This method sets up autobox bindings for the current lexical scope. It can be used to implement
+autobox extensions i.e. lexically-scoped modules that provide autobox bindings for one or more
 native types without requiring calling code to `use autobox`.
 
-This is done by subclassing `autobox` and overriding `import`. This allows extensions to effectively
+This is done by subclassing autobox and overriding `import`. This allows extensions to effectively
 translate `use MyModule` into a bespoke `use autobox` call e.g.:
 
 ```perl
@@ -635,8 +634,8 @@ sub trim {
 1;
 ```
 
-Note that `trim` is defined in an auxiliary class rather than in `String::Trim` itself to prevent
-`String::Trim`'s own methods (i.e. the methods it inherits from `autobox`) being exposed to `STRING` types.
+Note that `trim` is defined in an auxiliary class rather than in String::Trim itself to prevent
+String::Trim's own methods (i.e. the methods it inherits from autobox) being exposed to `STRING` types.
 
 This module can now be used without a `use autobox` statement to enable the `trim` method in the current
 lexical scope e.g.:
@@ -653,7 +652,7 @@ print "  Hello, world!  "->trim();
 
 ## autobox_class
 
-`autobox` adds a single method to all autoboxed types: `autobox_class`. This can be used to
+autobox adds a single method to all autoboxed types: `autobox_class`. This can be used to
 call [UNIVERSAL](https://metacpan.org/pod/UNIVERSAL) methods i.e. `can`, `DOES`, `import`, `isa`, `unimport` and `VERSION` e.g.
 
 ```perl
@@ -674,10 +673,10 @@ e.g.:
 
 ## type
 
-`autobox` includes an additional module, `autobox::universal`, which exports a single subroutine, `type`.
+autobox includes an additional module, autobox::universal, which exports a single subroutine, `type`.
 
-This sub returns the type of its argument within `autobox` (which is essentially longhand for the type names
-used within perl). This value is used by `autobox` to associate a method invocant with its designated classes e.g.
+This sub returns the type of its argument within autobox (which is essentially longhand for the type names
+used within perl). This value is used by autobox to associate a method invocant with its designated classes e.g.
 
 ```perl
 use autobox::universal qw(type);
@@ -688,7 +687,7 @@ type(42.0)  # FLOAT
 type(undef) # UNDEF
 ```
 
-`autobox::universal` is loaded automatically by `autobox`, and, as its name suggests, can be used to install
+autobox::universal is loaded automatically by autobox, and, as its name suggests, can be used to install
 a universal `type` method for autoboxed values e.g.
 
 ```perl
@@ -795,7 +794,7 @@ print '' . { @_ }->foo() ? 1 : 0;
 
 ### eval EXPR
 
-Like most pragmas, `autobox` performs operations at compile time, and,
+Like most pragmas, autobox performs operations at compile time, and,
 as a result, runtime string `eval`s are not executed within its scope i.e. this
 doesn't work:
 
@@ -805,7 +804,7 @@ use autobox;
 eval "42->foo";
 ```
 
-The workaround is to use `autobox` within the `eval` e.g.
+The workaround is to use autobox within the `eval` e.g.
 
 ```perl
 eval <<'EOS';
@@ -824,7 +823,7 @@ eval { 42->foo() }; # OK
 
 ### Operator Overloading
 
-Operator overloading via the [overload](https://metacpan.org/pod/overload) pragma doesn't (automatically) work. `autobox`
+Operator overloading via the [overload](https://metacpan.org/pod/overload) pragma doesn't (automatically) work. autobox
 works by lexically overriding the [arrow operator](https://metacpan.org/pod/perlop#The-Arrow-Operator).
 It doesn't bless native types into objects, so overloading — or any other kind of "magic" which depends on values being
 blessed — doesn't apply.
