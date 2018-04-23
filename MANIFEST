@@ -13,6 +13,7 @@ ptable.h
 README
 t/all.t
 t/autoref.t
+t/can.t
 t/coderef.t
 t/debugger.pl
 t/debugger.t

@@ -609,7 +609,7 @@ This method sets up `autobox` bindings for the current lexical scope. It can be 
 native types without requiring calling code to `use autobox`.
 
 This is done by subclassing `autobox` and overriding `import`. This allows extensions to effectively
-translate `use MyModule` into a bespoke `use autobox` call. e.g.:
+translate `use MyModule` into a bespoke `use autobox` call e.g.:
 
 ```perl
 package String::Trim;
@@ -639,7 +639,7 @@ Note that `trim` is defined in an auxiliary class rather than in `String::Trim` 
 `String::Trim`'s own methods (i.e. the methods it inherits from `autobox`) being exposed to `STRING` types.
 
 This module can now be used without a `use autobox` statement to enable the `trim` method in the current
-lexical scope. e.g.:
+lexical scope e.g.:
 
 ```perl
 #!/usr/bin/env perl
@@ -654,23 +654,21 @@ print "  Hello, world!  "->trim();
 ## autobox_class
 
 `autobox` adds a single method to all autoboxed types: `autobox_class`. This can be used to
-call `can`, `isa`, `VERSION`, `import` and `unimport`. e.g.
+call `can`, `isa`, `VERSION`, `import` and `unimport` e.g.
 
 ```perl
 if (sub { ... }->autobox_class->can('curry')) ...
 if (42->autobox_class->isa('SCALAR')) ...
 ```
 
-Note: `autobox_class` should **always** be used when calling these methods. The behaviour when
-these methods are called directly on the native type e.g.:
+Note: `autobox_class` must **always** be used when calling these methods. Calling them
+directly on native types produces the same results as calling them with autobox disabled
+e.g.:
 
 ```perl
-42->can('foo')
-42->isa('Bar')
-42->VERSION
+42->isa('NUMBER') # "" (interpeted as "42"->isa("NUMBER"))
+[]->can('push')   # Error: Can't call method "can" on unblessed reference
 ```
-
-\- is undefined.
 
 # EXPORTS
 
@@ -679,7 +677,7 @@ these methods are called directly on the native type e.g.:
 `autobox` includes an additional module, `autobox::universal`, which exports a single subroutine, `type`.
 
 This sub returns the type of its argument within `autobox` (which is essentially longhand for the type names
-used within perl). This value is used by `autobox` to associate a method invocant with its designated classes. e.g.
+used within perl). This value is used by `autobox` to associate a method invocant with its designated classes e.g.
 
 ```perl
 use autobox::universal qw(type);

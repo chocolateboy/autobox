@@ -22,7 +22,11 @@ OP * autobox_method(pTHX);
 
 void auto_ref(pTHX_ OP *invocant, UNOP *parent, OP *prev);
 
-/* handle non-reference invocants e.g. @foo->bar, %foo->bar etc. */
+/*
+ * convert array/hash invocants to arrayref/hashref e.g.:
+ *
+ *     @foo->bar -> (\@foo)->bar
+ */
 void auto_ref(pTHX_ OP *invocant, UNOP *parent, OP *prev) {
     /*
      * perlref:
@@ -119,7 +123,7 @@ OP * autobox_check_entersub(pTHX_ OP *o) {
         goto done;
     }
 
-    /* bail out if the invocant is a bareword e.g. Foo->bar */
+    /* bail out if the invocant is a bareword e.g. Foo->bar or Foo->$bar */
     if ((invocant->op_type == OP_CONST) && (invocant->op_private & OPpCONST_BARE)) {
         goto done;
     }
@@ -134,6 +138,16 @@ OP * autobox_check_entersub(pTHX_ OP *o) {
      * (this is documented: the solution/workaround is to use
      * $value->autobox_class instead.)
      *
+     * note: we exempt all invocant types from these methods rather than just
+     * the invocants we can't be sure about (i.e. OP_CONST). we *could* allow
+     * e.g. []->VERSION or {}->import, but we don't, for consistency. even if
+     * OP_CONST invocants had the correct bareword flags, it's far more likely
+     * to be a bug for e.g. []->VERSION to differ from ARRAY->VERSION than
+     * a deliberate feature.
+     *
+     * likewise, we also exempt $native->can and $native->isa here, neither
+     * of which are well-defined as instance methods.
+     *
      * [1] XXX this is a bug (in perl)
      */
     if (cvop->op_type == OP_METHOD_NAMED) {
@@ -141,7 +155,9 @@ OP * autobox_check_entersub(pTHX_ OP *o) {
         const char * method_name = SvPVX_const(((SVOP *)cvop)->op_sv);
 
         if (
+            strEQ(method_name, "can")      ||
             strEQ(method_name, "import")   ||
+            strEQ(method_name, "isa")      ||
             strEQ(method_name, "unimport") ||
             strEQ(method_name, "VERSION")
         ) {

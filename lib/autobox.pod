@@ -489,7 +489,7 @@ C<autobox> extensions i.e. lexically-scoped modules that provide C<autobox> bind
 native types without requiring calling code to C<use autobox>.
 
 This is done by subclassing C<autobox> and overriding C<import>. This allows extensions to effectively
-translate C<use MyModule> into a bespoke C<use autobox> call. e.g.:
+translate C<use MyModule> into a bespoke C<use autobox> call e.g.:
 
     package String::Trim;
 
@@ -517,7 +517,7 @@ Note that C<trim> is defined in an auxiliary class rather than in C<String::Trim
 C<String::Trim>'s own methods (i.e. the methods it inherits from C<autobox>) being exposed to C<STRING> types.
 
 This module can now be used without a C<use autobox> statement to enable the C<trim> method in the current
-lexical scope. e.g.:
+lexical scope e.g.:
 
     #!/usr/bin/env perl
 
@@ -530,19 +530,17 @@ lexical scope. e.g.:
 =head2 autobox_class
 
 C<autobox> adds a single method to all autoboxed types: C<autobox_class>. This can be used to
-call C<can>, C<isa>, C<VERSION>, C<import> and C<unimport>. e.g.
+call C<can>, C<isa>, C<VERSION>, C<import> and C<unimport> e.g.
 
     if (sub { ... }->autobox_class->can('curry')) ...
     if (42->autobox_class->isa('SCALAR')) ...
 
-Note: C<autobox_class> should B<always> be used when calling these methods. The behaviour when
-these methods are called directly on the native type e.g.:
+Note: C<autobox_class> must B<always> be used when calling these methods. Calling them
+directly on native types produces the same results as calling them with autobox disabled
+e.g.:
 
-    42->can('foo')
-    42->isa('Bar')
-    42->VERSION
-
-- is undefined.
+    42->isa('NUMBER') # "" (interpeted as "42"->isa("NUMBER"))
+    []->can('push')   # Error: Can't call method "can" on unblessed reference
 
 =head1 EXPORTS
 
@@ -551,7 +549,7 @@ these methods are called directly on the native type e.g.:
 C<autobox> includes an additional module, C<autobox::universal>, which exports a single subroutine, C<type>.
 
 This sub returns the type of its argument within C<autobox> (which is essentially longhand for the type names
-used within perl). This value is used by C<autobox> to associate a method invocant with its designated classes. e.g.
+used within perl). This value is used by C<autobox> to associate a method invocant with its designated classes e.g.
 
     use autobox::universal qw(type);
 
