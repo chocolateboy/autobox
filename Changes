@@ -9,6 +9,7 @@ Revision history for Perl extension autobox
         "undefined", but the switch from "don't know" to "don't" could
         break buggy code, so bump for safety)
     - switch to SemVer i.e. 2.86 (v2.860.0) -> 3.0.0 (v3.0.0)
+    - upgrade ppport.h from 3.35 -> 3.42
 
 2.86 Fri 20 Apr 20:07:29 2018
 
@@ -28,7 +29,7 @@ Revision history for Perl extension autobox
 
     - compatibility fix for perl >= 5.25
       (thanks, mat813, karenetheridge and eserte)
-    - update ppport.h from 3.20 to 3.35
+    - upgrade ppport.h from 3.20 to 3.35
 
 2.83 Sun Feb 1 21:34:01 2015
 
@@ -74,7 +75,7 @@ Revision history for Perl extension autobox
 
     - fix breaking tests in perl >= 5.17.5: update error
       message pattern (thanks, rjbs)
-    - update ppport.h from 3.19 to 3.20
+    - upgrade ppport.h from 3.19 to 3.20
 
 2.75  Thu Jul 21 22:07:26 2011
 
