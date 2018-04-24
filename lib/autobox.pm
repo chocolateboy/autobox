@@ -257,7 +257,7 @@ sub import {
     # sanity check %args, expand the namespace prefixes into class names,
     # and copy values to the $bindings hash
 
-    my %synthetic = reverse (%$CLASS_CACHE); # synthetic class name => bool - see _pretty_print
+    my %synthetic = reverse(%$CLASS_CACHE); # synthetic class name => bool - see _pretty_print
 
     for my $type (keys %args) {
         # we've handled the virtual types, so we only need to check that this is a valid (real) type

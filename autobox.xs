@@ -22,15 +22,114 @@ OP * autobox_method(pTHX);
 
 void auto_ref(pTHX_ OP *invocant, UNOP *parent, OP *prev);
 
+#ifndef MUTABLE_GV /* XXX missing from ppport.h */
+    #define MUTABLE_GV(p) ((GV *)MUTABLE_PTR(p))
+#endif
+
+#define AUTOBOX_TYPE_RETURN(type) STMT_START { \
+    *len = (sizeof(type) - 1); return type;    \
+} STMT_END
+
+static const char *autobox_type(pTHX_ SV * const sv, STRLEN *len) {
+    switch (SvTYPE(sv)) {
+        case SVt_NULL:
+            AUTOBOX_TYPE_RETURN("UNDEF");
+        case SVt_IV:
+            AUTOBOX_TYPE_RETURN("INTEGER");
+        case SVt_PVIV:
+            if (SvIOK(sv)) {
+                AUTOBOX_TYPE_RETURN("INTEGER");
+            } else {
+                AUTOBOX_TYPE_RETURN("STRING");
+            }
+        case SVt_NV:
+            if (SvIOK(sv)) {
+                AUTOBOX_TYPE_RETURN("INTEGER");
+            } else {
+                AUTOBOX_TYPE_RETURN("FLOAT");
+            }
+        case SVt_PVNV:
+            /*
+             * integer before float:
+             * https://rt.cpan.org/Ticket/Display.html?id=46814
+             */
+            if (SvIOK(sv)) {
+                AUTOBOX_TYPE_RETURN("INTEGER");
+            } else if (SvNOK(sv)) {
+                AUTOBOX_TYPE_RETURN("FLOAT");
+            } else {
+                AUTOBOX_TYPE_RETURN("STRING");
+            }
+
+        #ifdef SVt_RV /* no longer defined by default if PERL_CORE is defined */
+            case SVt_RV:
+        #endif
+
+        case SVt_PV:
+        case SVt_PVMG:
+
+        #ifdef SvVOK
+            if (SvVOK(sv)) {
+                AUTOBOX_TYPE_RETURN("VSTRING");
+            }
+        #endif
+
+            if (SvROK(sv)) {
+                AUTOBOX_TYPE_RETURN("REF");
+            } else {
+                AUTOBOX_TYPE_RETURN("STRING");
+            }
+        case SVt_PVLV:
+            if (SvROK(sv)) {
+                AUTOBOX_TYPE_RETURN("REF");
+            } else if (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T') { /* tied lvalue */
+                if (SvIOK(sv)) {
+                    AUTOBOX_TYPE_RETURN("INTEGER");
+                } else if (SvNOK(sv)) {
+                    AUTOBOX_TYPE_RETURN("FLOAT");
+                } else {
+                    AUTOBOX_TYPE_RETURN("STRING");
+                }
+            } else {
+                AUTOBOX_TYPE_RETURN("LVALUE");
+            }
+        case SVt_PVAV:
+            AUTOBOX_TYPE_RETURN("ARRAY");
+        case SVt_PVHV:
+            AUTOBOX_TYPE_RETURN("HASH");
+        case SVt_PVCV:
+            AUTOBOX_TYPE_RETURN("CODE");
+        case SVt_PVGV:
+            AUTOBOX_TYPE_RETURN("GLOB");
+        case SVt_PVFM:
+            AUTOBOX_TYPE_RETURN("FORMAT");
+        case SVt_PVIO:
+            AUTOBOX_TYPE_RETURN("IO");
+
+        #ifdef SVt_BIND
+        case SVt_BIND:
+            AUTOBOX_TYPE_RETURN("BIND");
+        #endif
+
+        #ifdef SVt_REGEXP
+        case SVt_REGEXP:
+            AUTOBOX_TYPE_RETURN("REGEXP");
+        #endif
+
+        default:
+            AUTOBOX_TYPE_RETURN("UNKNOWN");
+    }
+}
+
 /*
  * convert array/hash invocants to arrayref/hashref e.g.:
  *
  *     @foo->bar -> (\@foo)->bar
  */
 void auto_ref(pTHX_ OP *invocant, UNOP *parent, OP *prev) {
-#ifndef op_sibling_splice
-    OP *refgen;
-#endif
+    #ifndef op_sibling_splice
+        OP *refgen;
+    #endif
 
     /*
      * perlref:
@@ -52,30 +151,30 @@ void auto_ref(pTHX_ OP *invocant, UNOP *parent, OP *prev) {
         toggled = TRUE;
     }
 
-#ifdef op_sibling_splice
-    op_sibling_splice(
-        (OP *)parent,
-        prev,
-        0,
-        newUNOP(
-            OP_REFGEN,
+    #ifdef op_sibling_splice
+        op_sibling_splice(
+            (OP *)parent,
+            prev,
             0,
-            op_sibling_splice(
-                (OP *)parent,
-                prev,
-                1,
-                NULL
+            newUNOP(
+                OP_REFGEN,
+                0,
+                op_sibling_splice(
+                    (OP *)parent,
+                    prev,
+                    1,
+                    NULL
+                )
             )
-        )
-    );
-#else
-    /* XXX if this (old?) way works, why do we need both? */
-    PERL_UNUSED_ARG(parent); /* silence warning on perl v5.8 */
-    refgen = newUNOP(OP_REFGEN, 0, invocant);
-    prev->op_sibling = refgen;
-    refgen->op_sibling = invocant->op_sibling;
-    invocant->op_sibling = NULL;
-#endif
+        );
+    #else
+        /* XXX if this (old?) way works, why do we need both? */
+        PERL_UNUSED_ARG(parent); /* silence warning on perl v5.8 */
+        refgen = newUNOP(OP_REFGEN, 0, invocant);
+        prev->op_sibling = refgen;
+        refgen->op_sibling = invocant->op_sibling;
+        invocant->op_sibling = NULL;
+    #endif
 
     /* Restore the parentheses in case something else expects them */
     if (toggled) {
@@ -213,6 +312,114 @@ OP * autobox_check_entersub(pTHX_ OP *o) {
         return autobox_old_check_entersub(aTHX_ o);
 }
 
+/* returns either the method, or NULL, meaning delegate to the original op */
+static SV * autobox_method_common(pTHX_ SV * method, U32* hashp) {
+    SV * const invocant = *(PL_stack_base + TOPMARK + 1);
+    SV * packsv;
+    HV * autobox_bindings;
+    HV * stash;
+    const char * reftype; /* autobox_bindings key */
+    SV **svp; /* pointer to autobox_bindings value */
+    STRLEN typelen = 0, packlen = 0;
+    const char * packname;
+    GV * gv;
+
+    /* if autobox isn't enabled (in scope) for this op, bail out */
+    if (!(PL_op->op_flags & OPf_SPECIAL)) {
+        return NULL;
+    }
+
+    // bail out if the invocant is NULL (not to be confused with undef) e.g.
+    // from a buggy XS module
+    if (!invocant) {
+        return NULL;
+    }
+
+    /*
+     * if the invocant's an object (blessed reference), bail out.
+     *
+     * XXX don't use sv_isobject - we don't want to call SvGETMAGIC twice
+     */
+    if (SvROK(invocant) && SvOBJECT(SvRV(invocant))) {
+        return NULL;
+    }
+
+    /* XXX do non-objects have magic attached? */
+    SvGETMAGIC(invocant);
+
+    /* the "bindings hash", which maps datatypes to package names */
+    autobox_bindings = (HV *)(PTABLE_fetch(AUTOBOX_OP_MAP, PL_op));
+
+    if (!autobox_bindings) {
+        return NULL;
+    }
+
+    /*
+     * the type is either the invocant's reftype(), a subtype of
+     * SCALAR if it's not a ref, or UNDEF if it's not defined
+     */
+    if (SvOK(invocant)) {
+        reftype = autobox_type(
+            aTHX_ (SvROK(invocant) ? SvRV(invocant) : invocant),
+            &typelen
+        );
+    } else {
+        reftype = "UNDEF";
+        typelen = sizeof("UNDEF") - 1;
+    }
+
+    svp = hv_fetch(autobox_bindings, reftype, typelen, 0);
+
+    if (!(svp && SvOK(*svp))) {
+        return NULL;
+    }
+
+    packsv = *svp;
+    packname = SvPV_const(packsv, packlen);
+    stash = gv_stashpvn(packname, packlen, FALSE);
+
+    if (hashp) {
+        /* shortcut for simple names */
+        const HE * const he = hv_fetch_ent(stash, method, 0, *hashp);
+
+        if (he) {
+            U32 cvgen;
+
+            #ifdef HvMROMETA /* introduced in v5.10 */
+                cvgen = PL_sub_generation + HvMROMETA(stash)->cache_gen;
+            #else
+                cvgen = PL_sub_generation;
+            #endif
+
+            gv = MUTABLE_GV(HeVAL(he));
+
+            /*
+             * GvCVGEN(gv) is almost always 0, so the global and local cache
+             * invalidation (above) seldom comes into play
+             */
+            if (isGV(gv) && GvCV(gv) && (!GvCVGEN(gv) || GvCVGEN(gv) == cvgen)) {
+                return MUTABLE_SV(GvCV(gv));
+            }
+        }
+    }
+
+    /*
+     * SvPV_nolen_const returns the method name as a const char *,
+     * stringifying names that are not strings (e.g. undef, SvIV,
+     * SvNV &c.) - see name.t
+     */
+    gv = gv_fetchmethod(
+        stash ? stash : (HV*)packsv,
+        SvPV_nolen_const(method)
+    );
+
+    if (gv) {
+        return isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv);
+    }
+
+    return NULL;
+}
+
 OP* autobox_method(pTHX) {
     dVAR; dSP;
     SV * const sv = TOPs;
@@ -251,181 +458,6 @@ OP* autobox_method_named(pTHX) {
     } else {
         return PL_ppaddr[OP_METHOD_NAMED](aTHXR);
     }
-}
-
-#define AUTOBOX_TYPE_RETURN(type) STMT_START { \
-    *len = (sizeof(type) - 1); return type;    \
-} STMT_END
-
-static const char *autobox_type(pTHX_ SV * const sv, STRLEN *len) {
-    switch (SvTYPE(sv)) {
-        case SVt_NULL:
-            AUTOBOX_TYPE_RETURN("UNDEF");
-        case SVt_IV:
-            AUTOBOX_TYPE_RETURN("INTEGER");
-        case SVt_PVIV:
-            if (SvIOK(sv)) {
-                AUTOBOX_TYPE_RETURN("INTEGER");
-            } else {
-                AUTOBOX_TYPE_RETURN("STRING");
-            }
-        case SVt_NV:
-            if (SvIOK(sv)) {
-                AUTOBOX_TYPE_RETURN("INTEGER");
-            } else {
-                AUTOBOX_TYPE_RETURN("FLOAT");
-            }
-        case SVt_PVNV:
-            /*
-             * integer before float:
-             * https://rt.cpan.org/Ticket/Display.html?id=46814
-             */
-            if (SvIOK(sv)) {
-                AUTOBOX_TYPE_RETURN("INTEGER");
-            } else if (SvNOK(sv)) {
-                AUTOBOX_TYPE_RETURN("FLOAT");
-            } else {
-                AUTOBOX_TYPE_RETURN("STRING");
-            }
-#ifdef SVt_RV /* no longer defined by default if PERL_CORE is defined */
-        case SVt_RV:
-#endif
-        case SVt_PV:
-        case SVt_PVMG:
-#ifdef SvVOK
-            if (SvVOK(sv)) {
-                AUTOBOX_TYPE_RETURN("VSTRING");
-            }
-#endif
-            if (SvROK(sv)) {
-                AUTOBOX_TYPE_RETURN("REF");
-            } else {
-                AUTOBOX_TYPE_RETURN("STRING");
-            }
-        case SVt_PVLV:
-            if (SvROK(sv)) {
-                AUTOBOX_TYPE_RETURN("REF");
-            } else if (LvTYPE(sv) == 't' || LvTYPE(sv) == 'T') { /* tied lvalue */
-                if (SvIOK(sv)) {
-                    AUTOBOX_TYPE_RETURN("INTEGER");
-                } else if (SvNOK(sv)) {
-                    AUTOBOX_TYPE_RETURN("FLOAT");
-                } else {
-                    AUTOBOX_TYPE_RETURN("STRING");
-                }
-            } else {
-                AUTOBOX_TYPE_RETURN("LVALUE");
-            }
-        case SVt_PVAV:
-            AUTOBOX_TYPE_RETURN("ARRAY");
-        case SVt_PVHV:
-            AUTOBOX_TYPE_RETURN("HASH");
-        case SVt_PVCV:
-            AUTOBOX_TYPE_RETURN("CODE");
-        case SVt_PVGV:
-            AUTOBOX_TYPE_RETURN("GLOB");
-        case SVt_PVFM:
-            AUTOBOX_TYPE_RETURN("FORMAT");
-        case SVt_PVIO:
-            AUTOBOX_TYPE_RETURN("IO");
-#ifdef SVt_BIND
-        case SVt_BIND:
-            AUTOBOX_TYPE_RETURN("BIND");
-#endif
-#ifdef SVt_REGEXP
-        case SVt_REGEXP:
-            AUTOBOX_TYPE_RETURN("REGEXP");
-#endif
-        default:
-            AUTOBOX_TYPE_RETURN("UNKNOWN");
-    }
-}
-
-/* returns either the method, or NULL, meaning delegate to the original op */
-/* FIXME this has diverged from the implementation in pp_hot.c */
-static SV * autobox_method_common(pTHX_ SV * method, U32* hashp) {
-    SV * const sv = *(PL_stack_base + TOPMARK + 1);
-
-    /*
-     * if autobox is enabled (in scope) for this op and the invocant isn't
-     * an object...
-     */
-    /* don't use sv_isobject - we don't want to call SvGETMAGIC twice */
-    if ((PL_op->op_flags & OPf_SPECIAL) && ((!SvROK(sv)) || !SvOBJECT(SvRV(sv)))) {
-        HV * autobox_bindings;
-
-        SvGETMAGIC(sv);
-
-        /* this is the "bindings hash" that maps datatypes to package names */
-        autobox_bindings = (HV *)(PTABLE_fetch(AUTOBOX_OP_MAP, PL_op));
-
-        if (autobox_bindings) {
-            const char * reftype; /* autobox_bindings key */
-            SV **svp; /* pointer to autobox_bindings value */
-            STRLEN typelen = 0;
-
-            /*
-             * the type is either the invocant's reftype(), a subtype of
-             * SCALAR if it's not a ref, or UNDEF if it's not defined
-             */
-
-            if (SvOK(sv)) {
-                reftype = autobox_type(aTHX_ (SvROK(sv) ? SvRV(sv) : sv), &typelen);
-            } else {
-                reftype = "UNDEF";
-                typelen = sizeof("UNDEF") - 1;
-            }
-
-            svp = hv_fetch(autobox_bindings, reftype, typelen, 0);
-
-            if (svp && SvOK(*svp)) {
-                SV * packsv = *svp;
-                STRLEN packlen;
-                HV * stash;
-                GV * gv;
-                const char * packname = SvPV_const(packsv, packlen);
-
-                stash = gv_stashpvn(packname, packlen, FALSE);
-
-                if (hashp) {
-                    /* shortcut for simple names */
-                    const HE* const he = hv_fetch_ent(stash, method, 0, *hashp);
-
-                    if (he) {
-                        gv = (GV*)HeVAL(he);
-
-                        /*
-                         * FIXME this has diverged from the implementation
-                         * in pp_hot.c
-                         */
-                        if (
-                               isGV(gv)
-                            && GvCV(gv)
-                            && (!GvCVGEN(gv) || GvCVGEN(gv) == PL_sub_generation)
-                        ) {
-                            return ((SV*)GvCV(gv));
-                        }
-                    }
-                }
-
-                /*
-                 * SvPV_nolen_const returns the method name as a const char *,
-                 * stringifying names that are not strings (e.g. undef, SvIV,
-                 * SvNV &c.) - see name.t
-                 */
-                gv = gv_fetchmethod(
-                    stash ? stash : (HV*)packsv,
-                    SvPV_nolen_const(method)
-                );
-
-                if (gv) {
-                    return(isGV(gv) ? (SV*)GvCV(gv) : (SV*)gv);
-                }
-            }
-        }
-    }
-
-    return NULL;
 }
 
 static void autobox_cleanup(pTHX_ void * unused) {
