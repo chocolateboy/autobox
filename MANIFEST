@@ -27,7 +27,6 @@ t/lib/autobox_scope_2.pm
 t/lib/Versioned.pm
 t/merge.t
 t/name.t
-t/pod.t
 t/rt_46814.t
 t/rt_55652.t
 t/rt_71777.t
