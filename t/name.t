@@ -25,10 +25,10 @@ my $float = 3.1415927;
 
 # make sure they don't work when autobox has not been enabled
 eval { 'hello'->$split('') };
-like($@, qr{^Can't locate object method "split" via package "hello"}, 'autobox not enabled for scalar'); 
+like($@, qr{^Can't locate object method "split" via package "hello"}, 'autobox not enabled for scalar');
 
 eval { [ 1, 2, 3 ]->$join(' >> ') };
-like($@, qr{^Can't call method "join" on unblessed reference\b}, 'autobox not enabled for array'); 
+like($@, qr{^Can't call method "join" on unblessed reference\b}, 'autobox not enabled for array');
 
 {
     use autobox;
@@ -58,15 +58,15 @@ like($@, qr{^Can't call method "join" on unblessed reference\b}, 'autobox not en
 
     # make sure they don't work when autobox has been disabled
     eval { 'hello'->$split('') };
-    like($@, qr{^Can't locate object method "split" via package "hello"}, 'autobox disabled for scalar'); 
+    like($@, qr{^Can't locate object method "split" via package "hello"}, 'autobox disabled for scalar');
 
     eval { [ 1, 2, 3 ]->$join(' >> ') };
-    like($@, qr{^Can't call method "join" on unblessed reference}, 'autobox disabled for array'); 
+    like($@, qr{^Can't call method "join" on unblessed reference}, 'autobox disabled for array');
 }
 
 # make sure they don't work when autobox is no longer in scope
 eval { 'hello'->$split('') };
-like($@, qr{^Can't locate object method "split" via package "hello"}, 'autobox not in scope for scalar'); 
+like($@, qr{^Can't locate object method "split" via package "hello"}, 'autobox not in scope for scalar');
 
 eval { [ 1, 2, 3 ]->$join(' >> ') };
-like($@, qr{^Can't call method "join" on unblessed reference}, 'autobox not in scope for array'); 
+like($@, qr{^Can't call method "join" on unblessed reference}, 'autobox not in scope for array');

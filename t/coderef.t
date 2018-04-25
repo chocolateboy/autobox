@@ -23,7 +23,7 @@ my $split = \&split;
 
 # make sure autobox isn't on
 eval { 'hello'->to_upper };
-like($@, qr{^Can't locate object method "to_upper" via package "hello"}, 'autobox is not enabled'); 
+like($@, qr{^Can't locate object method "to_upper" via package "hello"}, 'autobox is not enabled');
 
 # This has always worked, regardless of whether autobox is used or not
 is ([ 1, 2, 3 ]->$join(' >> '), '1 >> 2 >> 3', q{no autobox: [ 1, 2, 3 ]->$join(' >> ') eq '1 >> 2 >> 3'});

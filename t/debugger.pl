@@ -8,8 +8,8 @@ use autobox { DEFAULT => __PACKAGE__ };
 
 # helper for t/debugger.t
 #
-# this prints "foo -> bar -> baz -> quux"
-# on perl < 5.22 and fails with the following error on newer perls:
+# this prints "foo -> bar -> baz -> quux" on perl < 5.22
+# and fails with the following error on newer perls:
 #
 #     Can't locate object method "baz" via package "foo -> bar"
 #

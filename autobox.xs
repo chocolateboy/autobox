@@ -240,7 +240,7 @@ OP * autobox_check_entersub(pTHX_ OP *o) {
      * break `use`, `no` etc.
      *
      * (this is documented: the solution/workaround is to use
-     * $value->autobox_class instead.)
+     * $native->autobox_class instead.)
      *
      * note: we exempt all invocant types from these methods rather than just
      * the invocants we can't be sure about (i.e. OP_CONST). we *could* allow
@@ -378,8 +378,7 @@ static SV * autobox_method_common(pTHX_ SV * method, U32* hashp) {
     packname = SvPV_const(packsv, packlen);
     stash = gv_stashpvn(packname, packlen, FALSE);
 
-    if (hashp) {
-        /* shortcut for simple names */
+    if (hashp) { /* shortcut for simple names */
         const HE * const he = hv_fetch_ent(stash, method, 0, *hashp);
 
         if (he) {

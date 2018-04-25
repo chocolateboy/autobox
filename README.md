@@ -539,9 +539,9 @@ use autobox {
 would result in the following bindings:
 
 ```perl
-42->foo             -> [ MyInteger, MyNumber, MyScalar ]
-3.1415927->bar      -> [ MyNumber, MyScalar ]
-"Hello, world!->baz -> [ MyScalar ]
+42->foo              -> [ MyInteger, MyNumber, MyScalar ]
+3.1415927->bar       -> [ MyNumber, MyScalar ]
+"Hello, world!"->baz -> [ MyScalar ]
 ```
 
 Note that DEFAULT bindings take precedence over virtual type bindings i.e.
