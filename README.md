@@ -617,6 +617,7 @@ use base qw(autobox);
 
 sub import {
     my $class = shift;
+
     $class->SUPER::import(
         STRING => 'String::Trim::String'
     );

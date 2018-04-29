@@ -497,6 +497,7 @@ translate C<use MyModule> into a bespoke C<use autobox> call e.g.:
 
     sub import {
         my $class = shift;
+
         $class->SUPER::import(
             STRING => 'String::Trim::String'
         );

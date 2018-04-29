@@ -27,6 +27,7 @@ my $META_MERGE = {
 
 my $TEST_REQUIRES = {
     'IPC::System::Simple' => '1.25',
+    'Test::Fatal'         => '0.014',
 };
 
 WriteMakefile(

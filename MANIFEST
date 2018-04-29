@@ -12,6 +12,7 @@ ppport.h
 ptable.h
 README
 t/all.t
+t/autoload.t
 t/autoref.t
 t/can.t
 t/coderef.t
