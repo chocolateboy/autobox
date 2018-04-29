@@ -1,19 +1,19 @@
 #!/usr/bin/env perl
 
+# confirm method autoloading works
+
 use strict;
 use warnings;
 
 use Test::Fatal qw(exception);
 use Test::More tests => 6;
 
-# confirm method autoloading works
-
 our $AUTOLOAD;
 
 my $scalar = 42;
 my $array = [];
 my $hash = {};
-my $error = q{Can't (call|locate object) method "%s"};
+my $error = q{^Can't (call|locate object) method "%s"};
 
 sub error {
     my $message = sprintf($error, shift);
