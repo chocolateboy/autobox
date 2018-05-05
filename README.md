@@ -831,7 +831,7 @@ blessed — doesn't apply.
 
 # VERSION
 
-3.0.0
+3.0.1
 
 # SEE ALSO
 
