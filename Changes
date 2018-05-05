@@ -1,6 +1,6 @@
 Revision history for Perl extension autobox
 
-3.0.0 TBC
+3.0.0 Sat 5 May 18:10:16 2018
 
     - breaking change:
         - the behaviour of UNIVERSAL methods like $native->can and

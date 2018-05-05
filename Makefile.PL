@@ -40,6 +40,7 @@ WriteMakefile(
     PREREQ_PM => {
         'Scope::Guard' => '0.21',
     },
+
     ABSTRACT_FROM => 'lib/autobox.pod',
     AUTHOR        => 'chocolateboy <chocolate@cpan.org>',
     INC           => '-I.',

@@ -678,7 +678,7 @@ which depends on values being blessed - doesn't apply.
 
 =head1 VERSION
 
-2.86
+3.0.0
 
 =head1 SEE ALSO
 
