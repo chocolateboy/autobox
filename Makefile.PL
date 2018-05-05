@@ -39,6 +39,7 @@ WriteMakefile(
 
     PREREQ_PM => {
         'Scope::Guard' => '0.21',
+        'version'      => '0.77',
     },
 
     ABSTRACT_FROM => 'lib/autobox.pod',

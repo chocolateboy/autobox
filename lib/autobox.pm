@@ -11,7 +11,9 @@ use Scalar::Util;
 use Scope::Guard;
 use Storable;
 
-our $VERSION = '3.0.0';
+# XXX this declaration needs to be on a single line
+# https://github.com/chocolateboy/autobox/issues/11
+use version 0.77; our $VERSION = version->declare('v3.0.0');
 
 XSLoader::load 'autobox', $VERSION;
 

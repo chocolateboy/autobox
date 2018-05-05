@@ -212,7 +212,6 @@ OP * autobox_check_entersub(pTHX_ OP *o) {
      * children. navigate to it by following the `op_sibling` pointers from the
      * first child in the list (the invocant)
      */
-
     parent = OpHAS_SIBLING(cUNOPo->op_first) ? cUNOPo : ((UNOP *)cUNOPo->op_first);
     prev = parent->op_first;
     invocant = OpSIBLING(prev);

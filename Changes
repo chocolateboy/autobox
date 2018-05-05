@@ -1,5 +1,9 @@
 Revision history for Perl extension autobox
 
+3.0.1 TBC
+
+    - GH #11: fix version declaration on 5.8 (thanks, Grinnz)
+
 3.0.0 Sat 5 May 18:10:16 2018
 
     - breaking change:
