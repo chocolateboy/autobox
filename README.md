@@ -666,7 +666,7 @@ directly on native types produces the same results as calling them with autobox 
 e.g.:
 
 ```perl
-42->isa('NUMBER') # "" (interpeted as "42"->isa("NUMBER"))
+42->isa('NUMBER') # "" (interpreted as "42"->isa("NUMBER"))
 []->can('push')   # Error: Can't call method "can" on unblessed reference
 ```
 

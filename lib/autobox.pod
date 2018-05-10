@@ -540,7 +540,7 @@ Note: C<autobox_class> must B<always> be used when calling these methods. Callin
 directly on native types produces the same results as calling them with autobox disabled
 e.g.:
 
-    42->isa('NUMBER') # "" (interpeted as "42"->isa("NUMBER"))
+    42->isa('NUMBER') # "" (interpreted as "42"->isa("NUMBER"))
     []->can('push')   # Error: Can't call method "can" on unblessed reference
 
 =head1 EXPORTS
