@@ -75,8 +75,8 @@ use autobox;
 
 # can, isa, VERSION, import and unimport can be accessed via autobox_class
 
-    42->autobox_class->isa('MyNumber')
-    say []->autobox_class->VERSION
+    42->autobox_class->isa('MyNumber');
+    say []->autobox_class->VERSION;
 ```
 
 # DESCRIPTION
