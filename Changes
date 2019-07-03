@@ -179,7 +179,7 @@ Revision history for Perl extension autobox
     - support @array and %hash (thanks, Yuval Kogman (nothingmuch)
       and Matthijs van Duin (xmath))
         - added t/autoref.t
-    - fix $value->$method segfault with undef, integer, float &c.
+    - fix $value->$method segfault with undef, integer, float etc.
       (i.e. non-string) method names (thanks, John Goulah)
 
 2.30  Fri May  9 01:52:19 2008

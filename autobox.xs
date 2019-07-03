@@ -404,7 +404,7 @@ static SV * autobox_method_common(pTHX_ SV * method, U32* hashp) {
     /*
      * SvPV_nolen_const returns the method name as a const char *,
      * stringifying names that are not strings (e.g. undef, SvIV,
-     * SvNV &c.) - see name.t
+     * SvNV etc.) - see name.t
      */
     gv = gv_fetchmethod(
         stash ? stash : (HV*)packsv,

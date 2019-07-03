@@ -329,7 +329,7 @@ values of type `key` will be dispatched as methods of the class specified in
 the corresponding `value`.
 
 - A namespace: this is a class prefix (up to and including the final '::')
-to which the specified type name (INTEGER, FLOAT, STRING &c.) will be appended:
+to which the specified type name (INTEGER, FLOAT, STRING etc.) will be appended:
 
 Thus:
 
@@ -388,7 +388,7 @@ use autobox {
 ```
 
 Namespaces in DEFAULT values have the default type name appended, which, in the case of defaulted SCALAR types,
-is SCALAR rather than INTEGER, FLOAT &c.
+is SCALAR rather than INTEGER, FLOAT etc.
 
 Thus:
 
@@ -558,7 +558,7 @@ is equivalent to:
 ```perl
 use autobox {
     INTEGER => [ 'MyDefault', 'MyUniversal' ],
-    FLOAT   => [ 'MyDefault', 'MyUniversal' ], # ... &c.
+    FLOAT   => [ 'MyDefault', 'MyUniversal' ], # ... etc.
 }
 ```
 
@@ -846,7 +846,7 @@ blessed — doesn't apply.
 
 # COPYRIGHT AND LICENSE
 
-Copyright © 2003-2018 by chocolateboy.
+Copyright © 2003-2019 by chocolateboy.
 
 This is free software; you can redistribute it and/or modify it under the terms of the
 [Artistic License 2.0](http://www.opensource.org/licenses/artistic-license-2.0.php).

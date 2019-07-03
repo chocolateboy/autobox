@@ -256,7 +256,7 @@ the corresponding C<value>.
 =item *
 
 A namespace: this is a class prefix (up to and including the final '::')
-to which the specified type name (INTEGER, FLOAT, STRING &c.) will be appended:
+to which the specified type name (INTEGER, FLOAT, STRING etc.) will be appended:
 
 Thus:
 
@@ -309,7 +309,7 @@ Which in turn is equivalent to:
     }
 
 Namespaces in DEFAULT values have the default type name appended, which, in the case of defaulted SCALAR types,
-is SCALAR rather than INTEGER, FLOAT &c.
+is SCALAR rather than INTEGER, FLOAT etc.
 
 Thus:
 
@@ -351,7 +351,7 @@ This doesn't work:
 
     use autobox;
 
-    undef->foo() # runtime error
+    undef->foo(); # runtime error
 
 This works:
 
@@ -446,7 +446,7 @@ is equivalent to:
 
   use autobox {
       INTEGER => [ 'MyDefault', 'MyUniversal' ],
-      FLOAT   => [ 'MyDefault', 'MyUniversal' ], # ... &c.
+      FLOAT   => [ 'MyDefault', 'MyUniversal' ], # ... etc.
   }
 
 =head2 DEBUG
@@ -624,7 +624,7 @@ Perl's special-casing for the C<print BLOCK ...> syntax (see L<perlsub>) means t
     print { 'foo', 'bar', @_ }->foo();
 
     # but this doesn't
-    print { @_ }->foo() ? 1 : 0
+    print { @_ }->foo() ? 1 : 0;
 
 In the latter case, the solution is to supply something
 other than a HASH ref literal as the first argument
@@ -700,7 +700,7 @@ chocolateboy <chocolate@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2003-2018 by chocolateboy.
+Copyright (c) 2003-2019 by chocolateboy.
 
 This library is free software; you can redistribute it and/or modify it under the
 terms of the L<Artistic License 2.0|http://www.opensource.org/licenses/artistic-license-2.0.php>.
