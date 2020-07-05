@@ -277,7 +277,7 @@ Revision history for Perl extension autobox
 1.04  Mon Nov 20 00:25:50 2006
 
     - fix threaded perl pessimization
-    - applied patch: http://rt.cpan.org/Public/Bug/Display.html?id=22868
+    - applied patch: https://rt.cpan.org/Public/Bug/Display.html?id=22868
       (thanks, Steve Peters)
     - documentation fixlet
     - portability fixlet

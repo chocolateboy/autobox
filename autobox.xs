@@ -201,7 +201,7 @@ OP * autobox_check_entersub(pTHX_ OP *o) {
      *
      * XXX this is fixed in #33311:
      *
-     *     http://www.nntp.perl.org/group/perl.perl5.porters/2008/02/msg134131.html
+     *     https://www.nntp.perl.org/group/perl.perl5.porters/2008/02/msg134131.html
      */
     if ((PL_hints & 0x80020000) != 0x80020000) {
         goto done;
