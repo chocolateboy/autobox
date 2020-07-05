@@ -1,3 +1,4 @@
+dist: trusty # 5.8 and 5.10 are missing from the default dist (currently Xenial for perl)
 language: perl
 perl:
   - "5.8"
@@ -8,3 +9,7 @@ perl:
   - "5.26"
   - "5.28"
   - "5.30"
+  - "5.32" # not available yet
+matrix:
+  allow_failures:
+    - perl: "5.32"
