@@ -1,10 +1,9 @@
 # autobox
 
-[![Build Status](https://travis-ci.org/chocolateboy/autobox.svg)](https://travis-ci.org/chocolateboy/autobox)
+[![Build Status](https://github.com/chocolateboy/autobox/workflows/test/badge.svg)](https://github.com/chocolateboy/autobox/actions?query=workflow%3Atest)
 [![CPAN Version](https://badge.fury.io/pl/autobox.svg)](https://badge.fury.io/pl/autobox)
 
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+<!-- TOC -->
 
 - [NAME](#name)
 - [SYNOPSIS](#synopsis)
@@ -32,7 +31,7 @@
 - [AUTHOR](#author)
 - [COPYRIGHT AND LICENSE](#copyright-and-license)
 
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+<!-- TOC END -->
 
 # NAME
 
