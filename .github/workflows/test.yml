@@ -5,6 +5,7 @@ on:
   push:
     paths-ignore:
       - '**.md'
+      - '**.pod'
 
 env:
   CI: true

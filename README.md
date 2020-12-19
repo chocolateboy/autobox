@@ -210,7 +210,7 @@ no autobox qw(SCALAR);
 "Hello, world!"->bar(); # runtime error
 ```
 
-Autoboxing is not performed for barewords i.e.
+Autoboxing is not performed for barewords, i.e.
 
 ```perl
 my $foo = Foo->new();
@@ -317,7 +317,7 @@ use autobox {
 The INTEGER, FLOAT, NUMBER, STRING, SCALAR, ARRAY, HASH, CODE, UNDEF, DEFAULT and UNIVERSAL options can take
 three different types of value:
 
-- A class name e.g.
+- A class name, e.g.
 
 ```perl
 use autobox INTEGER => 'MyInt';
@@ -512,7 +512,7 @@ use autobox {
 ```
 
 Virtual types can also be passed to `unimport` via the `no autobox` syntax. This disables autoboxing
-for the corresponding subtypes e.g.
+for the corresponding subtypes, e.g.
 
 ```perl
 no autobox qw(NUMBER);
@@ -543,7 +543,7 @@ would result in the following bindings:
 "Hello, world!"->baz -> [ MyScalar ]
 ```
 
-Note that DEFAULT bindings take precedence over virtual type bindings i.e.
+Note that DEFAULT bindings take precedence over virtual type bindings, i.e.
 
 ```perl
 use autobox {
@@ -603,11 +603,11 @@ use autobox DEBUG => \&my_callback, ...
 ## import
 
 This method sets up autobox bindings for the current lexical scope. It can be used to implement
-autobox extensions i.e. lexically-scoped modules that provide autobox bindings for one or more
+autobox extensions, i.e. lexically-scoped modules that provide autobox bindings for one or more
 native types without requiring calling code to `use autobox`.
 
 This is done by subclassing autobox and overriding `import`. This allows extensions to effectively
-translate `use MyModule` into a bespoke `use autobox` call e.g.:
+translate `use MyModule` into a bespoke `use autobox` call, e.g.:
 
 ```perl
 package String::Trim;
@@ -638,7 +638,7 @@ Note that `trim` is defined in an auxiliary class rather than in String::Trim it
 String::Trim's own methods (i.e. the methods it inherits from autobox) being exposed to `STRING` types.
 
 This module can now be used without a `use autobox` statement to enable the `trim` method in the current
-lexical scope e.g.:
+lexical scope, e.g.:
 
 ```perl
 #!/usr/bin/env perl
@@ -652,8 +652,9 @@ print "  Hello, world!  "->trim();
 
 ## autobox_class
 
-autobox adds a single method to all autoboxed types: `autobox_class`. This can be used to
-call [UNIVERSAL](https://metacpan.org/pod/UNIVERSAL) methods i.e. `can`, `DOES`, `import`, `isa`, `unimport` and `VERSION` e.g.
+autobox adds a single method to all autoboxed types: `autobox_class`. This can
+be used to call [UNIVERSAL](https://metacpan.org/pod/UNIVERSAL) methods, i.e.
+`can`, `DOES`, `import`, `isa`, `unimport` and `VERSION`, e.g.
 
 ```perl
 if (sub { ... }->autobox_class->can('curry')) ...
@@ -676,7 +677,7 @@ e.g.:
 autobox includes an additional module, autobox::universal, which exports a single subroutine, `type`.
 
 This sub returns the type of its argument within autobox (which is essentially longhand for the type names
-used within perl). This value is used by autobox to associate a method invocant with its designated classes e.g.
+used within perl). This value is used by autobox to associate a method invocant with its designated classes, e.g.
 
 ```perl
 use autobox::universal qw(type);
@@ -688,7 +689,7 @@ type(undef) # UNDEF
 ```
 
 autobox::universal is loaded automatically by autobox, and, as its name suggests, can be used to install
-a universal `type` method for autoboxed values e.g.
+a universal `type` method for autoboxed values, e.g.
 
 ```perl
 use autobox UNIVERSAL => 'autobox::universal';
@@ -767,7 +768,7 @@ print { 'foo', 'bar' }->foo();
 print { 'foo', 'bar', @_ }->foo();
 
 # but this doesn't
-print { @_ }->foo() ? 1 : 0
+print { @_ }->foo() ? 1 : 0;
 ```
 
 In the latter case, the solution is to supply something
@@ -794,8 +795,8 @@ print '' . { @_ }->foo() ? 1 : 0;
 
 ### eval EXPR
 
-Like most pragmas, autobox performs operations at compile time, and,
-as a result, runtime string `eval`s are not executed within its scope i.e. this
+Like most pragmas, autobox performs operations at compile time, and, as a
+result, runtime string `eval`s are not executed within its scope, i.e. this
 doesn't work:
 
 ```perl
@@ -804,7 +805,7 @@ use autobox;
 eval "42->foo";
 ```
 
-The workaround is to use autobox within the `eval` e.g.
+The workaround is to use autobox within the `eval`, e.g.
 
 ```perl
 eval <<'EOS';
