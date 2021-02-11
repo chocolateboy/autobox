@@ -846,7 +846,7 @@ blessed — doesn't apply.
 
 # COPYRIGHT AND LICENSE
 
-Copyright © 2003-2020 by chocolateboy.
+Copyright © 2003-2021 by chocolateboy.
 
 This is free software; you can redistribute it and/or modify it under the terms of the
 [Artistic License 2.0](https://www.opensource.org/licenses/artistic-license-2.0.php).
