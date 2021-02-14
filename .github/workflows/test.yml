@@ -35,21 +35,6 @@ jobs:
         # this also upgrades ExtUtils::MakeMaker to the latest version
       - run: cpanm --notest Test::Pod
 
-        # FIXME
-        #
-        #   - AFAICT ExtUtils::PL2Bat shouldn't be needed [1]
-        #   - Windows tests on perl 5.8 and 5.10 pass without it
-        #   - Windows tests on perl 5.20, 5.30 and 5.32 fail without it
-        #
-        # [1]
-        #   - added:   https://github.com/shogo82148/actions-setup-perl/issues/224
-        #   - removed: https://github.com/shogo82148/actions-setup-perl/pull/448
-
-        # the conditional isn't strictly needed since it's not used on other
-        # platforms
-      - run: cpanm ExtUtils::PL2Bat
-        if: "matrix.os == 'windows-latest'"
-
       - run: cpanm --installdeps --notest .
       - run: perl Makefile.PL
       - run: make test
