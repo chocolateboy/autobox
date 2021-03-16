@@ -11,12 +11,24 @@ env:
   CI: true
 
 jobs:
+  skip-duplicate-runs:
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@ea548f2a2a08c55dcb111418ca62181f7887e297
+        with:
+          concurrent_skipping: 'same_content'
+          paths_ignore: '["**/*.md", "**/*.pod"]'
+
   test:
+    needs: skip-duplicate-runs
+    if: ${{ needs.skip-duplicate-runs.outputs.should_skip != 'true' }}
     name: 'Perl v${{ matrix.perl }} on ${{ matrix.os }}'
     runs-on: ${{ matrix.os }}
 
     strategy:
-      fail-fast: false
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
         perl: ['5.8', '5.10', '5.20', '5.30', '5.32']
