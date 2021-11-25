@@ -408,7 +408,7 @@ use autobox {
     FLOAT   => 'MyNamespace::SCALAR',
     STRING  => 'MyNamespace::SCALAR',
     ARRAY   => 'MyArray',
-    HASH    => 'MyArray',
+    HASH    => 'MyHash',
     CODE    => 'MyCode',
 }
 ```
