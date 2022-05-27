@@ -248,7 +248,7 @@ Revision history for Perl extension autobox
     - merge.t: test merging
     - beef up the default DEBUG handler so that it shows the superclasses
       of the synthetic classes
-    - Windows compatibilty fix (thanks, Alexandr Ciornii)
+    - Windows compatibility fix (thanks, Alexandr Ciornii)
     - misc optimizations, cleanups
 
 1.22  Sun Sep 23 22:27:44 2007
