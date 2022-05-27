@@ -5324,7 +5324,7 @@ DPPP_(my_newCONSTSUB)(HV *stash, const char *name, SV *sv)
 
 /*
  * Boilerplate macros for initializing and accessing interpreter-local
- * data from C.  All statics in extensions should be reworked to use
+ * data from C.  All statistics in extensions should be reworked to use
  * this, if you want to make the extension thread-safe.  See ext/re/re.xs
  * for an example of the use of these macros.
  *

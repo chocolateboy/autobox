@@ -32,7 +32,7 @@ use Test::More tests => 12;
 }
 
 {
-    # the custom `can` in CanFoo should pre-empt the default `can` in CanBar
+    # the custom `can` in CanFoo should preempt the default `can` in CanBar
     use autobox SCALAR => [ 'CanFoo', 'CanBar' ];
 
     ok(42->autobox_class->can('foo'), '$can_merged_1->autobox_class->can("foo") == true');
