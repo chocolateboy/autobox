@@ -2,9 +2,10 @@ Revision history for Perl extension autobox
 
 3.0.2 TBC
 
+    - GH #15: fix debugger test (thanks, djerius)
+    - upgrade ppport.h from 3.42 to 3.68
     - GH #12: fix doc typo (thanks, guimard)
     - GH #14: fix changelog typo (thanks, EdwardBetts)
-    - GH #15: fix debugger test (thanks, djerius)
 
 3.0.1 Sat 5 May 2018
 
