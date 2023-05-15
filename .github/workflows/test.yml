@@ -31,7 +31,7 @@ jobs:
     strategy:
       matrix:
         os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        perl: ['5.8', '5.10', '5.20', '5.30', '5.32']
+        perl: ['5.8', '5.10', '5.20', '5.30', '5.36']
 
     steps:
       - name: checkout
