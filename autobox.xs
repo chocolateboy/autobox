@@ -122,7 +122,7 @@ static const char *autobox_type(pTHX_ SV * const sv, STRLEN *len) {
 }
 
 /*
- * convert array/hash invocants to arrayref/hashref e.g.:
+ * convert array/hash invocants to arrayref/hashref, e.g.:
  *
  *     @foo->bar -> (\@foo)->bar
  */
@@ -287,7 +287,7 @@ OP * autobox_check_entersub(pTHX_ OP *o) {
 
     /*
      * if the invocant is an @array, %hash, @{ ... } or %{ ... }, then
-     * "auto-ref" it i.e. the optree equivalent of inserting a backslash
+     * "auto-ref" it, i.e. the optree equivalent of inserting a backslash
      * before it:
      *
      *     @foo->bar -> (\@foo)->bar
@@ -346,7 +346,7 @@ static SV * autobox_method_common(pTHX_ SV * method, U32* hashp) {
     /* XXX do non-objects have magic attached? */
     SvGETMAGIC(invocant);
 
-    /* the "bindings hash", which maps datatypes to package names */
+    /* the "bindings hash", which maps the names of native types to package names */
     autobox_bindings = (HV *)(PTABLE_fetch(AUTOBOX_OP_MAP, PL_op));
 
     if (!autobox_bindings) {
