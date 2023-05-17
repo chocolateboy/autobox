@@ -4,6 +4,9 @@ on:
   pull_request:
   push:
     paths-ignore:
+      - 'Changes'
+      - 'README'
+      - '.editorconfig'
       - '**.md'
       - '**.pod'
 
@@ -17,10 +20,10 @@ jobs:
       should_skip: ${{ steps.skip_check.outputs.should_skip }}
     steps:
       - id: skip_check
-        uses: fkirc/skip-duplicate-actions@ea548f2a2a08c55dcb111418ca62181f7887e297
+        uses: fkirc/skip-duplicate-actions@12aca0a884f6137d619d6a8a09fcc3406ced5281
         with:
           concurrent_skipping: 'same_content'
-          paths_ignore: '["**/*.md", "**/*.pod"]'
+          paths: '["**/*.{h,xs,pm,t,PL}"]'
 
   test:
     needs: skip-duplicate-runs
@@ -35,7 +38,7 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: set up perl v${{ matrix.perl }}
         uses: shogo82148/actions-setup-perl@v1
