@@ -58,6 +58,12 @@ jobs:
 
       - run: cpanm --installdeps --notest .
       - run: perl Makefile.PL
-      - run: perl -MConfig -e 'print $Config{make}, $/'
-      - run: perl -MConfig -e 'exec $Config{make}'
-      - run: perl -MConfig -e 'exec $Config{make}, "test"'
+
+      - name: which make
+        run: perl -MConfig -e 'print $Config{make}, $/'
+
+      - name: make
+        run: perl -MConfig -e 'exec $Config{make}'
+
+      - name: make test
+        run: perl -MConfig -e 'exec $Config{make}, "test"'
