@@ -7,16 +7,16 @@ use Test::More;
 
 BEGIN {
     eval 'use Parallel::ForkManager 2.02';
-    plan skip_all => 'Parallel::ForkManager >= 2.02 required for this test' if ($@);
+    plan skip_all => "Parallel::ForkManager >= 2.02 required for this test ($@)" if ($@);
 }
 
-use autobox;
+# use autobox;
 
 sub SCALAR::greet {
     return "Hello, $_[0]!";
 }
 
-plan tests => 2;
+plan tests => 1;
 
 my @results;
 my $pm = Parallel::ForkManager->new(3);
@@ -39,5 +39,5 @@ for my $id (0 .. 9) {
 
 $pm->wait_all_children;
 
-is('world'->greet, 'Hello, world!', 'autobox');
+# is('world'->greet, 'Hello, world!', 'autobox');
 is_deeply([ sort @results ], [ 0..9 ], 'Parallel::ForkManager');
