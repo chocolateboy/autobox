@@ -5,12 +5,12 @@ use warnings;
 
 use Test::More;
 
+use autobox;
+
 BEGIN {
     eval 'use Parallel::ForkManager 2.02';
-    plan skip_all => "Parallel::ForkManager >= 2.02 required for this test ($@)" if ($@);
+    plan skip_all => "Parallel::ForkManager >= 2.02 required for this test" if ($@);
 }
-
-# use autobox;
 
 sub SCALAR::greet {
     return "Hello, $_[0]!";
