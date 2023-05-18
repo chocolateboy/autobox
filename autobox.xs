@@ -24,19 +24,23 @@
  * perlapi.h, which imposes the speed limit.
  */
 
-/* unlike the PERL_CORE hack, this is documented in (and suggested by) perlguts */
-#ifdef WIN32 /* Win32 doesn't get PERL_CORE, so use the next best thing */
-#define PERL_NO_GET_CONTEXT
-#endif
+/*
+ * #<{(| unlike the PERL_CORE hack, this is documented in (and suggested by) perlguts |)}>#
+ * #ifdef WIN32 #<{(| Win32 doesn't get PERL_CORE, so use the next best thing |)}>#
+ * #define PERL_NO_GET_CONTEXT
+ * #endif
+ * 
+ * #<{(| thanks to Andy Grundman for pointing out problems with this on ActivePerl >= 5.10 |)}>#
+ * #ifdef WIN32
+ * #include "XSUB.h"
+ * #else #<{(| not WIN32 |)}>#
+ * #define PERL_CORE
+ * #include "XSUB.h"
+ * #undef PERL_CORE
+ * #endif
+ */
 
-/* thanks to Andy Grundman for pointing out problems with this on ActivePerl >= 5.10 */
-#ifdef WIN32
 #include "XSUB.h"
-#else /* not WIN32 */
-#define PERL_CORE
-#include "XSUB.h"
-#undef PERL_CORE
-#endif
 
 #define NEED_sv_2pv_flags
 #include "ppport.h"
