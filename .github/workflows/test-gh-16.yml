@@ -56,7 +56,8 @@ jobs:
         # this also upgrades ExtUtils::MakeMaker to the latest version
       - run: cpanm --notest Test::Pod
 
-      - run: cpanm --installdeps --notest .
+      # - run: cpanm --installdeps --notest .
+      - run: cpanm --installdeps .
       - run: perl Makefile.PL
 
       - name: which make
