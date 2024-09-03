@@ -831,7 +831,7 @@ blessed — doesn't apply.
 
 # VERSION
 
-3.0.1
+3.0.2
 
 # SEE ALSO
 
@@ -846,7 +846,7 @@ blessed — doesn't apply.
 
 # COPYRIGHT AND LICENSE
 
-Copyright © 2003-2021 by chocolateboy.
+Copyright © 2003-2024 by chocolateboy.
 
 This is free software; you can redistribute it and/or modify it under the terms of the
 [Artistic License 2.0](https://www.opensource.org/licenses/artistic-license-2.0.php).

@@ -679,7 +679,7 @@ which depends on values being blessed - doesn't apply.
 
 =head1 VERSION
 
-3.0.1
+3.0.2
 
 =head1 SEE ALSO
 
@@ -701,7 +701,7 @@ chocolateboy <chocolate@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2003-2021 by chocolateboy.
+Copyright (c) 2003-2024 by chocolateboy.
 
 This library is free software; you can redistribute it and/or modify it under the
 terms of the L<Artistic License 2.0|https://www.opensource.org/licenses/artistic-license-2.0.php>.
